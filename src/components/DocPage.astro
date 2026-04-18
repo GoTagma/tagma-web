@@ -1,20 +1,57 @@
 ---
-import { getCollection, type CollectionEntry } from 'astro:content';
-import DocPage from '../../components/DocPage.astro';
-
-export async function getStaticPaths() {
-  const entries = await getCollection('docs');
-  return entries.map((entry) => ({
-    params: { slug: entry.id },
-    props: { entry },
-  }));
-}
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
 
 interface Props { entry: CollectionEntry<'docs'> }
 const { entry } = Astro.props;
+const { Content, headings } = await render(entry);
+
+const allDocs = await getCollection('docs');
+const byGroup = new Map<string, CollectionEntry<'docs'>[]>();
+for (const d of allDocs) {
+  const g = d.data.group;
+  if (!byGroup.has(g)) byGroup.set(g, []);
+  byGroup.get(g)!.push(d);
+}
+for (const list of byGroup.values()) {
+  list.sort((a, b) => a.data.order - b.data.order);
+}
+const groupedDocs = Array.from(byGroup.entries());
 ---
 
-<DocPage entry={entry} />
+<BaseLayout title={`${entry.data.title} — Tagma Docs`} description={entry.data.description}>
+  <main>
+    <div class="doc-layout">
+      <aside class="doc-side">
+        {groupedDocs.map(([group, docs]) => (
+          <Fragment>
+            <h5>{group}</h5>
+            {docs.map((d) => (
+              <a
+                href={`/docs/${d.id}`}
+                class={d.id === entry.id ? 'active' : undefined}
+              >{d.data.title}</a>
+            ))}
+          </Fragment>
+        ))}
+      </aside>
+
+      <article class="doc-main">
+        <div class="crumb">DOCS<span class="sep">/</span>{entry.data.group.toUpperCase()}<span class="sep">/</span>{entry.data.title.toUpperCase()}</div>
+        <h1>{entry.data.title}</h1>
+        {entry.data.description && <p class="lede">{entry.data.description}</p>}
+        <Content />
+      </article>
+
+      <aside class="doc-toc">
+        <h5>On this page</h5>
+        {headings.filter((h) => h.depth === 2 || h.depth === 3).map((h) => (
+          <a href={`#${h.slug}`} class={h.depth === 3 ? 'sub' : undefined}>{h.text}</a>
+        ))}
+      </aside>
+    </div>
+  </main>
+</BaseLayout>
 
 <style is:global>
   .doc-layout {
@@ -58,7 +95,6 @@ const { entry } = Astro.props;
     text-decoration: var(--shiki-light-text-decoration) !important;
   }
 
-  /* Heading anchors (rehype-autolink-headings appends an <a class="heading-anchor">) */
   .doc-main h2, .doc-main h3 { position: relative; }
   .doc-main .heading-anchor {
     position: absolute; left: -22px; top: 50%; transform: translateY(-50%);
@@ -73,7 +109,6 @@ const { entry } = Astro.props;
   .doc-main .heading-anchor:hover { color: var(--accent); }
   .doc-main .heading-anchor.copied { color: var(--green); }
 
-  /* Code copy button (mounted by docs.client.ts) */
   .doc-main .copy-btn {
     position: absolute; top: 8px; right: 8px;
     font-family: 'JetBrains Mono', monospace; font-size: 10px;

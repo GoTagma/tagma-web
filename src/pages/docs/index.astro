@@ -1,10 +1,11 @@
 ---
 import { getCollection } from 'astro:content';
+import DocPage from '../../components/DocPage.astro';
 
 const all = await getCollection('docs');
 const sorted = all.slice().sort((a, b) => a.data.order - b.data.order);
 const first = sorted[0];
-const target = first ? `/docs/${first.id}` : '/';
-
-return Astro.redirect(target, 301);
+if (!first) return Astro.redirect('/', 302);
 ---
+
+<DocPage entry={first} />
