@@ -39,7 +39,7 @@ const { prev, next } = findPrevNext(allDocs, entry.id);
         ))}
       </aside>
 
-      <article class="doc-main">
+      <article class="doc-main" data-pagefind-body>
         <div class="crumb">DOCS<span class="sep">/</span>{entry.data.group.toUpperCase()}<span class="sep">/</span>{entry.data.title.toUpperCase()}</div>
         <h1>{entry.data.title}</h1>
         {entry.data.description && <p class="lede">{entry.data.description}</p>}
