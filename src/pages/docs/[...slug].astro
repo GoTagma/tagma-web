@@ -89,8 +89,49 @@ const groupedDocs = Array.from(byGroup.entries());
   .doc-main p { font-size: 15px; color: var(--fg-dim); line-height: 1.7; margin-bottom: 12px; max-width: 62ch; }
   .doc-main strong, .doc-main b { color: var(--fg); font-weight: 600; }
   .doc-main code { font-family: 'JetBrains Mono', monospace; font-size: 13px; background: var(--bg-1); padding: 2px 6px; border: 1px solid var(--line); color: var(--fg); }
-  .doc-main pre { font-family: 'JetBrains Mono', monospace; font-size: 13px; background: var(--bg-1); border: 1px solid var(--line); padding: 18px 20px; margin: 16px 0 24px; overflow-x: auto; line-height: 1.6; }
-  .doc-main pre code { background: transparent; border: 0; padding: 0; }
+  .doc-main .code-block { position: relative; margin: 16px 0 24px; }
+  .doc-main .code-block pre.astro-code,
+  .doc-main pre { font-family: 'JetBrains Mono', monospace; font-size: 13px; background: var(--bg-1) !important; border: 1px solid var(--line); padding: 18px 20px; overflow-x: auto; line-height: 1.6; }
+  .doc-main pre code { background: transparent; border: 0; padding: 0; font-family: 'JetBrains Mono', monospace; }
+  .doc-main pre code .line { display: block; }
+  html[data-theme="light"] .doc-main pre.astro-code,
+  html[data-theme="light"] .doc-main pre.astro-code span {
+    color: var(--shiki-light, inherit) !important;
+    background-color: var(--shiki-light-bg, var(--bg-1)) !important;
+    font-style: var(--shiki-light-font-style) !important;
+    font-weight: var(--shiki-light-font-weight) !important;
+    text-decoration: var(--shiki-light-text-decoration) !important;
+  }
+
+  /* Heading anchors (rehype-autolink-headings appends an <a class="heading-anchor">) */
+  .doc-main h2, .doc-main h3 { position: relative; }
+  .doc-main .heading-anchor {
+    position: absolute; left: -22px; top: 50%; transform: translateY(-50%);
+    color: var(--fg-muted); border: 0;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.8em;
+    opacity: 0; transition: opacity .12s ease, color .12s ease;
+    cursor: pointer; padding: 4px 6px; line-height: 1;
+  }
+  .doc-main h2:hover .heading-anchor,
+  .doc-main h3:hover .heading-anchor,
+  .doc-main .heading-anchor:focus { opacity: 1; }
+  .doc-main .heading-anchor:hover { color: var(--accent); }
+  .doc-main .heading-anchor.copied { color: var(--green); }
+
+  /* Code copy button (mounted by docs.client.ts) */
+  .doc-main .copy-btn {
+    position: absolute; top: 8px; right: 8px;
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    letter-spacing: .08em; text-transform: uppercase;
+    color: var(--fg-muted); background: var(--bg-2);
+    border: 1px solid var(--line); padding: 4px 8px;
+    opacity: 0; transition: opacity .12s ease, color .12s ease;
+    cursor: pointer;
+  }
+  .doc-main .code-block:hover .copy-btn,
+  .doc-main .copy-btn:focus { opacity: 1; }
+  .doc-main .copy-btn:hover { color: var(--fg); }
+  .doc-main .copy-btn.copied { color: var(--green); border-color: var(--green); }
   .doc-main ul { margin: 8px 0 20px 22px; color: var(--fg-dim); font-size: 15px; line-height: 1.7; }
   .doc-main a { color: var(--accent); border-bottom: 1px solid transparent; }
   .doc-main a:hover { border-bottom-color: var(--accent); }
