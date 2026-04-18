@@ -1,0 +1,119 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('docs');
+  return entries.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+interface Props { entry: CollectionEntry<'docs'> }
+const { entry } = Astro.props;
+const { Content, headings } = await render(entry);
+
+const allDocs = await getCollection('docs');
+const byGroup = new Map<string, CollectionEntry<'docs'>[]>();
+for (const d of allDocs) {
+  const g = d.data.group;
+  if (!byGroup.has(g)) byGroup.set(g, []);
+  byGroup.get(g)!.push(d);
+}
+for (const list of byGroup.values()) {
+  list.sort((a, b) => a.data.order - b.data.order);
+}
+const groupedDocs = Array.from(byGroup.entries());
+---
+
+<BaseLayout title={`${entry.data.title} — Tagma Docs`} description={entry.data.description}>
+  <main>
+    <div class="doc-layout">
+      <aside class="doc-side">
+        {groupedDocs.map(([group, docs]) => (
+          <Fragment>
+            <h5>{group}</h5>
+            {docs.map((d) => (
+              <a
+                href={`/docs/${d.id}`}
+                class={d.id === entry.id ? 'active' : undefined}
+              >{d.data.title}</a>
+            ))}
+          </Fragment>
+        ))}
+      </aside>
+
+      <article class="doc-main">
+        <div class="crumb">DOCS<span class="sep">/</span>{entry.data.group.toUpperCase()}<span class="sep">/</span>{entry.data.title.toUpperCase()}</div>
+        <h1>{entry.data.title}</h1>
+        {entry.data.description && <p class="lede">{entry.data.description}</p>}
+        <Content />
+      </article>
+
+      <aside class="doc-toc">
+        <h5>On this page</h5>
+        {headings.filter((h) => h.depth === 2 || h.depth === 3).map((h) => (
+          <a href={`#${h.slug}`} class={h.depth === 3 ? 'sub' : undefined}>{h.text}</a>
+        ))}
+      </aside>
+    </div>
+  </main>
+</BaseLayout>
+
+<style is:global>
+  .doc-layout {
+    max-width: 1360px; margin: 0 auto;
+    display: grid; grid-template-columns: 240px minmax(0, 1fr) 220px;
+    gap: 0; min-height: calc(100vh - 56px);
+  }
+  .doc-side {
+    border-right: 1px solid var(--line);
+    padding: 32px 24px; background: var(--bg);
+    position: sticky; top: 56px; align-self: start;
+    max-height: calc(100vh - 56px); overflow: auto;
+  }
+  .doc-side h5 { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--fg-muted); margin: 18px 0 10px; font-weight: 500; }
+  .doc-side h5:first-child { margin-top: 0; }
+  .doc-side a { display: block; padding: 6px 0; font-size: 13px; color: var(--fg-dim); border-left: 2px solid transparent; padding-left: 12px; margin-left: -12px; }
+  .doc-side a:hover { color: var(--fg); }
+  .doc-side a.active { color: var(--accent); border-left-color: var(--accent); }
+
+  .doc-main { padding: 56px 56px 200px; max-width: 820px; }
+  .doc-main .crumb { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--fg-muted); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 20px; }
+  .doc-main .crumb .sep { color: var(--line-2); margin: 0 8px; }
+  .doc-main h1 { font-size: clamp(36px, 5vw, 56px); line-height: 1.04; letter-spacing: -.03em; font-weight: 500; margin-bottom: 14px; }
+  .doc-main .lede { font-size: 18px; color: var(--fg-dim); line-height: 1.55; margin-bottom: 40px; max-width: 62ch; }
+  .doc-main h2 { font-size: 26px; font-weight: 500; letter-spacing: -.01em; margin: 48px 0 12px; }
+  .doc-main h3 { font-size: 16px; font-weight: 600; margin: 28px 0 10px; color: var(--fg); }
+  .doc-main p { font-size: 15px; color: var(--fg-dim); line-height: 1.7; margin-bottom: 12px; max-width: 62ch; }
+  .doc-main strong, .doc-main b { color: var(--fg); font-weight: 600; }
+  .doc-main code { font-family: 'JetBrains Mono', monospace; font-size: 13px; background: var(--bg-1); padding: 2px 6px; border: 1px solid var(--line); color: var(--fg); }
+  .doc-main pre { font-family: 'JetBrains Mono', monospace; font-size: 13px; background: var(--bg-1); border: 1px solid var(--line); padding: 18px 20px; margin: 16px 0 24px; overflow-x: auto; line-height: 1.6; }
+  .doc-main pre code { background: transparent; border: 0; padding: 0; }
+  .doc-main ul { margin: 8px 0 20px 22px; color: var(--fg-dim); font-size: 15px; line-height: 1.7; }
+  .doc-main a { color: var(--accent); border-bottom: 1px solid transparent; }
+  .doc-main a:hover { border-bottom-color: var(--accent); }
+  .doc-main blockquote {
+    border: 1px solid var(--line-2); border-left: 3px solid var(--accent);
+    padding: 14px 18px; margin: 18px 0 24px; background: var(--bg-1);
+    font-size: 14px; color: var(--fg-dim); line-height: 1.6;
+  }
+  .doc-main blockquote p { margin-bottom: 0; }
+  .doc-main table { width: 100%; margin: 16px 0 24px; border-collapse: collapse; font-size: 14px; }
+  .doc-main th, .doc-main td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+  .doc-main th { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--fg-muted); font-weight: 500; }
+  .doc-main td { color: var(--fg-dim); }
+
+  .doc-toc { padding: 56px 24px; position: sticky; top: 56px; align-self: start; max-height: calc(100vh - 56px); overflow-y: auto; }
+  .doc-toc h5 { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--fg-muted); margin-bottom: 14px; font-weight: 500; }
+  .doc-toc a { display: block; padding: 5px 0; font-size: 12px; color: var(--fg-dim); border-left: 1px solid var(--line); padding-left: 12px; }
+  .doc-toc a.sub { padding-left: 24px; font-size: 11px; }
+  .doc-toc a:hover { color: var(--fg); }
+
+  @media (max-width: 1100px) { .doc-toc { display: none; } .doc-layout { grid-template-columns: 240px 1fr; } }
+  @media (max-width: 800px)  { .doc-side { display: none; } .doc-layout { grid-template-columns: 1fr; } .doc-main { padding: 32px 24px; } }
+
+  body { user-select: none; -webkit-user-select: none; }
+  .doc-main, .doc-main * { user-select: text; -webkit-user-select: text; }
+</style>

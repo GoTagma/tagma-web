@@ -1,0 +1,51 @@
+---
+import { site } from '../site.config';
+
+interface Props { currentPath: string }
+const { currentPath } = Astro.props;
+
+const navItems = [
+  { href: '/',          key: 'index',     i18n: 'nav.product',   label: 'Product' },
+  { href: '/docs',      key: 'docs',      i18n: 'nav.docs',      label: 'Docs' },
+  { href: '/changelog', key: 'changelog', i18n: 'nav.changelog', label: 'Changelog' },
+];
+
+function isActive(href: string): boolean {
+  if (href === '/') return currentPath === '/' || currentPath === '';
+  return currentPath === href || currentPath.startsWith(href + '/');
+}
+---
+
+<div class="topbar-inner">
+  <div class="brand">
+    <span class="mark"></span>
+    <span>{site.name}</span>
+    <span class="v">v{site.version}</span>
+  </div>
+  <nav class="topnav">
+    {navItems.map((item) => (
+      <a
+        href={item.href}
+        data-nav={item.key}
+        data-i18n={item.i18n}
+        class={isActive(item.href) ? 'active' : undefined}
+      >{item.label}</a>
+    ))}
+    <a href="#" data-i18n="nav.github">GitHub ↗</a>
+  </nav>
+  <div class="topbar-right">
+    <div class="lang-menu" id="lang">
+      <button class="trigger" type="button" aria-haspopup="listbox" aria-expanded="false">
+        <span class="label">EN</span><span class="caret">▾</span>
+      </button>
+      <div class="panel" role="listbox">
+        <button class="opt active"  data-v="en" type="button">English<span class="code">EN</span></button>
+        <button class="opt"         data-v="zh" type="button">中文<span class="code">ZH</span></button>
+        <button class="opt disabled" type="button">日本語<span class="code">Soon</span></button>
+        <button class="opt disabled" type="button">Español<span class="code">Soon</span></button>
+      </div>
+    </div>
+    <button class="theme-btn" id="themeBtn" title="Toggle theme">◐</button>
+    <a class="accent-btn" href="/#download" data-i18n="cta.download">↓ Download</a>
+  </div>
+</div>

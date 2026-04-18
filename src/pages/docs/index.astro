@@ -1,0 +1,22 @@
+---
+import { getCollection } from 'astro:content';
+
+// Find the first doc (lowest order) and redirect /docs → /docs/<first>.
+const all = await getCollection('docs');
+const sorted = all.slice().sort((a, b) => a.data.order - b.data.order);
+const first = sorted[0];
+const target = first ? `/docs/${first.id}` : '/';
+---
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="refresh" content={`0; url=${target}`} />
+  <link rel="canonical" href={target} />
+  <title>Tagma — Docs</title>
+</head>
+<body>
+  <p>Redirecting to <a href={target}>{target}</a>…</p>
+</body>
+</html>

@@ -1,0 +1,50 @@
+---
+import { site } from '../site.config';
+---
+
+<div class="foot-inner">
+  <div class="foot">
+    <div class="brand-col">
+      <div class="name"><span class="mark"></span>{site.name}</div>
+      <p data-i18n="foot.tag">Every agent in formation. A swim-lane editor for AI orchestration — task as atomic unit, plugin-native, local-first.</p>
+    </div>
+    <div>
+      <h5 data-i18n="foot.product">Product</h5>
+      <ul>
+        <li><a href="/#download" data-i18n="foot.download">Download</a></li>
+        <li><a href="/docs" data-i18n="foot.docs">Documentation</a></li>
+        <li><a href="/changelog" data-i18n="foot.changelog">Changelog</a></li>
+      </ul>
+    </div>
+    <div>
+      <h5 data-i18n="foot.dev">Developers</h5>
+      <ul>
+        <li><a href="#" data-i18n="foot.gh">GitHub ↗</a></li>
+        <li><a href="#" data-i18n="foot.sdk">Plugin SDK</a></li>
+        <li><a href="#" data-i18n="foot.discord">Discord</a></li>
+      </ul>
+    </div>
+    <div>
+      <h5 data-i18n="foot.legal">Legal</h5>
+      <ul>
+        <li><a href="#" data-i18n="foot.terms">Terms of Service</a></li>
+        <li><a href="#" data-i18n="foot.privacy">Privacy Policy</a></li>
+        <li><a href="#" data-i18n="foot.license">License ({site.license})</a></li>
+      </ul>
+    </div>
+    <div>
+      <h5 data-i18n="foot.contact">Contact</h5>
+      <ul>
+        <li><a href="mailto:hello@tagma.dev">hello@tagma.dev</a></li>
+        <li><a href="#" data-i18n="foot.security">Security</a></li>
+        <li><a href="#" data-i18n="foot.status">Status ●</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+<div class="foot-base-wrap">
+  <div class="foot-base">
+    <span data-i18n="foot.copyright">© 2026 {site.name} · All rights reserved</span>
+    <span>BUILD {site.build} · SHA256 {site.sha256Short}</span>
+  </div>
+</div>
