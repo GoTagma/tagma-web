@@ -46,11 +46,20 @@ const { entry } = Astro.props;
   .doc-main code { font-family: 'JetBrains Mono', monospace; font-size: 13px; background: var(--bg-1); padding: 2px 6px; border: 1px solid var(--line); color: var(--fg); }
   .doc-main .code-block { position: relative; margin: 16px 0 24px; }
   .doc-main .code-block pre.astro-code,
-  .doc-main pre { font-family: 'JetBrains Mono', monospace; font-size: 13px; background: var(--bg-1) !important; border: 1px solid var(--line); padding: 18px 20px; overflow-x: auto; line-height: 1.6; }
+  .doc-main pre { font-family: 'JetBrains Mono', monospace; font-size: 13px; border: 1px solid var(--line); padding: 18px 20px; margin: 16px 0 24px; overflow-x: auto; line-height: 1.6; }
+  .doc-main .code-block pre { margin: 0; }
   .doc-main pre code { background: transparent; border: 0; padding: 0; font-family: 'JetBrains Mono', monospace; }
   .doc-main pre code .line { display: block; }
-  html[data-theme="light"] .doc-main pre.astro-code,
-  html[data-theme="light"] .doc-main pre.astro-code span {
+  .doc-main pre.astro-code,
+  .doc-main pre.astro-code span {
+    color: var(--shiki-dark, inherit);
+    background-color: var(--shiki-dark-bg, var(--bg-1));
+    font-style: var(--shiki-dark-font-style);
+    font-weight: var(--shiki-dark-font-weight);
+    text-decoration: var(--shiki-dark-text-decoration);
+  }
+  [data-theme="light"] .doc-main pre.astro-code,
+  [data-theme="light"] .doc-main pre.astro-code span {
     color: var(--shiki-light, inherit) !important;
     background-color: var(--shiki-light-bg, var(--bg-1)) !important;
     font-style: var(--shiki-light-font-style) !important;
@@ -70,7 +79,7 @@ const { entry } = Astro.props;
   .doc-main h2:hover .heading-anchor,
   .doc-main h3:hover .heading-anchor,
   .doc-main .heading-anchor:focus { opacity: 1; }
-  .doc-main .heading-anchor:hover { color: var(--accent); }
+  .doc-main .heading-anchor:hover { color: var(--accent); border-bottom: 0; }
   .doc-main .heading-anchor.copied { color: var(--green); }
 
   /* Code copy button (mounted by docs.client.ts) */
