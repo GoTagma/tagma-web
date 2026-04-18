@@ -13,7 +13,7 @@
     "theme": "light",
     "lang": "en"
   }/*EDITMODE-END*/;
-  // merge any cross-page state saved by shell.js (docs/changelog/plugins share this)
+  // merge any cross-page state saved by shell.js (docs/changelog share this)
   try {
     const saved = JSON.parse(localStorage.getItem('tagma_tweaks') || '{}');
     if (saved && typeof saved === 'object') Object.assign(TWEAKS, saved);
@@ -169,6 +169,9 @@
   }
   .way-install .prompt { color: var(--fg-muted); user-select: none; }
   .way-install code { flex: 1; overflow-x: auto; white-space: nowrap; }
+  /* product page: only SDK / CLI install commands are selectable */
+  body { user-select: none; -webkit-user-select: none; }
+  .way-install code.cmd { user-select: text; -webkit-user-select: text; cursor: text; }
   .way-install .copy {
     font-size: 10px; letter-spacing: .1em; color: var(--fg-dim);
     border: 1px solid var(--line-2); padding: 3px 8px; cursor: pointer;
@@ -412,10 +415,10 @@
   }
   .mm-block { position: absolute; height: 8px; }
   .mm-view {
-    position: absolute; inset: 0;
+    position: absolute;
     border: 1px solid var(--accent); opacity: .5;
     pointer-events: none;
-    left: 2%; right: 30%; top: 2px; bottom: 2px;
+    left: 2%; right: 2%; top: 2px; bottom: 2px;
   }
 
   .zoom {
@@ -515,19 +518,19 @@
         <div class="lane-row">
           <div class="lane-name"><span class="swatch" style="background:var(--blue)"></span><span data-i18n="lane.backend">Backend</span></div>
           <div class="lane-meta">opencode · sonnet</div>
-          <div class="lane-meta" style="color:var(--green)">3 tasks · 2 ok</div>
+          <div class="lane-meta lane-status" data-lane="0">3 tasks · 2 ok</div>
           <span class="cnt">3</span>
         </div>
         <div class="lane-row">
           <div class="lane-name"><span class="swatch" style="background:var(--green)"></span><span data-i18n="lane.ops">Ops</span></div>
           <div class="lane-meta">shell · codex</div>
-          <div class="lane-meta" style="color:var(--green)">2 tasks · 2 ok</div>
+          <div class="lane-meta lane-status" data-lane="1">2 tasks · 2 ok</div>
           <span class="cnt">2</span>
         </div>
         <div class="lane-row">
           <div class="lane-name"><span class="swatch" style="background:var(--pink)"></span><span data-i18n="lane.review">Review</span></div>
           <div class="lane-meta">claude-code · opus</div>
-          <div class="lane-meta">1 task · queued</div>
+          <div class="lane-meta lane-status" data-lane="2">1 task · queued</div>
           <span class="cnt">1</span>
         </div>
       </div>
@@ -623,7 +626,7 @@
         <p data-i18n="ways.sdk.desc">Build and run pipelines from your own code. The same runtime the editor uses — just imported as a library.</p>
         <div class="way-install">
           <span class="prompt">$</span>
-          <code>bun add @tagma/sdk</code>
+          <code class="cmd">bun add @tagma/sdk</code>
           <button class="copy" data-copy="bun add @tagma/sdk">COPY</button>
         </div>
         <div class="way-links">
@@ -638,12 +641,12 @@
         <p data-i18n="ways.cli.desc">Run any <code style="font-family:inherit;color:var(--fg)">pipeline.yaml</code> from a shell. Ideal for CI, cron, or gluing agents into existing scripts.</p>
         <div class="way-install">
           <span class="prompt">$</span>
-          <code>bun add -g @tagma/cli</code>
+          <code class="cmd">bun add -g @tagma/cli</code>
           <button class="copy" data-copy="bun add -g @tagma/cli">COPY</button>
         </div>
         <div class="way-install">
           <span class="prompt">$</span>
-          <code>bunx @tagma/cli ./pipeline.yaml</code>
+          <code class="cmd">bunx @tagma/cli ./pipeline.yaml</code>
           <button class="copy" data-copy="bunx @tagma/cli ./pipeline.yaml">COPY</button>
         </div>
         <div class="way-links">
@@ -906,6 +909,33 @@
     { t1:'ok',       t2:'ok',       t3:'ok',       t4:'ok',       t5:'ok',      t6:'running',
       e: [['t1','t2','pending'],['t2','t3','pending'],['t4','t5','pending'],['t3','t6','pending'],['t5','t6','pending']] },
   ];
+  // which task ids belong to each lane
+  const LANE_TASKS = { 0: ['t1','t2','t3'], 1: ['t4','t5'], 2: ['t6'] };
+
+  function updateLaneStatuses(f) {
+    document.querySelectorAll('.lane-status').forEach(meta => {
+      const lane = meta.getAttribute('data-lane');
+      const ids = LANE_TASKS[lane] || [];
+      let ok = 0, run = 0, queued = 0;
+      ids.forEach(id => {
+        const s = f[id];
+        if (s === 'ok') ok++;
+        else if (s === 'running') run++;
+        else if (s === 'queued') queued++;
+      });
+      const total = ids.length;
+      const parts = [`${total} ${total === 1 ? 'task' : 'tasks'}`];
+      if (ok)     parts.push(`${ok} ok`);
+      if (run)    parts.push(`${run} run`);
+      if (queued) parts.push(`${queued} queued`);
+      meta.textContent = parts.join(' · ');
+      // color: orange while running, green when all ok, muted otherwise
+      if (run)           meta.style.color = 'var(--accent)';
+      else if (ok && ok === total) meta.style.color = 'var(--green)';
+      else               meta.style.color = '';
+    });
+  }
+
   let frame = 0;
   function applyFrame() {
     const f = cycle[frame];
@@ -928,6 +958,7 @@
         }
       }
     });
+    updateLaneStatuses(f);
     currentEdges = f.e;
     drawWires();
   }

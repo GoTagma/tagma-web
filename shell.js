@@ -11,7 +11,6 @@
     <a href="index.html"     data-nav="index"     data-i18n="nav.product">Product</a>
     <a href="docs.html"      data-nav="docs"      data-i18n="nav.docs">Docs</a>
     <a href="changelog.html" data-nav="changelog" data-i18n="nav.changelog">Changelog</a>
-    <a href="plugins.html"   data-nav="plugins"   data-i18n="nav.plugins">Plugins</a>
     <a href="#"              data-i18n="nav.github">GitHub ↗</a>
   </nav>
   <div class="topbar-right">

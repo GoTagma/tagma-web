@@ -63,6 +63,10 @@
 
   @media (max-width: 1100px) { .doc-toc { display: none; } .doc-layout { grid-template-columns: 240px 1fr; } }
   @media (max-width: 800px)  { .doc-side { display: none; } .doc-layout { grid-template-columns: 1fr; } .doc-main { padding: 32px 24px; } }
+
+  /* selection: only article body is selectable; chrome/nav/toc is not */
+  body { user-select: none; -webkit-user-select: none; }
+  .doc-main, .doc-main * { user-select: text; -webkit-user-select: text; }
 </style>
 </head>
 <body data-theme="dark">
