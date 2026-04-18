@@ -1,0 +1,11 @@
+{
+  // Cloudflare Workers Builds manifest. Deploys the Astro static output
+  // (./dist) as a Worker with static assets. Consumed by `npx wrangler deploy`
+  // both locally and in the CF Workers Builds UI.
+  "name": "tagma-web",
+  "compatibility_date": "2026-04-18",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page"
+  }
+}
