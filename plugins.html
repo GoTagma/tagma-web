@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Tagma — Plugins</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="shell.css">
+<style>
+  .ghost-btn { padding:0 14px; height:30px; border:1px solid var(--line-2); display:inline-flex; align-items:center; font-size:12px; color:var(--fg-dim); font-family:'JetBrains Mono',monospace; }
+  .mk-wrap { padding: 0 40px 80px; max-width: 1360px; margin: 0 auto; }
+  .mk-bar {
+    display: flex; gap: 12px; padding: 24px 0; border-bottom: 1px solid var(--line);
+    align-items: center; flex-wrap: wrap;
+  }
+  .mk-bar input {
+    flex: 1; min-width: 240px; height: 40px; padding: 0 14px;
+    background: var(--bg-1); border: 1px solid var(--line-2); color: var(--fg);
+    font: inherit; font-family: 'JetBrains Mono', monospace; font-size: 13px;
+  }
+  .mk-bar input:focus { outline: none; border-color: var(--accent); }
+  .mk-bar .count { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--fg-muted); letter-spacing: .06em; }
+  .mk-bar .sort { height: 40px; padding: 0 14px; border: 1px solid var(--line-2); font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--fg-dim); display: inline-flex; align-items: center; gap: 8px; }
+
+  .mk-layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 40px; padding-top: 32px; }
+  .mk-side h5 { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--fg-muted); margin: 20px 0 12px; font-weight: 500; }
+  .mk-side h5:first-child { margin-top: 0; }
+  .mk-side .cat { display: flex; justify-content: space-between; padding: 7px 10px 7px 12px; font-size: 13px; color: var(--fg-dim); border-left: 2px solid transparent; margin-left: -12px; cursor: pointer; }
+  .mk-side .cat:hover { color: var(--fg); }
+  .mk-side .cat.active { color: var(--accent); border-left-color: var(--accent); }
+  .mk-side .cat .n { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--fg-muted); }
+  .mk-side .cat.active .n { color: var(--accent); }
+
+  .mk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+  .card {
+    border: 1px solid var(--line-2); background: var(--panel);
+    padding: 20px; display: flex; flex-direction: column; gap: 12px;
+    transition: border-color .15s, transform .15s;
+    position: relative;
+  }
+  .card:hover { border-color: var(--fg-muted); transform: translateY(-1px); }
+  .card.featured { border-top: 3px solid var(--accent); padding-top: 17px; }
+  .card .head { display: flex; align-items: flex-start; gap: 12px; }
+  .card .avatar {
+    width: 40px; height: 40px; flex-shrink: 0;
+    background: var(--bg-2); border: 1px solid var(--line-2);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 600;
+  }
+  .card .avatar.tl { background: var(--teal); color: #0a1512; border-color: var(--teal); }
+  .card .avatar.or { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  [data-theme="light"] .card .avatar.or { color: #fff; }
+  .card .avatar.bl { background: var(--blue); color: #fff; border-color: var(--blue); }
+  .card .avatar.pk { background: var(--pink); color: #fff; border-color: var(--pink); }
+  .card .avatar.gn { background: var(--green); color: #052610; border-color: var(--green); }
+  .card .avatar.wn { background: var(--warn); color: #2a1e00; border-color: var(--warn); }
+
+  .card .title { font-size: 15px; font-weight: 500; color: var(--fg); margin-bottom: 2px; display: flex; align-items: center; gap: 6px; }
+  .card .title .check { color: var(--blue); font-size: 11px; }
+  .card .sub { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--fg-muted); }
+  .card .desc { font-size: 13px; color: var(--fg-dim); line-height: 1.5; flex: 1; }
+  .card .meta {
+    display: flex; gap: 14px; padding-top: 10px;
+    border-top: 1px solid var(--line); font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; color: var(--fg-muted); letter-spacing: .04em;
+  }
+  .card .meta b { color: var(--fg); font-weight: 500; }
+  .card .pill { position: absolute; top: 14px; right: 14px; font-family: 'JetBrains Mono', monospace; font-size: 9px; padding: 2px 6px; border: 1px solid var(--line-2); color: var(--fg-muted); letter-spacing: .08em; }
+  .card .pill.official { color: var(--blue); border-color: color-mix(in srgb, var(--blue) 40%, var(--line-2)); }
+  .card .install-row { display: flex; gap: 8px; margin-top: 4px; }
+  .card .btn-install { flex: 1; height: 32px; background: var(--fg); color: var(--bg); font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: .06em; border: 1px solid var(--fg); }
+  .card .btn-install:hover { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .card .btn-info { width: 32px; height: 32px; border: 1px solid var(--line-2); color: var(--fg-dim); font-size: 12px; }
+  .card .btn-info:hover { color: var(--fg); }
+  .card.installed .btn-install { background: transparent; color: var(--green); border-color: var(--green); }
+
+  @media (max-width: 900px) {
+    .mk-wrap { padding: 0 24px 40px; }
+    .mk-layout { grid-template-columns: 1fr; gap: 20px; }
+    .mk-side { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; }
+    .mk-side h5:first-child { display: none; }
+    .mk-side h5:not(:first-child) { grid-column: 1 / -1; }
+  }
+</style>
+</head>
+<body data-theme="dark">
+
+<header class="topbar"></header>
+
+<main>
+  <section class="page-head">
+    <div class="page-eyebrow"><span class="square"></span><span>§ TAGMA · PLUGIN MARKETPLACE</span><span class="bar"></span><span style="color:var(--fg-dim)">127 DRIVERS · 342K INSTALLS</span></div>
+    <h1>Every driver, <span class="accent">signed<span style="color:var(--accent)">.</span></span></h1>
+    <p class="lede">Install CLI drivers, task templates, and lane presets from the marketplace. Everything signed, everything reversible — uninstall drops cleanly with zero residue.</p>
+  </section>
+
+  <div class="mk-wrap">
+    <div class="mk-bar">
+      <input type="text" placeholder="> search plugins, drivers, templates...">
+      <span class="count">127 PLUGINS</span>
+      <span class="sort">SORT: POPULAR <span style="color:var(--fg-muted)">▾</span></span>
+    </div>
+
+    <div class="mk-layout">
+      <aside class="mk-side">
+        <h5>Category</h5>
+        <div class="cat active"><span>All</span><span class="n">127</span></div>
+        <div class="cat"><span>Drivers</span><span class="n">18</span></div>
+        <div class="cat"><span>Templates</span><span class="n">64</span></div>
+        <div class="cat"><span>Lane presets</span><span class="n">29</span></div>
+        <div class="cat"><span>Themes</span><span class="n">16</span></div>
+
+        <h5>Source</h5>
+        <div class="cat"><span>First-party</span><span class="n">12</span></div>
+        <div class="cat"><span>Verified</span><span class="n">48</span></div>
+        <div class="cat"><span>Community</span><span class="n">67</span></div>
+
+        <h5>Compatibility</h5>
+        <div class="cat"><span>v0.8+</span><span class="n">110</span></div>
+        <div class="cat"><span>v0.7 legacy</span><span class="n">17</span></div>
+      </aside>
+
+      <div class="mk-grid">
+
+        <div class="card featured installed">
+          <span class="pill official">OFFICIAL</span>
+          <div class="head">
+            <div class="avatar or">C</div>
+            <div>
+              <div class="title">claude-code <span class="check">✓</span></div>
+              <div class="sub">anthropic · v2.1.4</div>
+            </div>
+          </div>
+          <p class="desc">Drive Claude Code sessions from Tagma tasks. Full support for sonnet, opus, and haiku with streaming output and tool use.</p>
+          <div class="meta"><span><b>84.2k</b> installs</span><span><b>★ 4.9</b></span><span>MIT</span></div>
+          <div class="install-row"><button class="btn-install">✓ INSTALLED</button><button class="btn-info">?</button></div>
+        </div>
+
+        <div class="card featured installed">
+          <span class="pill official">OFFICIAL</span>
+          <div class="head">
+            <div class="avatar tl">O</div>
+            <div>
+              <div class="title">opencode <span class="check">✓</span></div>
+              <div class="sub">opencode-ai · v1.8.0</div>
+            </div>
+          </div>
+          <p class="desc">OpenCode CLI driver with model routing. Supports opencode/big and opencode/fast backends, plus custom model pinning per task.</p>
+          <div class="meta"><span><b>71.8k</b> installs</span><span><b>★ 4.8</b></span><span>Apache-2.0</span></div>
+          <div class="install-row"><button class="btn-install">✓ INSTALLED</button><button class="btn-info">?</button></div>
+        </div>
+
+        <div class="card featured installed">
+          <span class="pill official">OFFICIAL</span>
+          <div class="head">
+            <div class="avatar bl">X</div>
+            <div>
+              <div class="title">codex <span class="check">✓</span></div>
+              <div class="sub">openai · v1.3.2</div>
+            </div>
+          </div>
+          <p class="desc">OpenAI Codex CLI integration. Run gpt-4o and o1 tasks in any lane with full tool-call and file-edit pass-through.</p>
+          <div class="meta"><span><b>63.4k</b> installs</span><span><b>★ 4.7</b></span><span>MIT</span></div>
+          <div class="install-row"><button class="btn-install">✓ INSTALLED</button><button class="btn-info">?</button></div>
+        </div>
+
+        <div class="card">
+          <span class="pill official">OFFICIAL</span>
+          <div class="head">
+            <div class="avatar gn">$</div>
+            <div>
+              <div class="title">shell <span class="check">✓</span></div>
+              <div class="sub">tagma · v0.8.2</div>
+            </div>
+          </div>
+          <p class="desc">Execute shell commands as tasks. Supports interactive prompts, signal emission, and file-based task boundaries.</p>
+          <div class="meta"><span><b>128k</b> installs</span><span><b>★ 4.9</b></span><span>MIT</span></div>
+          <div class="install-row"><button class="btn-install">INSTALL</button><button class="btn-info">?</button></div>
+        </div>
+
+        <div class="card">
+          <div class="head">
+            <div class="avatar pk">A</div>
+            <div>
+              <div class="title">aider-bridge</div>
+              <div class="sub">community · v0.4.1</div>
+            </div>
+          </div>
+          <p class="desc">Drive Aider from Tagma. Preserves Aider's chat history and auto-commit flow while exposing it as a first-class task driver.</p>
+          <div class="meta"><span><b>12.1k</b> installs</span><span><b>★ 4.5</b></span><span>MIT</span></div>
+          <div class="install-row"><button class="btn-install">INSTALL</button><button class="btn-info">?</button></div>
+        </div>
+
+        <div class="card">
+          <div class="head">
+            <div class="avatar wn">G</div>
+            <div>
+              <div class="title">gemini-cli</div>
+              <div class="sub">community · v0.2.0</div>
+            </div>
+          </div>
+          <p class="desc">Google Gemini CLI adapter with support for 1.5 Pro and Flash. File upload, multi-modal prompts, and streaming.</p>
+          <div class="meta"><span><b>8.7k</b> installs</span><span><b>★ 4.3</b></span><span>Apache-2.0</span></div>
+          <div class="install-row"><button class="btn-install">INSTALL</button><button class="btn-info">?</button></div>
+        </div>
+
+        <div class="card">
+          <div class="head">
+            <div class="avatar bl">□</div>
+            <div>
+              <div class="title">lane-preset-feature</div>
+              <div class="sub">tagma · v1.0.0</div>
+            </div>
+          </div>
+          <p class="desc">Four-lane preset for feature work: Plan → Implement → Review → Deploy. Wires Claude Code + shell + codex with sensible defaults.</p>
+          <div class="meta"><span><b>22.5k</b> installs</span><span><b>★ 4.8</b></span><span>MIT</span></div>
+          <div class="install-row"><button class="btn-install">INSTALL</button><button class="btn-info">?</button></div>
+        </div>
+
+        <div class="card">
+          <div class="head">
+            <div class="avatar tl">T</div>
+            <div>
+              <div class="title">template-bugfix</div>
+              <div class="sub">community · v0.6.3</div>
+            </div>
+          </div>
+          <p class="desc">Task template: reproduce → minimal repro → fix → test. Great starting point for tracking down regressions.</p>
+          <div class="meta"><span><b>14.3k</b> installs</span><span><b>★ 4.6</b></span><span>MIT</span></div>
+          <div class="install-row"><button class="btn-install">INSTALL</button><button class="btn-info">?</button></div>
+        </div>
+
+        <div class="card">
+          <div class="head">
+            <div class="avatar or">M</div>
+            <div>
+              <div class="title">mono-graphite</div>
+              <div class="sub">community · v0.3.0</div>
+            </div>
+          </div>
+          <p class="desc">Graphite-inspired monospace theme for Tagma's canvas. Swaps task cards for tight single-line rows — denser pipelines, more on screen.</p>
+          <div class="meta"><span><b>4.1k</b> installs</span><span><b>★ 4.4</b></span><span>MIT</span></div>
+          <div class="install-row"><button class="btn-install">INSTALL</button><button class="btn-info">?</button></div>
+        </div>
+
+      </div>
+    </div>
+
+    <p style="color:var(--fg-muted); font-size: 12px; margin-top: 48px; font-family: 'JetBrains Mono', monospace; text-align: center;">/* placeholder marketplace content — 127 plugins shown: 9 */</p>
+  </div>
+</main>
+
+<footer class="site-footer"></footer>
+
+<script src="shell.js"></script>
+</body>
+</html>
