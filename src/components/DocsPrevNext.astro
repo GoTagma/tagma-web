@@ -1,0 +1,44 @@
+---
+import type { DocEntry } from '../lib/docs-nav';
+
+interface Props { prev: DocEntry | null; next: DocEntry | null }
+const { prev, next } = Astro.props;
+---
+
+{(prev || next) && (
+  <nav class="docs-pager" aria-label="Previous and next page">
+    {prev ? (
+      <a class="docs-pager-link prev" href={`/docs/${prev.id}`}>
+        <span class="docs-pager-dir">← Previous</span>
+        <span class="docs-pager-title">{prev.data.title}</span>
+      </a>
+    ) : <span />}
+    {next ? (
+      <a class="docs-pager-link next" href={`/docs/${next.id}`}>
+        <span class="docs-pager-dir">Next →</span>
+        <span class="docs-pager-title">{next.data.title}</span>
+      </a>
+    ) : <span />}
+  </nav>
+)}
+
+<style is:global>
+  .doc-main .docs-pager {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    margin-top: 64px; padding-top: 32px; border-top: 1px solid var(--line);
+  }
+  .doc-main .docs-pager-link {
+    display: flex; flex-direction: column; gap: 6px;
+    padding: 16px 18px; border: 1px solid var(--line);
+    background: var(--bg-1);
+    transition: border-color .12s ease, background .12s ease;
+  }
+  .doc-main .docs-pager-link.next { text-align: right; align-items: flex-end; }
+  .doc-main .docs-pager-link:hover { border-color: var(--accent); background: var(--bg-2); }
+  .doc-main .docs-pager-dir {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    letter-spacing: .12em; text-transform: uppercase; color: var(--fg-muted);
+  }
+  .doc-main .docs-pager-title { font-size: 15px; color: var(--fg); font-weight: 500; }
+  @media (max-width: 600px) { .doc-main .docs-pager { grid-template-columns: 1fr; } }
+</style>
