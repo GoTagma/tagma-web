@@ -45,7 +45,7 @@ Or one-shot, no install:
 bunx @tagma/cli ./pipeline.yaml
 ```
 
-Package: [`@tagma/cli`](https://github.com/GoTagma/tagma-cli). Requires Bun ≥ 1.0. See the [CLI reference](/docs/cli) for flags, approval WebSocket, and exit codes.
+Package: [`@tagma/cli`](https://github.com/GoTagma/tagma-cli). Requires Bun ≥ 1.3 (the CLI depends on `@tagma/sdk`, which uses Bun-only runtime APIs). See the [CLI reference](/docs/cli) for flags, approval WebSocket, and exit codes.
 
 ### SDK
 

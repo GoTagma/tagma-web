@@ -49,6 +49,8 @@ pipeline:
 
 **Windows:** the plugin automatically unwraps npm `.cmd` shims to the underlying node invocation so multi-line prompts survive.
 
+**Error-JSON failsafe:** opencode occasionally emits `{"type":"error", ...}` JSON with exit code `0` on transient upstream API failures. The driver detects this in `parseResult` and sets `forceFailure: true` so the engine marks the task failed instead of silently passing bogus output into downstream `continue_from` consumers.
+
 ## Plugin: [`@tagma/driver-codex`](https://github.com/GoTagma/tagma-mono/tree/main/packages/driver-codex)
 
 ```yaml

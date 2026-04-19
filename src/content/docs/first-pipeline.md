@@ -54,7 +54,7 @@ A few things worth noting:
 tagma ./.tagma/hello.yaml --cwd .
 ```
 
-The CLI prints pipeline progress to stdout and writes a full run log to `./tmp/pipeline.log`. Exit code `0` means every task succeeded.
+The CLI prints pipeline progress to stdout and writes a full run log to `./.tagma/logs/<runId>/pipeline.log` under the `--cwd` directory (each run gets its own `<runId>` folder). Exit code `0` means every task succeeded.
 
 **From the editor:**
 

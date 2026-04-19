@@ -19,7 +19,7 @@ Or one-shot, no install:
 bunx @tagma/cli ./pipeline.yaml
 ```
 
-Requires Bun ≥ 1.0.
+Requires Bun ≥ 1.3 (the CLI depends on `@tagma/sdk`, which uses Bun-only runtime APIs).
 
 ## Usage
 
