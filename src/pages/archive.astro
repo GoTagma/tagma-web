@@ -1,0 +1,203 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../site.config';
+
+const entries = await getCollection('archive');
+entries.sort((a, b) => b.data.date.localeCompare(a.data.date));
+
+const ASSETS = [
+  { os: 'mac-arm', label: 'macOS arm64', file: 'Tagma-mac-arm64.dmg' },
+  { os: 'mac-x64', label: 'macOS x64',   file: 'Tagma-mac-x64.dmg' },
+  { os: 'win',     label: 'Windows',     file: 'Tagma-win-x64.exe' },
+  { os: 'linux',   label: 'Linux',       file: 'Tagma-linux-x86_64.AppImage' },
+] as const;
+
+function downloadUrl(version: string, file: string): string {
+  return `${site.github.mono}/releases/download/desktop-v${version}/${file}`;
+}
+
+function fmtDate(iso: string): string {
+  const d = new Date(iso + 'T00:00:00Z');
+  const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+  return `${months[d.getUTCMonth()]} ${String(d.getUTCDate()).padStart(2, '0')}, ${d.getUTCFullYear()}`;
+}
+
+function channelLabel(ch: string): string {
+  const m: Record<string, string> = {
+    alpha: 'ALPHA', beta: 'BETA', rc: 'RC', stable: 'STABLE', patch: 'PATCH',
+  };
+  return m[ch] ?? ch.toUpperCase();
+}
+---
+
+<BaseLayout title="Tagma — Archive" description="Every released build of Tagma. Direct download links for all platforms.">
+  <main>
+    <section class="page-head">
+      <div class="page-eyebrow"><span class="square"></span><span>§ TAGMA · ARCHIVE</span><span class="bar"></span><span style="color:var(--fg-dim)">HISTORICAL BUILDS</span></div>
+      <h1>Version <span class="accent">archive<span style="color:var(--accent)">.</span></span></h1>
+      <p class="lede">Every released build of Tagma. Pick a platform to download directly.</p>
+    </section>
+
+    <div class="arc-wrap">
+      <div class="filter-bar">
+        <span class="chip active" data-filter="all">All</span>
+        <span class="chip" data-filter="stable">Stable</span>
+        <span class="chip" data-filter="beta">Beta</span>
+        <span class="chip" data-filter="rc">RC</span>
+        <span class="chip" data-filter="alpha">Alpha</span>
+        <span class="chip" data-filter="patch">Patch</span>
+        <span class="sep"></span>
+        <input id="arc-q" type="text" placeholder="> filter versions..." />
+      </div>
+
+      <ul class="arc-list">
+        {entries.map((e) => (
+          <li class="arc-row" data-channel={e.data.channel} data-version={e.data.version}>
+            <div class="arc-meta">
+              <span class="arc-ver">v{e.data.version}</span>
+              <span class={`arc-tag ${e.data.channel}`}>{channelLabel(e.data.channel)}</span>
+              <span class="arc-date">{fmtDate(e.data.date)}</span>
+            </div>
+            <div class="arc-dl">
+              {ASSETS.map((a) => (
+                <a class="arc-btn" data-os={a.os} href={downloadUrl(e.data.version, a.file)} download>
+                  <span class="arc-btn-label">{a.label}</span>
+                  <span class="arc-btn-arrow">↓</span>
+                </a>
+              ))}
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </main>
+</BaseLayout>
+
+<script>
+  const chips = document.querySelectorAll<HTMLElement>('.filter-bar .chip');
+  const rows = document.querySelectorAll<HTMLElement>('.arc-row');
+  const q = document.getElementById('arc-q') as HTMLInputElement | null;
+  let activeFilter = 'all';
+  let query = '';
+
+  function apply() {
+    rows.forEach((r) => {
+      const ch = r.dataset.channel ?? '';
+      const v = r.dataset.version ?? '';
+      const matchesFilter = activeFilter === 'all' || ch === activeFilter;
+      const matchesQuery = !query || v.toLowerCase().includes(query);
+      r.style.display = matchesFilter && matchesQuery ? '' : 'none';
+    });
+  }
+
+  chips.forEach((c) => {
+    c.addEventListener('click', () => {
+      chips.forEach((x) => x.classList.remove('active'));
+      c.classList.add('active');
+      activeFilter = c.dataset.filter ?? 'all';
+      apply();
+    });
+  });
+
+  q?.addEventListener('input', () => {
+    query = q.value.trim().toLowerCase();
+    apply();
+  });
+</script>
+
+<style is:global>
+  .page-head {
+    max-width: 1360px; margin: 0 auto;
+    padding: 64px 40px 40px;
+    border-bottom: 1px solid var(--line);
+  }
+  .page-eyebrow {
+    display: flex; align-items: center; gap: 14px;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--fg-muted); letter-spacing: 0.1em; text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+  .page-eyebrow .square { width: 8px; height: 8px; background: var(--accent); }
+  .page-eyebrow .bar { flex: 1; height: 1px; background: var(--line-2); max-width: 100px; }
+  .page-head h1 {
+    font-size: clamp(48px, 8vw, 108px);
+    line-height: 0.94; letter-spacing: -0.04em; font-weight: 500;
+    max-width: 18ch;
+  }
+  .page-head h1 .accent { color: var(--accent); }
+  .page-head .lede { margin-top: 28px; font-size: 17px; color: var(--fg-dim); max-width: 60ch; line-height: 1.55; }
+
+  .arc-wrap { padding: 0 40px 80px; max-width: 1360px; margin: 0 auto; }
+
+  .filter-bar {
+    display: flex; gap: 10px; padding: 20px 0; border-bottom: 1px solid var(--line);
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; align-items: center;
+    flex-wrap: wrap;
+  }
+  .filter-bar .chip {
+    padding: 5px 10px; border: 1px solid var(--line-2); color: var(--fg-dim);
+    cursor: pointer; letter-spacing: .05em; text-transform: uppercase;
+    user-select: none;
+  }
+  .filter-bar .chip:hover { color: var(--fg); }
+  .filter-bar .chip.active { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+  .filter-bar .sep { flex: 1; }
+  .filter-bar input {
+    height: 30px; padding: 0 12px; background: transparent;
+    border: 1px solid var(--line-2); color: var(--fg); font: inherit;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; width: 220px;
+  }
+
+  .arc-list { list-style: none; padding: 0; margin: 0; }
+  .arc-row {
+    display: grid; grid-template-columns: minmax(240px, 320px) minmax(0, 1fr);
+    gap: 32px; align-items: center;
+    padding: 20px 0; border-bottom: 1px solid var(--line);
+  }
+  .arc-row:last-child { border-bottom: 0; }
+
+  .arc-meta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .arc-ver {
+    font-family: 'JetBrains Mono', monospace; font-size: 15px;
+    color: var(--fg); font-weight: 600; letter-spacing: .02em;
+  }
+  .arc-tag {
+    padding: 2px 6px; font-family: 'JetBrains Mono', monospace; font-size: 9px;
+    font-weight: 500; background: var(--accent); color: var(--accent-ink);
+    letter-spacing: .08em;
+  }
+  [data-theme="light"] .arc-tag { color: #fff; }
+  .arc-tag.beta   { background: var(--blue); }
+  .arc-tag.patch  { background: var(--green); }
+  .arc-tag.rc     { background: var(--warn); }
+  .arc-tag.alpha  { background: var(--pink); }
+  .arc-tag.stable { background: var(--fg); color: var(--bg); }
+  .arc-date {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--fg-muted); letter-spacing: .05em;
+  }
+
+  .arc-dl { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+  .arc-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 7px 12px; border: 1px solid var(--line-2); color: var(--fg-dim);
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    text-decoration: none; letter-spacing: .03em; white-space: nowrap;
+    transition: color .1s, border-color .1s, background .1s;
+  }
+  .arc-btn:hover {
+    color: var(--fg); border-color: var(--fg); background: var(--bg-1);
+  }
+  .arc-btn-arrow { color: var(--fg-muted); font-size: 12px; }
+  .arc-btn:hover .arc-btn-arrow { color: var(--accent); }
+
+  @media (max-width: 900px) {
+    .arc-wrap { padding: 0 24px 40px; }
+    .arc-row { grid-template-columns: 1fr; gap: 12px; padding: 18px 0; }
+    .arc-dl { justify-content: flex-start; }
+  }
+
+  body { user-select: none; -webkit-user-select: none; }
+  .filter-bar input { user-select: text; -webkit-user-select: text; }
+</style>

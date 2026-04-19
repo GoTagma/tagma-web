@@ -13,16 +13,16 @@ const docs = defineCollection({
   }),
 });
 
-// Changelog: one file per release under src/content/changelog/*.md
-const changelog = defineCollection({
-  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/changelog' }),
+// Archive: one file per release under src/content/archive/*.md
+// Minimal frontmatter only — no body, no summary. The page derives download
+// URLs from the version field.
+const archive = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/archive' }),
   schema: z.object({
     version: z.string(),
     date: z.string(),
     channel: z.enum(['alpha', 'beta', 'rc', 'stable', 'patch']).default('stable'),
-    sha: z.string().optional(),
-    summary: z.string(),
   }),
 });
 
-export const collections = { docs, changelog };
+export const collections = { docs, archive };
