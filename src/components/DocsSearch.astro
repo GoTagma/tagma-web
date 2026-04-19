@@ -1,109 +1,187 @@
 ---
-// Docs search. The Pagefind UI is mounted inside a native <dialog>
-// triggered by a button in the left sidebar (or ⌘K / Ctrl+K / "/").
-// Using <dialog> + showModal() puts the panel in the browser's top
-// layer, which renders above every stacking context — no z-index
-// required, no interference from sticky headers or sidebars.
+// Docs search — reads a JSON index embedded in the page, filters it on
+// input, and renders results into [data-docs-search-results] inside the
+// main doc column. The article's normal content is hidden while a query
+// is active.
+import { getCollection } from 'astro:content';
+import fs from 'node:fs';
+import path from 'node:path';
+
+const docs = await getCollection('docs');
+const docsDir = path.resolve('./src/content/docs');
+
+function stripMarkdown(md: string): string {
+  return md
+    .replace(/^---[\s\S]*?---/, '')
+    .replace(/```[\s\S]*?```/g, ' ')
+    .replace(/`[^`\n]*`/g, ' ')
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+    .replace(/^#{1,6}\s+/gm, '')
+    .replace(/[*_~>]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+const index = docs
+  .map((d) => {
+    const filePath = path.join(docsDir, `${d.id}.md`);
+    let body = '';
+    try { body = stripMarkdown(fs.readFileSync(filePath, 'utf8')); } catch {}
+    return {
+      id: d.id,
+      title: d.data.title,
+      description: d.data.description ?? '',
+      group: d.data.group,
+      body: body.slice(0, 4000),
+    };
+  })
+  .sort((a, b) => a.title.localeCompare(b.title));
 ---
 
-<button type="button" class="docs-search-trigger" data-docs-search-open aria-label="Search docs">
-  <span class="docs-search-trigger__label">Search</span>
-  <kbd class="docs-search-trigger__kbd">⌘K</kbd>
-</button>
+<div class="docs-search">
+  <svg class="docs-search__icon" viewBox="0 0 16 16" aria-hidden="true" width="14" height="14">
+    <circle cx="7" cy="7" r="5" fill="none" stroke="currentColor" stroke-width="1.5"/>
+    <path d="M11 11l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+  </svg>
+  <input
+    type="search"
+    class="docs-search__input"
+    placeholder="Search docs"
+    aria-label="Search docs"
+    autocomplete="off"
+    autocorrect="off"
+    autocapitalize="off"
+    spellcheck="false"
+    data-docs-search-input
+  />
+  <kbd class="docs-search__kbd" aria-hidden="true">⌘K</kbd>
+</div>
 
-<dialog class="docs-search-modal" data-docs-search-modal aria-label="Search docs">
-  <div class="docs-search-modal__panel">
-    <div id="docs-search-mount"></div>
-  </div>
-</dialog>
+<script type="application/json" data-docs-search-index set:html={JSON.stringify(index)} />
 
-<link rel="stylesheet" href="/pagefind/pagefind-ui.css" />
 <script is:inline>
   (function () {
-    var initialized = false;
-    var dialog = null;
-    var trigger = null;
-
-    function ensurePagefind() {
-      if (initialized) return;
-      initialized = true;
-      var script = document.createElement('script');
-      script.src = '/pagefind/pagefind-ui.js';
-      script.onload = function () {
-        new window.PagefindUI({
-          element: '#docs-search-mount',
-          showSubResults: true,
-          showImages: false,
-          resetStyles: false,
-          translations: { placeholder: 'Search docs…' },
-        });
-        requestAnimationFrame(focusInput);
-      };
-      document.head.appendChild(script);
-    }
-
-    function focusInput() {
-      if (!dialog) return;
-      var input = dialog.querySelector('input[type="search"], input');
-      if (input) input.focus();
-    }
-
-    function openModal() {
-      if (!dialog) return;
-      if (typeof dialog.showModal === 'function') {
-        if (!dialog.open) dialog.showModal();
-      } else {
-        dialog.setAttribute('open', '');
-      }
-      document.documentElement.classList.add('docs-search-open');
-      ensurePagefind();
-      focusInput();
-    }
-
-    function closeModal() {
-      if (!dialog) return;
-      if (typeof dialog.close === 'function' && dialog.open) dialog.close();
-      else dialog.removeAttribute('open');
-      document.documentElement.classList.remove('docs-search-open');
-      if (trigger) trigger.focus();
-    }
-
-    function isEditable(el) {
-      if (!el) return false;
-      var tag = el.tagName;
-      return tag === 'INPUT' || tag === 'TEXTAREA' || el.isContentEditable;
-    }
+    var input, resultsEl, listEl, summaryEl, mainEl, indexEl;
+    var data = [];
 
     function boot() {
-      dialog = document.querySelector('[data-docs-search-modal]');
-      trigger = document.querySelector('[data-docs-search-open]');
-      if (!dialog || !trigger) return;
+      input = document.querySelector('[data-docs-search-input]');
+      resultsEl = document.querySelector('[data-docs-search-results]');
+      listEl = document.querySelector('[data-docs-search-list]');
+      summaryEl = document.querySelector('[data-docs-search-summary]');
+      mainEl = document.querySelector('.doc-main');
+      indexEl = document.querySelector('[data-docs-search-index]');
+      if (!input || !resultsEl || !listEl || !mainEl || !indexEl) return;
 
-      trigger.addEventListener('click', openModal);
+      try { data = JSON.parse(indexEl.textContent || '[]'); } catch { data = []; }
 
-      // Click on the ::backdrop surfaces as a click on the dialog itself.
-      dialog.addEventListener('click', function (e) {
-        if (e.target === dialog) closeModal();
-      });
-
-      // <dialog> handles Esc natively via the 'cancel' event; sync our state.
-      dialog.addEventListener('close', function () {
-        document.documentElement.classList.remove('docs-search-open');
-      });
+      input.addEventListener('input', render);
 
       document.addEventListener('keydown', function (e) {
-        if (dialog.open) return;
+        var active = document.activeElement;
+        var isEditable = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable);
         var meta = e.metaKey || e.ctrlKey;
         if (meta && (e.key === 'k' || e.key === 'K')) {
           e.preventDefault();
-          openModal();
-          return;
-        }
-        if (e.key === '/' && !isEditable(document.activeElement)) {
+          input.focus();
+          input.select();
+        } else if (e.key === '/' && !isEditable) {
           e.preventDefault();
-          openModal();
+          input.focus();
+        } else if (e.key === 'Escape' && active === input) {
+          input.value = '';
+          render();
+          input.blur();
         }
       });
+    }
+
+    function escapeHtml(s) {
+      return String(s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    function highlight(text, terms) {
+      var safe = escapeHtml(text);
+      terms.forEach(function (t) {
+        if (!t) return;
+        var re = new RegExp('(' + t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+        safe = safe.replace(re, '<mark>$1</mark>');
+      });
+      return safe;
+    }
+
+    function excerpt(body, terms) {
+      if (!body) return '';
+      var lower = body.toLowerCase();
+      var hit = -1;
+      for (var i = 0; i < terms.length; i++) {
+        var idx = lower.indexOf(terms[i]);
+        if (idx >= 0) { hit = idx; break; }
+      }
+      if (hit < 0) return body.slice(0, 160) + (body.length > 160 ? '…' : '');
+      var start = Math.max(0, hit - 40);
+      var end = Math.min(body.length, hit + 140);
+      var slice = body.slice(start, end);
+      return (start > 0 ? '…' : '') + slice + (end < body.length ? '…' : '');
+    }
+
+    function score(doc, terms) {
+      var s = 0;
+      var title = doc.title.toLowerCase();
+      var desc = (doc.description || '').toLowerCase();
+      var body = (doc.body || '').toLowerCase();
+      for (var i = 0; i < terms.length; i++) {
+        var t = terms[i];
+        if (!t) continue;
+        if (title.indexOf(t) >= 0) s += 10;
+        if (title.split(/\s+/).indexOf(t) >= 0) s += 5;
+        if (desc.indexOf(t) >= 0) s += 3;
+        if (body.indexOf(t) >= 0) s += 1;
+      }
+      return s;
+    }
+
+    function render() {
+      var q = (input.value || '').trim();
+      if (!q) {
+        mainEl.classList.remove('doc-main--searching');
+        resultsEl.hidden = true;
+        listEl.innerHTML = '';
+        if (summaryEl) summaryEl.textContent = '';
+        return;
+      }
+      mainEl.classList.add('doc-main--searching');
+      resultsEl.hidden = false;
+
+      var terms = q.toLowerCase().split(/\s+/).filter(Boolean);
+      var hits = data
+        .map(function (d) { return { doc: d, s: score(d, terms) }; })
+        .filter(function (x) { return x.s > 0; })
+        .sort(function (a, b) { return b.s - a.s; });
+
+      if (summaryEl) {
+        summaryEl.textContent = hits.length
+          ? hits.length + (hits.length === 1 ? ' result' : ' results') + ' for "' + q + '"'
+          : 'No results for "' + q + '"';
+      }
+
+      listEl.innerHTML = hits.map(function (h) {
+        var d = h.doc;
+        var titleHtml = highlight(d.title, terms);
+        var descHtml = d.description ? highlight(d.description, terms) : '';
+        var exHtml = highlight(excerpt(d.body, terms), terms);
+        return (
+          '<a class="docs-hit" href="/docs/' + encodeURIComponent(d.id) + '">' +
+            '<div class="docs-hit__group">' + escapeHtml(d.group) + '</div>' +
+            '<div class="docs-hit__title">' + titleHtml + '</div>' +
+            (descHtml ? '<div class="docs-hit__desc">' + descHtml + '</div>' : '') +
+            '<div class="docs-hit__excerpt">' + exHtml + '</div>' +
+          '</a>'
+        );
+      }).join('');
     }
 
     if (document.readyState === 'loading') {
@@ -115,122 +193,92 @@
 </script>
 
 <style is:global>
-  /* ─── Sidebar trigger ─── */
-  .docs-search-trigger {
-    display: flex; align-items: center; justify-content: space-between;
-    width: 100%; margin-bottom: 18px; padding: 8px 10px;
-    background: var(--bg-1); border: 1px solid var(--line);
-    color: var(--fg-dim); font-family: 'Space Grotesk', system-ui, sans-serif;
-    font-size: 12px; letter-spacing: .02em;
-    cursor: pointer; transition: color .12s ease, border-color .12s ease;
+  .docs-search {
+    position: relative;
+    display: flex; align-items: center;
+    margin-bottom: 18px;
+    height: 34px;
+    background: var(--bg-1);
+    border: 1px solid var(--line);
+    transition: border-color .12s ease;
   }
-  .docs-search-trigger:hover { color: var(--fg); border-color: var(--line-2); }
-  .docs-search-trigger__label { opacity: .9; }
-  .docs-search-trigger__kbd {
+  .docs-search:focus-within { border-color: var(--line-2); }
+  .docs-search__icon {
+    position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+    color: var(--fg-muted); pointer-events: none;
+  }
+  .docs-search__input {
+    flex: 1 1 auto;
+    width: 100%;
+    height: 100%;
+    padding: 0 44px 0 32px;
+    background: transparent;
+    color: var(--fg);
+    border: 0; outline: 0;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-size: 13px; letter-spacing: .02em;
+  }
+  .docs-search__input::placeholder { color: var(--fg-muted); opacity: 1; }
+  .docs-search__input::-webkit-search-cancel-button { appearance: none; -webkit-appearance: none; }
+  .docs-search__kbd {
+    position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
     font-family: 'JetBrains Mono', monospace; font-size: 10px;
     letter-spacing: .06em; color: var(--fg-muted);
     background: var(--bg-2); border: 1px solid var(--line);
-    padding: 1px 6px;
+    padding: 1px 6px; pointer-events: none;
   }
+  .docs-search:focus-within .docs-search__kbd { opacity: .4; }
 
-  /* ─── Native <dialog> styling ─── */
-  /* The element is in the top layer when opened via showModal(); no
-     z-index needed. We style the default appearance and use flexbox
-     to pin the panel near the top of the viewport. */
-  .docs-search-modal {
-    /* Override UA centering — we want top-ish positioning. */
-    padding: 0; border: 0; background: transparent; color: inherit;
-    margin: 12vh auto auto; /* top 12vh, horizontally centered */
-    max-width: 640px; width: calc(100% - 40px);
-    max-height: calc(100vh - 14vh - 40px);
-    overflow: visible;
-  }
-  .docs-search-modal::backdrop {
-    background: rgba(0, 0, 0, 0.55);
-    backdrop-filter: blur(2px);
-  }
-  /* Panel is a flex column: form is pinned at the top (non-scrolling),
-     drawer is the only scroll surface. This keeps the search input
-     visible while the result list scrolls underneath. */
-  .docs-search-modal__panel {
-    position: relative;
-    display: flex; flex-direction: column;
-    background: var(--bg); border: 1px solid var(--line);
-    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4);
-    max-height: calc(100vh - 14vh - 40px);
-    overflow: hidden;
-  }
+  .doc-main--searching > *:not(.doc-search-results) { display: none !important; }
+  .doc-search-results { margin-top: 0; }
+  .doc-search-results[hidden] { display: none !important; }
 
-  html.docs-search-open, html.docs-search-open body { overflow: hidden; }
-
-  /* Propagate the column-flex layout through the Pagefind wrapper
-     down to its form/drawer so the drawer can actually scroll. */
-  #docs-search-mount {
-    display: flex; flex-direction: column;
-    flex: 1 1 auto; min-height: 0;
-  }
-  #docs-search-mount .pagefind-ui {
-    display: flex; flex-direction: column;
-    flex: 1 1 auto; min-height: 0;
-  }
-  #docs-search-mount .pagefind-ui__form {
-    flex: 0 0 auto;
-    padding: 18px 20px 14px;
-    background: var(--bg);
+  .docs-search-summary {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--fg-muted);
+    padding: 8px 0 14px;
     border-bottom: 1px solid var(--line);
-    margin: 0;
+    margin-bottom: 8px;
   }
-  #docs-search-mount .pagefind-ui__drawer {
-    flex: 1 1 auto;
-    overflow-y: auto; overflow-x: hidden;
-    padding: 14px 20px 20px;
-    min-height: 0;
-  }
+  .docs-search-summary:empty { display: none; }
 
-  /* Theming + polish. */
-  #docs-search-mount .pagefind-ui {
-    --pagefind-ui-scale: 0.9;
-    --pagefind-ui-primary: var(--accent);
-    --pagefind-ui-text: var(--fg);
-    --pagefind-ui-background: var(--bg);
-    --pagefind-ui-border: var(--line);
-    --pagefind-ui-tag: var(--bg-2);
-    --pagefind-ui-border-width: 1px;
-    --pagefind-ui-border-radius: 0;
-    --pagefind-ui-font: 'Space Grotesk', system-ui, sans-serif;
+  .docs-search-list { display: flex; flex-direction: column; }
+
+  .docs-hit {
+    display: block;
+    padding: 18px 4px;
+    border-bottom: 1px solid var(--line);
+    color: var(--fg);
+    text-decoration: none;
+    transition: background .12s ease;
   }
-  #docs-search-mount .pagefind-ui__search-input {
-    font-family: 'JetBrains Mono', monospace; font-size: 14px;
-    padding: 10px 40px 10px 40px;
-    line-height: 1.4;
+  .doc-main a.docs-hit { border-bottom: 1px solid var(--line); }
+  .docs-hit:hover { background: var(--bg-1); }
+  .docs-hit:hover .docs-hit__title { color: var(--accent); }
+  .docs-hit__group {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--fg-muted); margin-bottom: 6px;
   }
-  /* Center the magnifying-glass and clear-button icons vertically
-     inside the input and give them a consistent click target. */
-  #docs-search-mount .pagefind-ui__form::before,
-  #docs-search-mount .pagefind-ui__search-clear {
-    top: 50% !important; transform: translateY(-50%);
-    display: inline-flex; align-items: center; justify-content: center;
+  .docs-hit__title {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-size: 17px; font-weight: 500; color: var(--fg);
+    line-height: 1.3; margin-bottom: 6px;
+    transition: color .12s ease;
   }
-  #docs-search-mount .pagefind-ui__search-clear {
-    right: 12px;
-    height: 24px; min-width: 24px; padding: 0 8px;
-    font-size: 11px; letter-spacing: .04em;
-    color: var(--fg-muted); background: transparent;
+  .docs-hit__desc {
+    font-size: 13px; color: var(--fg-dim); line-height: 1.55;
+    margin-bottom: 6px;
   }
-  #docs-search-mount .pagefind-ui__search-clear:hover { color: var(--fg); }
-  /* Result rows: consistent padding, subtle separators, no images. */
-  #docs-search-mount .pagefind-ui__result {
-    padding: 12px 0; border-bottom: 1px solid var(--line);
+  .docs-hit__excerpt {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-size: 12.5px; color: var(--fg-muted); line-height: 1.6;
   }
-  #docs-search-mount .pagefind-ui__result:last-child { border-bottom: 0; }
-  #docs-search-mount .pagefind-ui__result-title {
-    font-size: 14px; font-weight: 500; color: var(--fg);
-  }
-  #docs-search-mount .pagefind-ui__result-excerpt {
-    font-size: 12px; color: var(--fg-dim); line-height: 1.5; margin-top: 4px;
-  }
-  #docs-search-mount .pagefind-ui__message {
-    font-size: 12px; color: var(--fg-muted);
-    font-family: 'JetBrains Mono', monospace; letter-spacing: .04em;
+  .docs-hit mark {
+    background: rgba(249, 115, 22, 0.18);
+    color: var(--accent);
+    padding: 0 2px;
+    font-weight: 500;
   }
 </style>
