@@ -620,11 +620,11 @@ const DL = {
   };
   const cycle: Frame[] = [
     { t1: 'ok', t2: 'running', t3: 'queued', t4: 'ok', t5: 'ok', t6: 'queued',
-      e: [['t1', 't2', 'active'], ['t2', 't3', 'pending'], ['t4', 't5', 'active'], ['t3', 't6', 'pending'], ['t5', 't6', 'pending']] },
+      e: [['t1', 't2', 'active'], ['t2', 't3', 'pending'], ['t4', 't5', 'pending'], ['t3', 't6', 'pending'], ['t5', 't6', 'pending']] },
     { t1: 'ok', t2: 'ok', t3: 'running', t4: 'ok', t5: 'ok', t6: 'queued',
-      e: [['t1', 't2', 'pending'], ['t2', 't3', 'active'], ['t4', 't5', 'pending'], ['t3', 't6', 'active'], ['t5', 't6', 'pending']] },
+      e: [['t1', 't2', 'pending'], ['t2', 't3', 'active'], ['t4', 't5', 'pending'], ['t3', 't6', 'pending'], ['t5', 't6', 'pending']] },
     { t1: 'ok', t2: 'ok', t3: 'ok', t4: 'ok', t5: 'ok', t6: 'running',
-      e: [['t1', 't2', 'pending'], ['t2', 't3', 'pending'], ['t4', 't5', 'pending'], ['t3', 't6', 'pending'], ['t5', 't6', 'pending']] },
+      e: [['t1', 't2', 'pending'], ['t2', 't3', 'pending'], ['t4', 't5', 'pending'], ['t3', 't6', 'active'], ['t5', 't6', 'active']] },
   ];
   const LANE_TASKS: Record<string, string[]> = { '0': ['t1', 't2', 't3'], '1': ['t4', 't5'], '2': ['t6'] };
 
