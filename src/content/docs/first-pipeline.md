@@ -1,41 +1,67 @@
 ---
 title: Your First Pipeline
-description: Compose a two-lane pipeline and run it end-to-end in five minutes.
+description: Compose a two-track pipeline and run it end-to-end in five minutes.
 group: Getting Started
 order: 2
 ---
 
-This guide builds the smallest non-trivial pipeline in Tagma: two lanes, three tasks, one signal.
+This guide builds the smallest non-trivial pipeline in Tagma: two tracks, four tasks, one cross-track dependency.
 
 ## Create the file
 
-Tagma reads pipelines from `.tagma/*.yaml` in your project root. Create `.tagma/hello.yaml`:
+Pipelines are plain YAML. The editor typically keeps them under `.tagma/` in your project, but the CLI accepts any path — there's no fixed convention.
+
+Create `.tagma/hello.yaml`:
 
 ```yaml
-lanes:
-  - name: Plan
-    driver: opencode
-    tasks:
-      - id: outline
-        prompt: "Outline a CLI that greets the user."
-  - name: Build
-    driver: claude-code
-    tasks:
-      - id: scaffold
-        prompt: "Scaffold the project."
-        after: [outline]
-      - id: implement
-        prompt: "Implement greet()."
-        after: [scaffold]
+pipeline:
+  name: hello
+  driver: claude-code
+  tracks:
+    - id: plan
+      name: Plan
+      tasks:
+        - id: outline
+          prompt: "Outline a CLI that greets the user."
+
+    - id: build
+      name: Build
+      tasks:
+        - id: scaffold
+          prompt: "Scaffold the project."
+          depends_on: [plan.outline]
+          continue_from: plan.outline
+        - id: implement
+          prompt: "Implement greet()."
+          depends_on: [scaffold]
+          continue_from: scaffold
+        - id: verify
+          command: "node ./dist/cli.js --version"
+          depends_on: [implement]
 ```
+
+A few things worth noting:
+
+- Cross-track dependencies use `trackId.taskId` syntax (`plan.outline`). Same-track references can use the bare task id (`scaffold`).
+- `continue_from` does **not** imply `depends_on`; the DAG builder adds the edge for you, but listing both is explicit and safe.
+- The last task uses `command:` instead of `prompt:` — it's a plain shell command, no driver needed.
 
 ## Run it
 
-Open Tagma and pick the file. Each lane shows its tasks in a swim-lane; arrows mark `after` dependencies.
+**From the CLI:**
 
-> **Tip.** Hold `⇧` and click a task to run only that task plus its descendants.
+```sh
+tagma ./.tagma/hello.yaml --cwd .
+```
+
+The CLI prints pipeline progress to stdout and writes a full run log to `./tmp/pipeline.log`. Exit code `0` means every task succeeded.
+
+**From the editor:**
+
+Open the project in Tagma and pick the file. Each track renders as a swim-lane; arrows mark `depends_on` edges. Task logs stream live. You can run a single task plus its descendants by clicking it and using the context menu.
 
 ## Next
 
-- See the full [driver reference](/docs/drivers).
-- Learn about [signals](/docs/signals) for cross-lane coordination.
+- [Pipeline YAML reference](/docs/pipeline-yaml) — every field, every default.
+- [Drivers](/docs/drivers) — what ships, and how to pick one.
+- [Plugins](/docs/plugins) — triggers, completions, and middlewares.
