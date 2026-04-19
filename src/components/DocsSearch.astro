@@ -1,7 +1,9 @@
 ---
-// Docs search. The Pagefind UI is mounted inside a top-centered modal
-// triggered by a button in the left sidebar (or ⌘K / Ctrl+K / "/" globally).
-// The sidebar no longer hosts the search input or results.
+// Docs search. The Pagefind UI is mounted inside a native <dialog>
+// triggered by a button in the left sidebar (or ⌘K / Ctrl+K / "/").
+// Using <dialog> + showModal() puts the panel in the browser's top
+// layer, which renders above every stacking context — no z-index
+// required, no interference from sticky headers or sidebars.
 ---
 
 <button type="button" class="docs-search-trigger" data-docs-search-open aria-label="Search docs">
@@ -9,9 +11,8 @@
   <kbd class="docs-search-trigger__kbd">⌘K</kbd>
 </button>
 
-<div class="docs-search-modal" data-docs-search-modal hidden aria-modal="true" role="dialog" aria-label="Search docs">
-  <div class="docs-search-modal__backdrop" data-docs-search-close></div>
-  <div class="docs-search-modal__panel" role="document">
+<dialog class="docs-search-modal" data-docs-search-modal aria-label="Search docs">
+  <div class="docs-search-modal__panel">
     <button
       type="button"
       class="docs-search-modal__close"
@@ -20,13 +21,13 @@
     >×</button>
     <div id="docs-search-mount"></div>
   </div>
-</div>
+</dialog>
 
 <link rel="stylesheet" href="/pagefind/pagefind-ui.css" />
 <script is:inline>
   (function () {
     var initialized = false;
-    var modal = null;
+    var dialog = null;
     var trigger = null;
 
     function ensurePagefind() {
@@ -42,28 +43,33 @@
           resetStyles: false,
           translations: { placeholder: 'Search docs…' },
         });
-        requestAnimationFrame(function () {
-          var input = document.querySelector(
-            '#docs-search-mount input[type="search"], #docs-search-mount input'
-          );
-          if (input) input.focus();
-        });
+        requestAnimationFrame(focusInput);
       };
       document.head.appendChild(script);
     }
 
-    function openModal() {
-      if (!modal) return;
-      modal.removeAttribute('hidden');
-      document.documentElement.classList.add('docs-search-open');
-      ensurePagefind();
-      var input = modal.querySelector('input[type="search"], input');
+    function focusInput() {
+      if (!dialog) return;
+      var input = dialog.querySelector('input[type="search"], input');
       if (input) input.focus();
     }
 
+    function openModal() {
+      if (!dialog) return;
+      if (typeof dialog.showModal === 'function') {
+        if (!dialog.open) dialog.showModal();
+      } else {
+        dialog.setAttribute('open', '');
+      }
+      document.documentElement.classList.add('docs-search-open');
+      ensurePagefind();
+      focusInput();
+    }
+
     function closeModal() {
-      if (!modal) return;
-      modal.setAttribute('hidden', '');
+      if (!dialog) return;
+      if (typeof dialog.close === 'function' && dialog.open) dialog.close();
+      else dialog.removeAttribute('open');
       document.documentElement.classList.remove('docs-search-open');
       if (trigger) trigger.focus();
     }
@@ -75,9 +81,9 @@
     }
 
     function boot() {
-      modal = document.querySelector('[data-docs-search-modal]');
+      dialog = document.querySelector('[data-docs-search-modal]');
       trigger = document.querySelector('[data-docs-search-open]');
-      if (!modal || !trigger) return;
+      if (!dialog || !trigger) return;
 
       trigger.addEventListener('click', openModal);
 
@@ -85,14 +91,18 @@
         el.addEventListener('click', closeModal);
       });
 
+      // Click on the ::backdrop surfaces as a click on the dialog itself.
+      dialog.addEventListener('click', function (e) {
+        if (e.target === dialog) closeModal();
+      });
+
+      // <dialog> handles Esc natively via the 'cancel' event; sync our state.
+      dialog.addEventListener('close', function () {
+        document.documentElement.classList.remove('docs-search-open');
+      });
+
       document.addEventListener('keydown', function (e) {
-        var open = !modal.hasAttribute('hidden');
-        if (e.key === 'Escape' && open) {
-          e.preventDefault();
-          closeModal();
-          return;
-        }
-        if (open) return;
+        if (dialog.open) return;
         var meta = e.metaKey || e.ctrlKey;
         if (meta && (e.key === 'k' || e.key === 'K')) {
           e.preventDefault();
@@ -133,21 +143,24 @@
     padding: 1px 6px;
   }
 
-  /* ─── Modal ─── */
-  .docs-search-modal[hidden] { display: none; }
+  /* ─── Native <dialog> styling ─── */
+  /* The element is in the top layer when opened via showModal(); no
+     z-index needed. We style the default appearance and use flexbox
+     to pin the panel near the top of the viewport. */
   .docs-search-modal {
-    position: fixed; inset: 0; z-index: 1000;
-    display: flex; justify-content: center;
-    padding: 12vh 20px 20px;
+    /* Override UA centering — we want top-ish positioning. */
+    padding: 0; border: 0; background: transparent; color: inherit;
+    margin: 12vh auto auto; /* top 12vh, horizontally centered */
+    max-width: 640px; width: calc(100% - 40px);
+    max-height: calc(100vh - 14vh - 40px);
+    overflow: visible;
   }
-  .docs-search-modal__backdrop {
-    position: absolute; inset: 0;
+  .docs-search-modal::backdrop {
     background: rgba(0, 0, 0, 0.55);
     backdrop-filter: blur(2px);
   }
   .docs-search-modal__panel {
-    position: relative; z-index: 1;
-    width: 100%; max-width: 640px;
+    position: relative;
     background: var(--bg); border: 1px solid var(--line);
     box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4);
     padding: 20px 20px 16px;
