@@ -243,16 +243,50 @@ Reference implementation: `@tagma/middleware-lightrag`.
 
 ---
 
-## Building and publishing
+## Using your plugin without publishing
 
-Tagma plugins publish to npm like any other package. Published tarballs should include **both `dist/` and `src/`** so that consumers with sourcemaps can jump to the original TypeScript in their IDE.
+You do not need to publish to npm to use a plugin you're developing. Tagma installs local packages from two sources — a source directory or a packed `.tgz` — by recording a `file:` dependency in the workspace's `package.json` and running the workspace's package manager.
 
-```sh
-bun run build      # tsc to dist/
-npm publish        # or: bun publish
+### From the editor
+
+1. Open the **Plugins** page → **Local** tab.
+2. Click **Import Local**. The dialog picks either a directory that contains your `package.json` or a `.tgz` tarball.
+3. The editor validates that the package has a `tagmaPlugin` manifest and a valid plugin name, writes `dependencies["@acme/my-plugin"] = "file:/abs/path"` into the workspace's `package.json`, and runs `bun install` for you. The plugin is then loaded into the SDK registry and usable immediately — no restart.
+
+### From the command line
+
+If you'd rather wire it up manually, add the `file:` spec to your workspace's `package.json` and install:
+
+```jsonc
+// <workspace>/package.json
+{
+  "dependencies": {
+    "@acme/driver-myshell": "file:/abs/path/to/my-plugin"
+  }
+}
 ```
 
-Once published, a pipeline loads your plugin by name:
+```sh
+cd <workspace>
+bun install
+```
+
+Or pack first, then install:
+
+```sh
+cd /abs/path/to/my-plugin
+bun run build
+bun pm pack                            # produces my-plugin-0.1.0.tgz
+
+cd <workspace>
+bun add ./path/to/my-plugin-0.1.0.tgz
+```
+
+In both cases the plugin ends up under `<workspace>/node_modules/@acme/driver-myshell`, which is where the editor and the CLI both look.
+
+### Declare and use it
+
+Once installed — local or published, same shape — reference the package by name in your pipeline:
 
 ```yaml
 pipeline:
@@ -262,6 +296,25 @@ pipeline:
     - id: main
       driver: myshell
       tasks: [ ... ]
+```
+
+### The dev loop
+
+For fast iteration while writing a plugin:
+
+1. Edit source.
+2. `bun run build` to refresh `dist/`.
+3. In the editor's **Plugins → Local** tab, click **Import Local** again on the same directory. The loader re-imports from the updated `dist/` and replaces the handler in the registry — existing pipeline tasks that reference it now call the new code on their next run.
+
+Note: Node's ESM module cache still holds the first import, so code changes take effect on handler replacement rather than true hot-reload. Restart the editor if you hit a stale-module issue.
+
+## Publishing
+
+Publishing to npm is the distribution step — it isn't required to run a plugin. Published tarballs should include **both `dist/` and `src/`** so that consumers with sourcemaps can jump to the original TypeScript in their IDE.
+
+```sh
+bun run build      # tsc to dist/
+npm publish        # or: bun publish
 ```
 
 ## Next
