@@ -1,6 +1,6 @@
-// Mounted only on doc pages. Adds copy buttons to <pre> blocks and
-// rewrites heading anchor clicks to copy the canonical URL instead of
-// just navigating to the fragment.
+// Mounted only on doc pages. Adds copy buttons to <pre> blocks, rewrites
+// heading anchor clicks to copy the canonical URL, and runs a scroll-spy
+// that highlights the current section in the "On this page" panel.
 
 function flashCopied(el: HTMLElement, originalText?: string) {
   el.classList.add('copied');
@@ -55,15 +55,87 @@ function mountHeadingAnchors() {
         await navigator.clipboard.writeText(url);
         flashCopied(a);
       } catch {
-        // ignore — fragment update already happened
+        // fragment update already happened
       }
     });
   });
 }
 
+// Highlight the TOC entry for the section currently under the reader's
+// eye. Each h2/h3 with an id is observed against a narrow band near the
+// top of the viewport; whichever heading is inside the band (or, as a
+// fallback, the last one above it) is marked active.
+function mountTocScrollSpy() {
+  const toc = document.querySelector<HTMLElement>('.doc-toc');
+  const article = document.querySelector<HTMLElement>('.doc-main');
+  if (!toc || !article) return;
+
+  const links = Array.from(toc.querySelectorAll<HTMLAnchorElement>('a[href^="#"]'));
+  if (links.length === 0) return;
+
+  const linkById = new Map<string, HTMLAnchorElement>();
+  for (const a of links) {
+    const id = a.getAttribute('href')?.slice(1);
+    if (id) linkById.set(decodeURIComponent(id), a);
+  }
+
+  const headings = Array.from(
+    article.querySelectorAll<HTMLHeadingElement>('h2[id], h3[id]'),
+  ).filter((h) => linkById.has(h.id));
+  if (headings.length === 0) return;
+
+  const visible = new Set<string>();
+  let activeId: string | null = null;
+
+  const setActive = (id: string | null) => {
+    if (id === activeId) return;
+    activeId = id;
+    for (const a of links) a.classList.remove('active');
+    if (id) linkById.get(id)?.classList.add('active');
+  };
+
+  const pickActive = () => {
+    if (visible.size > 0) {
+      for (const h of headings) {
+        if (visible.has(h.id)) {
+          setActive(h.id);
+          return;
+        }
+      }
+    }
+    const cutoff = window.scrollY + 120;
+    let best: HTMLHeadingElement | null = null;
+    for (const h of headings) {
+      const top = h.getBoundingClientRect().top + window.scrollY;
+      if (top <= cutoff) best = h;
+      else break;
+    }
+    setActive(best ? best.id : headings[0].id);
+  };
+
+  const obs = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        const id = (entry.target as HTMLElement).id;
+        if (entry.isIntersecting) visible.add(id);
+        else visible.delete(id);
+      }
+      pickActive();
+    },
+    {
+      rootMargin: '-72px 0px -65% 0px',
+      threshold: 0,
+    },
+  );
+
+  for (const h of headings) obs.observe(h);
+  pickActive();
+}
+
 function init() {
   mountCopyButtons();
   mountHeadingAnchors();
+  mountTocScrollSpy();
 }
 
 if (document.readyState === 'loading') {
