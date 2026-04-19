@@ -22,15 +22,18 @@ entries.sort((a, b) => {
   return compareVersion(b.data.version, a.data.version);
 });
 
+// Filename pattern mirrors `artifactName` in packages/electron/package.json:
+// `Tagma-<version>-<slug>.<ext>`. Keep this table in lock-step with the
+// release targets (mac = dmg, win = NSIS .exe, linux = AppImage).
 const ASSETS = [
-  { os: 'mac-arm', label: 'macOS arm64', file: 'Tagma-mac-arm64.dmg' },
-  { os: 'mac-x64', label: 'macOS x64',   file: 'Tagma-mac-x64.dmg' },
-  { os: 'win',     label: 'Windows',     file: 'Tagma-win-x64.exe' },
-  { os: 'linux',   label: 'Linux',       file: 'Tagma-linux-x86_64.AppImage' },
+  { os: 'mac-arm', label: 'macOS arm64', slug: 'mac-arm64',    ext: 'dmg' },
+  { os: 'mac-x64', label: 'macOS x64',   slug: 'mac-x64',      ext: 'dmg' },
+  { os: 'win',     label: 'Windows',     slug: 'win-x64',      ext: 'exe' },
+  { os: 'linux',   label: 'Linux',       slug: 'linux-x86_64', ext: 'AppImage' },
 ] as const;
 
-function downloadUrl(version: string, file: string): string {
-  return `${site.github.mono}/releases/download/desktop-v${version}/${file}`;
+function downloadUrl(version: string, slug: string, ext: string): string {
+  return `${site.github.mono}/releases/download/desktop-v${version}/Tagma-${version}-${slug}.${ext}`;
 }
 
 function fmtDate(iso: string): string {
@@ -77,7 +80,7 @@ function channelLabel(ch: string): string {
             </div>
             <div class="arc-dl">
               {ASSETS.map((a) => (
-                <a class="arc-btn" data-os={a.os} href={downloadUrl(e.data.version, a.file)} download>
+                <a class="arc-btn" data-os={a.os} href={downloadUrl(e.data.version, a.slug, a.ext)} download>
                   <span class="arc-btn-label">{a.label}</span>
                   <span class="arc-btn-arrow">↓</span>
                 </a>
