@@ -13,7 +13,7 @@
   --fg:#15171a; --fg-dim:#4a4f56; --fg-muted:#8a8c8f; --accent-ink:#fff;
 }
 * { box-sizing:border-box; margin:0; padding:0; min-width:0; }
-html { height:100%; }
+html { height:100%; scrollbar-gutter: stable; }
 body {
   background:var(--bg); color:var(--fg);
   font-family:'Space Grotesk','Noto Sans SC',system-ui,sans-serif;

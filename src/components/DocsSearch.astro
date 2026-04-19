@@ -149,29 +149,45 @@
     background: rgba(0, 0, 0, 0.55);
     backdrop-filter: blur(2px);
   }
+  /* Panel is a flex column: form is pinned at the top (non-scrolling),
+     drawer is the only scroll surface. This keeps the search input
+     visible while the result list scrolls underneath. */
   .docs-search-modal__panel {
     position: relative;
+    display: flex; flex-direction: column;
     background: var(--bg); border: 1px solid var(--line);
     box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4);
     max-height: calc(100vh - 14vh - 40px);
-    overflow: auto;
+    overflow: hidden;
   }
 
   html.docs-search-open, html.docs-search-open body { overflow: hidden; }
 
-  /* Pin the Pagefind search form at the top of the scrollable panel so
-     it stays visible while the results list scrolls underneath. */
+  /* Propagate the column-flex layout through the Pagefind wrapper
+     down to its form/drawer so the drawer can actually scroll. */
+  #docs-search-mount {
+    display: flex; flex-direction: column;
+    flex: 1 1 auto; min-height: 0;
+  }
+  #docs-search-mount .pagefind-ui {
+    display: flex; flex-direction: column;
+    flex: 1 1 auto; min-height: 0;
+  }
   #docs-search-mount .pagefind-ui__form {
-    position: sticky; top: 0; z-index: 2;
+    flex: 0 0 auto;
+    padding: 18px 20px 14px;
     background: var(--bg);
-    padding: 16px 20px 10px;
     border-bottom: 1px solid var(--line);
     margin: 0;
   }
   #docs-search-mount .pagefind-ui__drawer {
-    padding: 12px 20px 18px;
+    flex: 1 1 auto;
+    overflow-y: auto; overflow-x: hidden;
+    padding: 14px 20px 20px;
+    min-height: 0;
   }
 
+  /* Theming + polish. */
   #docs-search-mount .pagefind-ui {
     --pagefind-ui-scale: 0.9;
     --pagefind-ui-primary: var(--accent);
@@ -184,6 +200,37 @@
     --pagefind-ui-font: 'Space Grotesk', system-ui, sans-serif;
   }
   #docs-search-mount .pagefind-ui__search-input {
-    font-family: 'JetBrains Mono', monospace; font-size: 13px;
+    font-family: 'JetBrains Mono', monospace; font-size: 14px;
+    padding: 10px 40px 10px 40px;
+    line-height: 1.4;
+  }
+  /* Center the magnifying-glass and clear-button icons vertically
+     inside the input and give them a consistent click target. */
+  #docs-search-mount .pagefind-ui__form::before,
+  #docs-search-mount .pagefind-ui__search-clear {
+    top: 50% !important; transform: translateY(-50%);
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  #docs-search-mount .pagefind-ui__search-clear {
+    right: 12px;
+    height: 24px; min-width: 24px; padding: 0 8px;
+    font-size: 11px; letter-spacing: .04em;
+    color: var(--fg-muted); background: transparent;
+  }
+  #docs-search-mount .pagefind-ui__search-clear:hover { color: var(--fg); }
+  /* Result rows: consistent padding, subtle separators, no images. */
+  #docs-search-mount .pagefind-ui__result {
+    padding: 12px 0; border-bottom: 1px solid var(--line);
+  }
+  #docs-search-mount .pagefind-ui__result:last-child { border-bottom: 0; }
+  #docs-search-mount .pagefind-ui__result-title {
+    font-size: 14px; font-weight: 500; color: var(--fg);
+  }
+  #docs-search-mount .pagefind-ui__result-excerpt {
+    font-size: 12px; color: var(--fg-dim); line-height: 1.5; margin-top: 4px;
+  }
+  #docs-search-mount .pagefind-ui__message {
+    font-size: 12px; color: var(--fg-muted);
+    font-family: 'JetBrains Mono', monospace; letter-spacing: .04em;
   }
 </style>

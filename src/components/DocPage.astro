@@ -52,7 +52,7 @@ const { prev, next } = findPrevNext(allDocs, entry.id);
       <aside class="doc-toc">
         <h5>On this page</h5>
         {headings.filter((h) => h.depth === 2 || h.depth === 3).map((h) => (
-          <a href={`#${h.slug}`} class={h.depth === 3 ? 'sub' : undefined}>{h.text}</a>
+          <a href={`#${h.slug}`} class={h.depth === 3 ? 'sub' : undefined}>{h.text.replace(/\s*#\s*$/, '').trim()}</a>
         ))}
       </aside>
     </div>
