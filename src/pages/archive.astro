@@ -4,7 +4,23 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { site } from '../site.config';
 
 const entries = await getCollection('archive');
-entries.sort((a, b) => b.data.date.localeCompare(a.data.date));
+
+function compareVersion(a: string, b: string): number {
+  const pa = a.split('.').map((n) => parseInt(n, 10) || 0);
+  const pb = b.split('.').map((n) => parseInt(n, 10) || 0);
+  const len = Math.max(pa.length, pb.length);
+  for (let i = 0; i < len; i++) {
+    const diff = (pa[i] ?? 0) - (pb[i] ?? 0);
+    if (diff !== 0) return diff;
+  }
+  return 0;
+}
+
+entries.sort((a, b) => {
+  const byDate = b.data.date.localeCompare(a.data.date);
+  if (byDate !== 0) return byDate;
+  return compareVersion(b.data.version, a.data.version);
+});
 
 const ASSETS = [
   { os: 'mac-arm', label: 'macOS arm64', file: 'Tagma-mac-arm64.dmg' },
