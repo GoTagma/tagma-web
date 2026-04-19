@@ -1,8 +1,8 @@
 ---
 title: CLI
 description: Run Tagma pipelines headlessly from the terminal.
-group: Reference
-order: 50
+group: SDK & CLI
+order: 310
 ---
 
 The Tagma CLI (`@tagma/cli`) is a thin wrapper around `@tagma/sdk` — same runtime as the desktop editor, no daemon, no shared config. It reads a pipeline YAML from disk, loads declared plugins, and runs to completion.
@@ -52,7 +52,7 @@ Pair this with the editor or a lightweight web UI to handle approvals out-of-ban
 ## Output
 
 - Human-readable progress + task results go to **stdout/stderr**.
-- A full run log (including `debug` / `section` lines not printed to console) is written to `<cwd>/tmp/pipeline.log`.
+- A full run log (including `debug` / `section` lines not printed to console) is written to `<cwd>/.tagma/logs/<runId>/pipeline.log`, where `<runId>` is generated per run.
 - Structured driver output (JSON from Claude Code, OpenCode) is captured in the run log and exposed to downstream tasks via `continue_from`.
 
 ## Exit codes

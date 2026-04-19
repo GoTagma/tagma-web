@@ -2,7 +2,7 @@
 title: Pipeline YAML Reference
 description: Every field accepted by a Tagma pipeline file.
 group: Reference
-order: 10
+order: 200
 ---
 
 A Tagma pipeline is a YAML document with a single top-level `pipeline:` key. Everything in this page is resolved against `@tagma/types`' `RawPipelineConfig`; if the runtime ever disagrees with this page, the types are the source of truth.

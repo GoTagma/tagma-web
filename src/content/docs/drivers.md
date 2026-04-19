@@ -2,14 +2,18 @@
 title: Drivers
 description: Built-in and plugin drivers for invoking agent CLIs.
 group: Reference
-order: 20
+order: 210
 ---
 
 A **driver** is the adapter that turns a task into a process invocation of an agent CLI. Pick one with `driver:` at the pipeline, track, or task level.
 
+> **Prerequisite for every driver.** Tagma drivers don't bundle or proxy agent CLIs — they spawn them as subprocesses. Install each vendor's CLI first (see the link in each section below) and make sure it runs from your terminal before adding the corresponding driver to a pipeline.
+
 ## Built-in: `claude-code`
 
 Ships with the SDK — no plugin load required. Invokes the [Claude Code CLI](https://claude.com/claude-code).
+
+**Prerequisite:** Install Claude Code from [claude.com/claude-code](https://claude.com/claude-code) and complete its authentication flow (`claude login` or equivalent). Tagma will fail at task start if the `claude` binary isn't reachable.
 
 | Option                 | Notes |
 | ---------------------- | ----- |
@@ -41,6 +45,8 @@ pipeline:
 | `reasoning_effort`     | mapped to `--variant low` / `medium` / `high` |
 | `agent_profile`        | prepended as a `[Role]…[Task]…` preamble |
 
+**Prerequisite:** Install the `opencode` CLI from [github.com/anomalyco/opencode](https://github.com/anomalyco/opencode) and make sure it's on your `PATH`. Then add `@tagma/driver-opencode` under `pipeline.plugins` as shown above.
+
 **Windows:** the plugin automatically unwraps npm `.cmd` shims to the underlying node invocation so multi-line prompts survive.
 
 ## Plugin: `@tagma/driver-codex`
@@ -60,7 +66,7 @@ pipeline:
 | Permissions → flags    | maps to `--sandbox read-only` / `workspace-write` / `danger-full-access` |
 | Invocation             | `codex exec …` with `--ask-for-approval never` |
 
-**Prerequisite:** `codex` CLI on `PATH` (`npm i -g @openai/codex`).
+**Prerequisite:** Install the Codex CLI from [github.com/openai/codex](https://github.com/openai/codex) (`npm i -g @openai/codex`) and confirm `codex --version` works in your terminal. The driver runs this probe once per process and throws a clear error if the binary is missing.
 
 ## Writing your own
 

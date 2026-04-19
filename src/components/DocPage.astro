@@ -10,14 +10,13 @@ const { entry } = Astro.props;
 const { Content, headings } = await render(entry);
 
 const allDocs = await getCollection('docs');
+// Group order follows the lowest-order doc per group (matches findPrevNext in docs-nav.ts).
+const sortedDocs = [...allDocs].sort((a, b) => a.data.order - b.data.order);
 const byGroup = new Map<string, CollectionEntry<'docs'>[]>();
-for (const d of allDocs) {
+for (const d of sortedDocs) {
   const g = d.data.group;
   if (!byGroup.has(g)) byGroup.set(g, []);
   byGroup.get(g)!.push(d);
-}
-for (const list of byGroup.values()) {
-  list.sort((a, b) => a.data.order - b.data.order);
 }
 const groupedDocs = Array.from(byGroup.entries());
 const { prev, next } = findPrevNext(allDocs, entry.id);

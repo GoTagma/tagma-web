@@ -1,8 +1,8 @@
 ---
 title: SDK
 description: Write your own driver, trigger, completion, or middleware in TypeScript.
-group: Reference
-order: 40
+group: SDK & CLI
+order: 300
 ---
 
 The Tagma runtime is `@tagma/sdk`. Plugins depend on `@tagma/types` for the wire contracts and export a default object that implements the relevant plugin interface.

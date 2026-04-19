@@ -2,10 +2,31 @@
 title: Introduction
 description: A swim-lane editor and runtime for AI agent orchestration.
 group: Getting Started
-order: 1
+order: 10
 ---
 
 Tagma is a swim-lane editor and runtime for AI agent orchestration. You compose pipelines of **tasks** — prompts or shell commands — and they execute on the agent CLIs you already have installed locally (Claude Code, OpenCode, Codex, …).
+
+> **Local-first.** Everything runs on your machine. Tagma never proxies prompts — it invokes the CLIs you already trust, under the permissions you grant.
+
+## Who is Tagma for
+
+Tagma sits on top of the agent CLIs you already use. It does not replace them, ship its own model, or run a cloud service — it coordinates local CLI invocations into a DAG with per-task permissions, approvals, and structured handoffs.
+
+Two kinds of users get the most out of it:
+
+**1. Power users of agent CLIs** — people already deep on Claude Code, OpenCode, or Codex CLI who want to:
+
+- Run **multiple agent CLIs in one pipeline** and hand off context between them (`continue_from` resumes the upstream session, or falls back to injecting its normalized output).
+- Parallelize work across **tracks** — e.g. a "plan" track on Claude Code running alongside a "test" track on Codex — instead of babysitting one REPL at a time.
+- Drop back to plain shell (`command:` tasks) for glue work between AI tasks without leaving the pipeline.
+
+**2. Teams that want agents on rails** — engineers who don't want an agent CLI making arbitrary changes to their repo and instead want:
+
+- **Per-task permissions** (`read` / `write` / `execute`) that map onto each driver's native sandbox flags — Claude Code's allowed-tools + `--permission-mode`, Codex's `--sandbox read-only` / `workspace-write` / `danger-full-access`, etc. The agent physically cannot do what you didn't grant.
+- **Manual approval gates** (`trigger: { type: manual }`) that block a task until a human approves in the editor or over WebSocket — useful before deploys, migrations, or any destructive step.
+- **Explicit completion checks** (`completion: exit_code | file_exists | output_check | llm_judge`) so a task counts as "succeeded" only when it actually does what you wanted — not just when the agent happily exits 0.
+- **Reproducible YAML** — your pipeline is a plain file on disk. No proprietary format, no cloud state, no "I edited it in the UI three days ago and can't remember what changed".
 
 ## Pipelines, tracks, tasks
 
@@ -30,41 +51,26 @@ pipeline:
 
 `depends_on` is a hard DAG edge. `continue_from` additionally asks the driver to resume the referenced task's session (or fall back to prepending its output as context) — it's how context flows between tasks.
 
-> **Local-first.** Everything runs on your machine. Tagma never proxies prompts — it invokes the CLIs you already trust, under the permissions you grant.
+## Two ways to use Tagma
 
-## Install
+### Visual editor (no code)
 
-Tagma is distributed as three pieces. Install the ones you need.
+Draw pipelines as swim lanes, run them, and watch logs stream live. Approvals, retries, and history all happen in the UI. Pipelines save to plain YAML on disk, so you can commit them to git or hand them off to the CLI later.
 
-### Desktop editor (Electron)
+- [Install the editor](/docs/install#desktop-editor)
+- [Using the editor](/docs/editor) — UI walkthrough, shortcuts, approvals, run history
 
-Build from source — `bun install` at the repo root, then `bun run dev:desktop` for a dev build or `bun run dist:desktop:{win,mac,linux}` to produce an installer. Requires **Bun ≥ 1.3**.
+### SDK, CLI & custom plugins (for developers)
 
-### CLI (headless)
+Everything the editor does is backed by `@tagma/sdk`. Run pipelines from a script, embed the runtime in your own tools, or extend it with plugins. Four plugin categories: **drivers**, **triggers**, **completions**, **middlewares** — each a TypeScript object that implements a small interface.
 
-```sh
-bun add -g @tagma/cli
-tagma ./my-pipeline.yaml
-```
-
-The CLI is the same runtime the editor uses — no daemon, no shared config. See [CLI reference](/docs/cli).
-
-### Agent CLIs
-
-Install whichever agent CLIs your pipelines call: Claude Code (built-in driver), plus `@tagma/driver-opencode` / `@tagma/driver-codex` if you want to drive OpenCode or Codex. See [Drivers](/docs/drivers).
-
-### System requirements
-
-| Platform | Minimum     | Recommended   |
-| -------- | ----------- | ------------- |
-| macOS    | 13 Ventura  | 14+ Sonoma    |
-| Windows  | 10 (22H2)   | 11            |
-| Linux    | glibc 2.31+ | Ubuntu 22.04+ |
-
-On Windows, the Claude Code driver requires `CLAUDE_CODE_GIT_BASH_PATH` pointing to Git Bash's `bash.exe` if auto-detection fails.
+- [Install the SDK or CLI](/docs/install#sdk--cli)
+- [SDK reference](/docs/sdk) — `runPipeline`, approval gateway, pipeline CRUD
+- [CLI reference](/docs/cli) — `tagma <pipeline.yaml>` for headless runs
+- [Writing custom plugins](/docs/custom-plugins) — per-category walkthroughs
 
 ## Next
 
-- Build [your first pipeline](/docs/first-pipeline) in five minutes.
-- Read the [pipeline YAML reference](/docs/pipeline-yaml).
-- Browse the [driver reference](/docs/drivers) or write one with the [TypeScript SDK](/docs/sdk).
+- [Install](/docs/install) — editor download, CLI, SDK
+- [Your first pipeline](/docs/first-pipeline) — five-minute quickstart
+- [Pipeline YAML reference](/docs/pipeline-yaml) — every field

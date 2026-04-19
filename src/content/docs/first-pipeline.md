@@ -2,7 +2,7 @@
 title: Your First Pipeline
 description: Compose a two-track pipeline and run it end-to-end in five minutes.
 group: Getting Started
-order: 2
+order: 30
 ---
 
 This guide builds the smallest non-trivial pipeline in Tagma: two tracks, four tasks, one cross-track dependency.
@@ -62,6 +62,8 @@ Open the project in Tagma and pick the file. Each track renders as a swim-lane; 
 
 ## Next
 
+- [Using the editor](/docs/editor) — swim-lane UI walkthrough.
 - [Pipeline YAML reference](/docs/pipeline-yaml) — every field, every default.
 - [Drivers](/docs/drivers) — what ships, and how to pick one.
 - [Plugins](/docs/plugins) — triggers, completions, and middlewares.
+- [Writing custom plugins](/docs/custom-plugins) — build your own.

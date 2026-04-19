@@ -2,7 +2,7 @@
 title: Plugins
 description: Triggers, completions, and middlewares — what ships and how to add one.
 group: Reference
-order: 30
+order: 220
 ---
 
 Tagma pipelines are extended with four plugin categories: **drivers**, **triggers**, **completions**, and **middlewares**. Drivers have their own page; this page covers the other three and how external packages are loaded.
@@ -125,4 +125,4 @@ LightRAG retrieval — injects relevant knowledge-graph chunks as context blocks
 
 ## Writing your own
 
-Any plugin category follows the same pattern: export a default object implementing the appropriate interface from `@tagma/types`, and declare the `tagmaPlugin` manifest in your `package.json`. See the [SDK guide](/docs/sdk).
+See [Custom Plugins](/docs/custom-plugins) for per-category walkthroughs (drivers, triggers, completions, middlewares) and the package manifest contract.
