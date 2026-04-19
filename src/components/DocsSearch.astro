@@ -13,12 +13,6 @@
 
 <dialog class="docs-search-modal" data-docs-search-modal aria-label="Search docs">
   <div class="docs-search-modal__panel">
-    <button
-      type="button"
-      class="docs-search-modal__close"
-      data-docs-search-close
-      aria-label="Close search"
-    >×</button>
     <div id="docs-search-mount"></div>
   </div>
 </dialog>
@@ -86,10 +80,6 @@
       if (!dialog || !trigger) return;
 
       trigger.addEventListener('click', openModal);
-
-      document.querySelectorAll('[data-docs-search-close]').forEach(function (el) {
-        el.addEventListener('click', closeModal);
-      });
 
       // Click on the ::backdrop surfaces as a click on the dialog itself.
       dialog.addEventListener('click', function (e) {
@@ -163,19 +153,24 @@
     position: relative;
     background: var(--bg); border: 1px solid var(--line);
     box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4);
-    padding: 20px 20px 16px;
     max-height: calc(100vh - 14vh - 40px);
     overflow: auto;
   }
-  .docs-search-modal__close {
-    position: absolute; top: 8px; right: 10px;
-    font-family: 'JetBrains Mono', monospace; font-size: 18px; line-height: 1;
-    color: var(--fg-muted); background: transparent; border: 0;
-    cursor: pointer; padding: 4px 8px;
-  }
-  .docs-search-modal__close:hover { color: var(--fg); }
 
   html.docs-search-open, html.docs-search-open body { overflow: hidden; }
+
+  /* Pin the Pagefind search form at the top of the scrollable panel so
+     it stays visible while the results list scrolls underneath. */
+  #docs-search-mount .pagefind-ui__form {
+    position: sticky; top: 0; z-index: 2;
+    background: var(--bg);
+    padding: 16px 20px 10px;
+    border-bottom: 1px solid var(--line);
+    margin: 0;
+  }
+  #docs-search-mount .pagefind-ui__drawer {
+    padding: 12px 20px 18px;
+  }
 
   #docs-search-mount .pagefind-ui {
     --pagefind-ui-scale: 0.9;
