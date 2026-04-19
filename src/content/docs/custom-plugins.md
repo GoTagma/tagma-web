@@ -7,7 +7,7 @@ order: 320
 
 Tagma has four plugin categories — `drivers`, `triggers`, `completions`, `middlewares`. Every category is a small TypeScript object that implements one interface from `@tagma/types`. Pipelines load plugins by package name under `pipeline.plugins`; the host reads your `package.json` manifest, imports the module, and registers the default export against `(category, type)`.
 
-> Five of `tagma-mono`'s plugin packages (`driver-codex`, `driver-opencode`, `middleware-lightrag`, `trigger-webhook`, `completion-llm-judge`) are maintained as reference implementations. Copy any of them as a scaffold.
+> Five of [`tagma-mono`](https://github.com/GoTagma/tagma-mono)'s plugin packages ([`driver-codex`](https://github.com/GoTagma/tagma-mono/tree/main/packages/driver-codex), [`driver-opencode`](https://github.com/GoTagma/tagma-mono/tree/main/packages/driver-opencode), [`middleware-lightrag`](https://github.com/GoTagma/tagma-mono/tree/main/packages/middleware-lightrag), [`trigger-webhook`](https://github.com/GoTagma/tagma-mono/tree/main/packages/trigger-webhook), [`completion-llm-judge`](https://github.com/GoTagma/tagma-mono/tree/main/packages/completion-llm-judge)) are maintained as reference implementations. Copy any of them as a scaffold.
 
 ## Package layout
 
@@ -108,7 +108,7 @@ Key interface points:
 - `parseResult` is optional; return `{ sessionId, normalizedOutput, forceFailure?, forceFailureReason? }` to classify the result. `forceFailure` marks the task failed even when the process exited 0 (useful when a CLI returns `{type:"error"}` JSON with status 0).
 - `resolveTools(permissions)` is an optional hook that drivers can use to map the Tagma `Permissions` shape (`{read, write, execute}`) onto tool whitelists specific to their CLI.
 
-Reference implementations: `@tagma/driver-opencode`, `@tagma/driver-codex`.
+Reference implementations: [`@tagma/driver-opencode`](https://github.com/GoTagma/tagma-mono/tree/main/packages/driver-opencode), [`@tagma/driver-codex`](https://github.com/GoTagma/tagma-mono/tree/main/packages/driver-codex).
 
 ---
 
@@ -154,7 +154,7 @@ export const pluginType = 'cron' as const;
 - Always honour `ctx.signal.aborted` and `'abort'` events so pipeline cancellation is clean.
 - The optional `schema` enables a typed form in the editor; without it users fall back to raw key/value.
 
-Reference implementation: `@tagma/trigger-webhook`.
+Reference implementation: [`@tagma/trigger-webhook`](https://github.com/GoTagma/tagma-mono/tree/main/packages/trigger-webhook).
 
 ---
 
@@ -192,7 +192,7 @@ export const pluginType = 'regex_check' as const;
 - `check` returns `true` iff the task succeeded. Throwing is the same as returning `false` but also logs the error.
 - `result` is the raw `TaskResult` (`exitCode`, `stdout`, `stderr`, `durationMs`, `sessionId`, `normalizedOutput`, `failureKind`).
 
-Reference implementation: `@tagma/completion-llm-judge`.
+Reference implementation: [`@tagma/completion-llm-judge`](https://github.com/GoTagma/tagma-mono/tree/main/packages/completion-llm-judge).
 
 ---
 
@@ -239,7 +239,7 @@ export const pluginType = 'git_status' as const;
 - **Don't assume order.** You receive whatever the previous middleware produced, and the driver may wrap your output further (e.g. OpenCode's `agent_profile` adds a `[Role]...[Task]...` preamble).
 - `enhance(prompt: string)` is the legacy string-in / string-out API and is deprecated — use `enhanceDoc` for new code.
 
-Reference implementation: `@tagma/middleware-lightrag`.
+Reference implementation: [`@tagma/middleware-lightrag`](https://github.com/GoTagma/tagma-mono/tree/main/packages/middleware-lightrag).
 
 ---
 

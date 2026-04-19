@@ -5,7 +5,7 @@ group: SDK & CLI
 order: 300
 ---
 
-The Tagma runtime is `@tagma/sdk`. Plugins depend on `@tagma/types` for the wire contracts and export a default object that implements the relevant plugin interface.
+The Tagma runtime is [`@tagma/sdk`](https://github.com/GoTagma/tagma-mono/tree/main/packages/sdk). Plugins depend on [`@tagma/types`](https://github.com/GoTagma/tagma-mono/tree/main/packages/types) for the wire contracts and export a default object that implements the relevant plugin interface.
 
 ## Install
 

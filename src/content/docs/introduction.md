@@ -69,6 +69,15 @@ Everything the editor does is backed by `@tagma/sdk`. Run pipelines from a scrip
 - [CLI reference](/docs/cli) — `tagma <pipeline.yaml>` for headless runs
 - [Writing custom plugins](/docs/custom-plugins) — per-category walkthroughs
 
+## Source
+
+Tagma is open source. The code lives in two repositories:
+
+- **[github.com/GoTagma/tagma-mono](https://github.com/GoTagma/tagma-mono)** — the editor, `@tagma/sdk`, `@tagma/types`, and the first-party driver / trigger / completion / middleware packages.
+- **[github.com/GoTagma/tagma-cli](https://github.com/GoTagma/tagma-cli)** — the `@tagma/cli` headless runner.
+
+Issues and contributions welcome.
+
 ## Next
 
 - [Install](/docs/install) — editor download, CLI, SDK

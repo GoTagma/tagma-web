@@ -31,7 +31,7 @@ function isActive(href: string): boolean {
         class={isActive(item.href) ? 'active' : undefined}
       >{item.label}</a>
     ))}
-    <a href="#" data-i18n="nav.github">GitHub ↗</a>
+    <a href={site.github.mono} target="_blank" rel="noopener" data-i18n="nav.github">GitHub ↗</a>
   </nav>
   <div class="topbar-right">
     <div class="lang-menu" id="lang">

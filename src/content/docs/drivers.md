@@ -27,7 +27,7 @@ Ships with the SDK — no plugin load required. Invokes the [Claude Code CLI](ht
 
 **Prerequisite:** Claude Code installed and authenticated.
 
-## Plugin: `@tagma/driver-opencode`
+## Plugin: [`@tagma/driver-opencode`](https://github.com/GoTagma/tagma-mono/tree/main/packages/driver-opencode)
 
 ```yaml
 pipeline:
@@ -49,7 +49,7 @@ pipeline:
 
 **Windows:** the plugin automatically unwraps npm `.cmd` shims to the underlying node invocation so multi-line prompts survive.
 
-## Plugin: `@tagma/driver-codex`
+## Plugin: [`@tagma/driver-codex`](https://github.com/GoTagma/tagma-mono/tree/main/packages/driver-codex)
 
 ```yaml
 pipeline:

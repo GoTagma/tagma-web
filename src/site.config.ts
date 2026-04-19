@@ -12,6 +12,13 @@ export const site = {
   sizeMB: 28,
   platforms: ['macOS', 'Windows', 'Linux'] as const,
   license: 'MIT',
+  github: {
+    org: 'https://github.com/GoTagma',
+    mono: 'https://github.com/GoTagma/tagma-mono',
+    cli: 'https://github.com/GoTagma/tagma-cli',
+    sdk: 'https://github.com/GoTagma/tagma-mono/tree/main/packages/sdk',
+    license: 'https://github.com/GoTagma/tagma-mono/blob/main/LICENSE',
+  },
 };
 
 export type SiteConfig = typeof site;

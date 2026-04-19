@@ -5,7 +5,7 @@ group: SDK & CLI
 order: 310
 ---
 
-The Tagma CLI (`@tagma/cli`) is a thin wrapper around `@tagma/sdk` — same runtime as the desktop editor, no daemon, no shared config. It reads a pipeline YAML from disk, loads declared plugins, and runs to completion.
+The Tagma CLI ([`@tagma/cli`](https://github.com/GoTagma/tagma-cli)) is a thin wrapper around [`@tagma/sdk`](https://github.com/GoTagma/tagma-mono/tree/main/packages/sdk) — same runtime as the desktop editor, no daemon, no shared config. It reads a pipeline YAML from disk, loads declared plugins, and runs to completion.
 
 ## Install
 

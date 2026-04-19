@@ -59,7 +59,7 @@ trigger:
   timeout: 1m
 ```
 
-### Plugin: `@tagma/trigger-webhook`
+### Plugin: [`@tagma/trigger-webhook`](https://github.com/GoTagma/tagma-mono/tree/main/packages/trigger-webhook)
 
 HTTP webhook listener — the task blocks until an authenticated request hits the configured endpoint. See the package README for the full config shape.
 
@@ -94,7 +94,7 @@ completion:
   timeout: 30s
 ```
 
-### Plugin: `@tagma/completion-llm-judge`
+### Plugin: [`@tagma/completion-llm-judge`](https://github.com/GoTagma/tagma-mono/tree/main/packages/completion-llm-judge)
 
 Call an LLM to judge the task's output against a rubric; success iff the judge's verdict matches. See the package README for rubric config.
 
@@ -113,7 +113,7 @@ middlewares:
     label: Project Readme
 ```
 
-### Plugin: `@tagma/middleware-lightrag`
+### Plugin: [`@tagma/middleware-lightrag`](https://github.com/GoTagma/tagma-mono/tree/main/packages/middleware-lightrag)
 
 LightRAG retrieval — injects relevant knowledge-graph chunks as context blocks. See the package README for vector store and retrieval config.
 
