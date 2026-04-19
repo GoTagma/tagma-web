@@ -3,6 +3,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { site } from '../site.config';
 
 const channelUpper = site.channel.toUpperCase();
+
+const DL_BASE = `${site.github.mono}/releases/latest/download`;
+const DL = {
+  mac: `${DL_BASE}/Tagma-mac-arm64.dmg`,
+  win: `${DL_BASE}/Tagma-win-x64.exe`,
+  linux: `${DL_BASE}/Tagma-linux-x86_64.AppImage`,
+};
 ---
 
 <BaseLayout title="Tagma — Every agent in formation.">
@@ -36,12 +43,12 @@ const channelUpper = site.channel.toUpperCase();
 
       <div class="hero-cta">
         <div class="dl-group">
-          <a class="primary" href="#" id="primaryDl">
+          <a class="primary" href={DL.mac} id="primaryDl">
             <span>↓</span><span data-i18n="dl.primary">Download for macOS</span>
           </a>
-          <a class="os active" data-os="mac"   href="#"><span class="os-icon"><svg viewBox="0 0 24 24"><path d="M17.05 12.53c-.03-3.02 2.47-4.47 2.58-4.54-1.41-2.06-3.6-2.34-4.38-2.37-1.86-.19-3.63 1.1-4.58 1.1-.94 0-2.4-1.07-3.94-1.04-2.03.03-3.9 1.18-4.94 3C-.33 11.36 1.25 17 3.28 20.09c1.01 1.51 2.21 3.21 3.79 3.15 1.52-.06 2.1-.98 3.94-.98 1.83 0 2.36.98 3.96.95 1.64-.03 2.67-1.54 3.67-3.06 1.16-1.76 1.64-3.47 1.66-3.56-.04-.02-3.19-1.22-3.22-4.86Zm-3.04-8.91c.84-1.02 1.4-2.43 1.25-3.84-1.21.05-2.67.8-3.53 1.81-.77.9-1.44 2.34-1.26 3.72 1.34.1 2.7-.68 3.54-1.69Z"/></svg></span>macOS</a>
-          <a class="os"        data-os="win"   href="#"><span class="os-icon"><svg viewBox="0 0 24 24"><path d="M3 3h8.5v8.5H3V3Zm9.5 0H21v8.5h-8.5V3ZM3 12.5h8.5V21H3v-8.5Zm9.5 0H21V21h-8.5v-8.5Z"/></svg></span>Windows</a>
-          <a class="os"        data-os="linux" href="#"><span class="os-icon"><svg viewBox="0 0 24 24"><path d="M12 2c-2.2 0-3.5 1.9-3.5 4.3 0 1.4.4 2.4.9 3.3-1 .9-2 2.2-2.6 3.5-.6 1.3-1 2.8-1 4.1 0 .9.3 1.6.8 2.1-.4.4-.6 1-.6 1.6 0 1.1.9 1.8 2 1.8.6 0 1.1-.2 1.5-.5.5.5 1.3.8 2.5.8s2-.3 2.5-.8c.4.3.9.5 1.5.5 1.1 0 2-.7 2-1.8 0-.6-.2-1.2-.6-1.6.5-.5.8-1.2.8-2.1 0-1.3-.4-2.8-1-4.1-.6-1.3-1.6-2.6-2.6-3.5.5-.9.9-1.9.9-3.3C15.5 3.9 14.2 2 12 2Zm-1.2 4c.3 0 .5.3.5.7 0 .4-.2.8-.5.8s-.5-.4-.5-.8c0-.4.2-.7.5-.7Zm2.4 0c.3 0 .5.3.5.7 0 .4-.2.8-.5.8s-.5-.4-.5-.8c0-.4.2-.7.5-.7Z"/></svg></span>Linux</a>
+          <a class="os active" data-os="mac"   href={DL.mac}><span class="os-icon"><svg viewBox="0 0 24 24"><path d="M17.05 12.53c-.03-3.02 2.47-4.47 2.58-4.54-1.41-2.06-3.6-2.34-4.38-2.37-1.86-.19-3.63 1.1-4.58 1.1-.94 0-2.4-1.07-3.94-1.04-2.03.03-3.9 1.18-4.94 3C-.33 11.36 1.25 17 3.28 20.09c1.01 1.51 2.21 3.21 3.79 3.15 1.52-.06 2.1-.98 3.94-.98 1.83 0 2.36.98 3.96.95 1.64-.03 2.67-1.54 3.67-3.06 1.16-1.76 1.64-3.47 1.66-3.56-.04-.02-3.19-1.22-3.22-4.86Zm-3.04-8.91c.84-1.02 1.4-2.43 1.25-3.84-1.21.05-2.67.8-3.53 1.81-.77.9-1.44 2.34-1.26 3.72 1.34.1 2.7-.68 3.54-1.69Z"/></svg></span>macOS</a>
+          <a class="os"        data-os="win"   href={DL.win}><span class="os-icon"><svg viewBox="0 0 24 24"><path d="M3 3h8.5v8.5H3V3Zm9.5 0H21v8.5h-8.5V3ZM3 12.5h8.5V21H3v-8.5Zm9.5 0H21V21h-8.5v-8.5Z"/></svg></span>Windows</a>
+          <a class="os"        data-os="linux" href={DL.linux}><span class="os-icon"><svg viewBox="0 0 24 24"><path d="M12 2c-2.2 0-3.5 1.9-3.5 4.3 0 1.4.4 2.4.9 3.3-1 .9-2 2.2-2.6 3.5-.6 1.3-1 2.8-1 4.1 0 .9.3 1.6.8 2.1-.4.4-.6 1-.6 1.6 0 1.1.9 1.8 2 1.8.6 0 1.1-.2 1.5-.5.5.5 1.3.8 2.5.8s2-.3 2.5-.8c.4.3.9.5 1.5.5 1.1 0 2-.7 2-1.8 0-.6-.2-1.2-.6-1.6.5-.5.8-1.2.8-2.1 0-1.3-.4-2.8-1-4.1-.6-1.3-1.6-2.6-2.6-3.5.5-.9.9-1.9.9-3.3C15.5 3.9 14.2 2 12 2Zm-1.2 4c.3 0 .5.3.5.7 0 .4-.2.8-.5.8s-.5-.4-.5-.8c0-.4.2-.7.5-.7Zm2.4 0c.3 0 .5.3.5.7 0 .4-.2.8-.5.8s-.5-.4-.5-.8c0-.4.2-.7.5-.7Z"/></svg></span>Linux</a>
         </div>
         <a class="docs-link" href="/docs"><span data-i18n="dl.docs">Read the docs</span><span>→</span></a>
       </div>
@@ -471,12 +478,14 @@ const channelUpper = site.channel.toUpperCase();
 
   function updatePrimaryDl() {
     const tw = window.TAGMA_SHELL?.get() ?? { theme: 'dark' as const, lang: 'en' as const };
-    const active = document.querySelector<HTMLElement>('.dl-group .os.active');
+    const active = document.querySelector<HTMLAnchorElement>('.dl-group .os.active');
     const os = active?.dataset.os ?? 'mac';
     const dict = DL_LABELS[tw.lang] ?? DL_LABELS.en;
     const label = dict[os] ?? dict.mac;
     const span = document.querySelector<HTMLElement>('#primaryDl span[data-i18n], #primaryDl span:last-child');
     if (span) span.textContent = label;
+    const primary = document.querySelector<HTMLAnchorElement>('#primaryDl');
+    if (primary && active?.href) primary.href = active.href;
   }
 
   document.getElementById('tweaks')?.querySelectorAll<HTMLElement>('.seg').forEach((g) => {
