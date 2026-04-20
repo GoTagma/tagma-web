@@ -2,7 +2,7 @@ export type Lang = 'en' | 'zh';
 
 export const I18N: Record<Lang, Record<string, string>> = {
   en: {
-    'nav.product': 'Product', 'nav.docs': 'Docs', 'nav.changelog': 'Changelog', 'nav.github': 'GitHub ↗',
+    'nav.product': 'Product', 'nav.docs': 'Docs', 'nav.archive': 'Archive', 'nav.github': 'GitHub ↗',
     'cta.docs': 'Docs ↗', 'cta.download': '↓ Download',
     'hero.eyebrow': '§ TAGMA · DESKTOP EDITOR · v0.8.2 BETA',
     'hero.tagline': 'LOCAL-FIRST · PLUGIN-NATIVE',

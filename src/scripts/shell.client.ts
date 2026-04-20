@@ -20,9 +20,12 @@ const TWEAKS: Tweaks = readTweaks();
 
 function applyLang(): void {
   const dict = I18N[TWEAKS.lang] || I18N.en;
+  const fallback = I18N.en;
   document.querySelectorAll<HTMLElement>('[data-i18n]').forEach((el) => {
     const k = el.dataset.i18n;
-    if (k && dict[k] != null) el.innerHTML = dict[k];
+    if (!k) return;
+    const v = dict[k] ?? fallback[k];
+    if (v != null) el.innerHTML = v;
   });
   document.documentElement.lang = TWEAKS.lang === 'zh' ? 'zh' : 'en';
 }
