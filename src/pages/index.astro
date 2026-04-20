@@ -37,15 +37,15 @@ const DL = {
       </h1>
 
       <p class="hero-sub" data-i18n="hero.sub">
-        A swim-lane editor for AI orchestration. <b>Task</b> is the atom — <b>prompt</b> or <b>command</b> — driven by the agent CLIs you already run: <b>Claude Code</b>, <b>Codex</b>, <b>OpenCode</b>, and anything you wire up through the plugin SDK.
+        A swim-lane editor for AI orchestration. <b>Task</b> is the atom — <b>prompt</b> or <b>command</b> — driven by the agent CLIs you already run: <b>Claude Code</b>, <b>Codex</b>, <b>OpenCode</b>, and anything you wire up through the SDK.
       </p>
 
       <div class="hero-meta">
-        <span data-i18n="meta.size"><b>~{site.sizeMB} MB</b> · signed build</span>
+        <span data-i18n="meta.size"><b>~{site.sizeMB} MB</b> · lightweight</span>
         <span class="pipe">│</span>
         <span data-i18n="meta.os"><b>{site.platforms.join(' · ')}</b></span>
         <span class="pipe">│</span>
-        <span data-i18n="meta.lic"><b>{site.license}</b> core · TypeScript plugin SDK</span>
+        <span data-i18n="meta.lic"><b>{site.license}</b> core · TypeScript SDK</span>
       </div>
 
       <div class="hero-cta">
@@ -726,6 +726,8 @@ const DL = {
     });
   }
 
+  const ANIM_INTERVAL_MS = 2600;
+
   type TaskState = 'ok' | 'running' | 'queued';
   type Frame = { [k: string]: TaskState | Edge[] } & { e: Edge[] };
   const BASE: Record<string, Partial<Record<'ok' | 'run' | 'queued', [string, string]>>> = {
@@ -799,7 +801,7 @@ const DL = {
   window.addEventListener('load', () => { positionTasks(); applyFrame(); });
   positionTasks();
   applyFrame();
-  setInterval(() => { frame = (frame + 1) % cycle.length; applyFrame(); }, 2600);
+  setInterval(() => { frame = (frame + 1) % cycle.length; applyFrame(); }, ANIM_INTERVAL_MS);
 
   window.addEventListener('message', (ev) => {
     const d = (ev.data ?? {}) as { type?: string };
