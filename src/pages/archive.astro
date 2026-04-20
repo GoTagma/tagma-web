@@ -23,14 +23,36 @@ entries.sort((a, b) => {
 });
 
 // Filename pattern mirrors `artifactName` in packages/electron/package.json:
-// `Tagma-<version>-<slug>.<ext>`. Keep this table in lock-step with the
-// release targets (mac = dmg, win = NSIS .exe, linux = AppImage).
-const ASSETS = [
-  { os: 'mac-arm', label: 'macOS arm64', slug: 'mac-arm64',    ext: 'dmg' },
-  { os: 'mac-x64', label: 'macOS x64',   slug: 'mac-x64',      ext: 'dmg' },
-  { os: 'win',     label: 'Windows',     slug: 'win-x64',      ext: 'exe' },
-  { os: 'linux',   label: 'Linux',       slug: 'linux-x86_64', ext: 'AppImage' },
-] as const;
+// `Tagma-<version>-<os>-<arch>.<ext>`. Each Linux target uses a different
+// arch token (AppImage/rpm → x86_64, deb → amd64, tar.gz → x64) — keep this
+// in lock-step with packages/electron/package.json `linux.target`.
+type AssetItem = { label: string; arch: string; slug: string; ext: string };
+type Platform = { os: 'mac' | 'win' | 'linux'; label: string; items: AssetItem[] };
+
+const PLATFORMS: Platform[] = [
+  {
+    os: 'mac', label: 'macOS',
+    items: [
+      { label: 'Apple Silicon', arch: 'arm64', slug: 'mac-arm64', ext: 'dmg' },
+      { label: 'Intel',         arch: 'x64',   slug: 'mac-x64',   ext: 'dmg' },
+    ],
+  },
+  {
+    os: 'win', label: 'Windows',
+    items: [
+      { label: 'Windows', arch: 'x64', slug: 'win-x64', ext: 'exe' },
+    ],
+  },
+  {
+    os: 'linux', label: 'Linux',
+    items: [
+      { label: 'AppImage',        arch: 'x86_64',  slug: 'linux-x86_64', ext: 'AppImage' },
+      { label: 'Debian · Ubuntu', arch: '.deb',    slug: 'linux-amd64',  ext: 'deb' },
+      { label: 'Fedora · RHEL',   arch: '.rpm',    slug: 'linux-x86_64', ext: 'rpm' },
+      { label: 'Tarball',         arch: '.tar.gz', slug: 'linux-x64',    ext: 'tar.gz' },
+    ],
+  },
+];
 
 function downloadUrl(version: string, slug: string, ext: string): string {
   return `${site.github.mono}/releases/download/desktop-v${version}/Tagma-${version}-${slug}.${ext}`;
@@ -79,11 +101,32 @@ function channelLabel(ch: string): string {
               <span class="arc-date">{fmtDate(e.data.date)}</span>
             </div>
             <div class="arc-dl">
-              {ASSETS.map((a) => (
-                <a class="arc-btn" data-os={a.os} href={downloadUrl(e.data.version, a.slug, a.ext)} download>
-                  <span class="arc-btn-label">{a.label}</span>
-                  <span class="arc-btn-arrow">↓</span>
-                </a>
+              {PLATFORMS.map((p) => (
+                p.items.length === 1 ? (
+                  <div class="arc-os-wrap" data-os={p.os}>
+                    <a class="arc-btn" data-os={p.os}
+                       href={downloadUrl(e.data.version, p.items[0].slug, p.items[0].ext)} download>
+                      <span class="arc-btn-label">{p.label}</span>
+                      <span class="arc-btn-arrow">↓</span>
+                    </a>
+                  </div>
+                ) : (
+                  <div class="arc-os-wrap has-menu" data-os={p.os}>
+                    <button type="button" class="arc-btn arc-btn-toggle" data-os={p.os} aria-haspopup="true" aria-expanded="false">
+                      <span class="arc-btn-label">{p.label}</span>
+                      <span class="arc-btn-arrow">▾</span>
+                    </button>
+                    <div class="arc-menu" hidden>
+                      {p.items.map((a) => (
+                        <a class="arc-menu-item"
+                           href={downloadUrl(e.data.version, a.slug, a.ext)} download>
+                          <span class="ami-label">{a.label}</span>
+                          <span class="ami-arch">{a.arch}</span>
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )
               ))}
             </div>
           </li>
@@ -122,6 +165,51 @@ function channelLabel(ch: string): string {
   q?.addEventListener('input', () => {
     query = q.value.trim().toLowerCase();
     apply();
+  });
+
+  function closeAllMenus(except?: HTMLElement) {
+    document.querySelectorAll<HTMLElement>('.arc-os-wrap.has-menu').forEach((wrap) => {
+      if (wrap === except) return;
+      const menu = wrap.querySelector<HTMLElement>('.arc-menu');
+      const toggle = wrap.querySelector<HTMLButtonElement>('.arc-btn-toggle');
+      menu?.setAttribute('hidden', '');
+      wrap.classList.remove('open');
+      toggle?.setAttribute('aria-expanded', 'false');
+    });
+  }
+
+  document.querySelectorAll<HTMLButtonElement>('.arc-btn-toggle').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const wrap = btn.closest<HTMLElement>('.arc-os-wrap.has-menu');
+      const menu = wrap?.querySelector<HTMLElement>('.arc-menu');
+      if (!wrap || !menu) return;
+      const open = !menu.hasAttribute('hidden');
+      closeAllMenus(open ? undefined : wrap);
+      if (open) {
+        menu.setAttribute('hidden', '');
+        wrap.classList.remove('open');
+        btn.setAttribute('aria-expanded', 'false');
+      } else {
+        menu.removeAttribute('hidden');
+        wrap.classList.add('open');
+        btn.setAttribute('aria-expanded', 'true');
+      }
+    });
+  });
+
+  document.querySelectorAll<HTMLAnchorElement>('.arc-menu-item').forEach((a) => {
+    a.addEventListener('click', () => closeAllMenus());
+  });
+
+  document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    if (!target.closest('.arc-os-wrap.has-menu')) closeAllMenus();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeAllMenus();
   });
 </script>
 
@@ -198,23 +286,52 @@ function channelLabel(ch: string): string {
   }
 
   .arc-dl { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+  .arc-os-wrap { position: relative; display: inline-flex; }
   .arc-btn {
     display: inline-flex; align-items: center; gap: 8px;
     padding: 7px 12px; border: 1px solid var(--line-2); color: var(--fg-dim);
     font-family: 'JetBrains Mono', monospace; font-size: 11px;
     text-decoration: none; letter-spacing: .03em; white-space: nowrap;
     transition: color .1s, border-color .1s, background .1s;
+    background: transparent; cursor: pointer;
   }
+  .arc-btn-toggle { font: inherit; font-family: 'JetBrains Mono', monospace; }
   .arc-btn:hover {
     color: var(--fg); border-color: var(--fg); background: var(--bg-1);
   }
+  .arc-os-wrap.has-menu.open .arc-btn { color: var(--fg); border-color: var(--fg); background: var(--bg-1); }
   .arc-btn-arrow { color: var(--fg-muted); font-size: 12px; }
-  .arc-btn:hover .arc-btn-arrow { color: var(--accent); }
+  .arc-btn:hover .arc-btn-arrow,
+  .arc-os-wrap.has-menu.open .arc-btn-arrow { color: var(--accent); }
+
+  .arc-menu {
+    position: absolute; right: 0; top: calc(100% + 4px);
+    min-width: 200px;
+    background: var(--bg); border: 1px solid var(--line-2);
+    display: flex; flex-direction: column;
+    z-index: 50;
+  }
+  .arc-menu[hidden] { display: none; }
+  .arc-menu-item {
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    padding: 9px 12px;
+    color: var(--fg); text-decoration: none;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    border-bottom: 1px solid var(--line);
+    transition: background .1s, color .1s;
+  }
+  .arc-menu-item:last-child { border-bottom: 0; }
+  .arc-menu-item:hover { background: var(--bg-1); color: var(--accent); }
+  .arc-menu-item .ami-arch {
+    font-size: 10px; color: var(--fg-muted); letter-spacing: .05em;
+  }
+  .arc-menu-item:hover .ami-arch { color: var(--accent); }
 
   @media (max-width: 900px) {
     .arc-wrap { padding: 0 24px 40px; }
     .arc-row { grid-template-columns: 1fr; gap: 12px; padding: 18px 0; }
     .arc-dl { justify-content: flex-start; }
+    .arc-menu { right: auto; left: 0; }
   }
 
   body { user-select: none; -webkit-user-select: none; }
