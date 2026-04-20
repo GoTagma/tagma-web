@@ -5,11 +5,17 @@ import { site } from '../site.config';
 const channelUpper = site.channel.toUpperCase();
 
 const DL_BASE = `${site.github.mono}/releases/download/desktop-v${site.version}`;
+// Linux arch tokens differ per electron-builder target:
+//   AppImage → x86_64, deb → amd64, rpm → x86_64, tar.gz → x64.
+// Keep in lock-step with packages/electron/package.json `linux.target` in tagma-mono.
 const DL = {
   mac: `${DL_BASE}/Tagma-${site.version}-mac-arm64.dmg`,
   mac_x64: `${DL_BASE}/Tagma-${site.version}-mac-x64.dmg`,
   win: `${DL_BASE}/Tagma-${site.version}-win-x64.exe`,
   linux: `${DL_BASE}/Tagma-${site.version}-linux-x86_64.AppImage`,
+  linux_deb: `${DL_BASE}/Tagma-${site.version}-linux-amd64.deb`,
+  linux_rpm: `${DL_BASE}/Tagma-${site.version}-linux-x86_64.rpm`,
+  linux_targz: `${DL_BASE}/Tagma-${site.version}-linux-x64.tar.gz`,
 };
 ---
 
@@ -50,13 +56,29 @@ const DL = {
               <span class="caret" id="primaryCaret">▾</span>
             </a>
             <div class="dl-menu" id="dlMenu" hidden>
-              <a class="dl-menu-item" href={DL.mac} data-mac-arch="arm64" download>
+              <a class="dl-menu-item" data-os="mac" data-menu-key="arm64" href={DL.mac} download>
                 <span class="mi-label" data-i18n="dl.macArm">Apple Silicon</span>
                 <span class="mi-arch">arm64</span>
               </a>
-              <a class="dl-menu-item" href={DL.mac_x64} data-mac-arch="x64" download>
+              <a class="dl-menu-item" data-os="mac" data-menu-key="x64" href={DL.mac_x64} download>
                 <span class="mi-label" data-i18n="dl.macIntel">Intel</span>
                 <span class="mi-arch">x64</span>
+              </a>
+              <a class="dl-menu-item" data-os="linux" data-menu-key="appimage" href={DL.linux} download>
+                <span class="mi-label" data-i18n="dl.linuxAppImage">AppImage</span>
+                <span class="mi-arch">x86_64</span>
+              </a>
+              <a class="dl-menu-item" data-os="linux" data-menu-key="deb" href={DL.linux_deb} download>
+                <span class="mi-label" data-i18n="dl.linuxDeb">Debian · Ubuntu</span>
+                <span class="mi-arch">.deb</span>
+              </a>
+              <a class="dl-menu-item" data-os="linux" data-menu-key="rpm" href={DL.linux_rpm} download>
+                <span class="mi-label" data-i18n="dl.linuxRpm">Fedora · RHEL</span>
+                <span class="mi-arch">.rpm</span>
+              </a>
+              <a class="dl-menu-item" data-os="linux" data-menu-key="targz" href={DL.linux_targz} download>
+                <span class="mi-label" data-i18n="dl.linuxTarGz">Tarball</span>
+                <span class="mi-arch">.tar.gz</span>
               </a>
             </div>
           </div>
@@ -360,6 +382,7 @@ const DL = {
     transition: background .1s, color .1s;
   }
   .dl-menu-item:last-child { border-bottom: 0; }
+  .dl-menu-item[hidden] { display: none; }
   .dl-menu-item:hover { background: var(--bg-1); color: var(--accent); }
   .dl-menu-item .mi-arch {
     font-family: 'JetBrains Mono', monospace; font-size: 10px;
@@ -520,9 +543,17 @@ const DL = {
     zh: { mac: '下载 macOS 版',        win: '下载 Windows 版',       linux: '下载 Linux 版' },
   };
   const MENU_LABELS: Record<string, Record<string, string>> = {
-    en: { arm64: 'Apple Silicon', x64: 'Intel' },
-    zh: { arm64: 'Apple Silicon', x64: 'Intel' },
+    en: {
+      arm64: 'Apple Silicon', x64: 'Intel',
+      appimage: 'AppImage', deb: 'Debian · Ubuntu', rpm: 'Fedora · RHEL', targz: 'Tarball',
+    },
+    zh: {
+      arm64: 'Apple Silicon', x64: 'Intel',
+      appimage: 'AppImage', deb: 'Debian · Ubuntu', rpm: 'Fedora · RHEL', targz: '压缩包',
+    },
   };
+
+  const OS_WITH_MENU = new Set(['mac', 'linux']);
 
   function updatePrimaryDl() {
     const tw = window.TAGMA_SHELL?.get() ?? { theme: 'dark' as const, lang: 'en' as const };
@@ -535,13 +566,19 @@ const DL = {
     const primary = document.querySelector<HTMLAnchorElement>('#primaryDl');
     if (primary && active?.href) primary.href = active.href;
     const wrap = document.querySelector<HTMLElement>('.primary-wrap');
-    const isMac = os === 'mac';
-    wrap?.classList.toggle('has-menu', isMac);
-    if (!isMac) document.getElementById('dlMenu')?.setAttribute('hidden', '');
+    const hasMenu = OS_WITH_MENU.has(os);
+    wrap?.classList.toggle('has-menu', hasMenu);
+    if (!hasMenu) document.getElementById('dlMenu')?.setAttribute('hidden', '');
+    // Show only menu items belonging to the active OS.
+    document.querySelectorAll<HTMLAnchorElement>('.dl-menu-item').forEach((el) => {
+      const itemOs = el.dataset.os ?? '';
+      if (itemOs === os) el.removeAttribute('hidden');
+      else el.setAttribute('hidden', '');
+    });
     const menuDict = MENU_LABELS[tw.lang] ?? MENU_LABELS.en;
     document.querySelectorAll<HTMLElement>('.dl-menu-item .mi-label').forEach((el) => {
-      const arch = el.parentElement?.getAttribute('data-mac-arch') ?? '';
-      el.textContent = menuDict[arch] ?? el.textContent ?? '';
+      const key = el.parentElement?.getAttribute('data-menu-key') ?? '';
+      el.textContent = menuDict[key] ?? el.textContent ?? '';
     });
   }
 
