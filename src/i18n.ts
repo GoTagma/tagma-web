@@ -37,9 +37,8 @@ export const I18N: Record<Lang, Record<string, string>> = {
     'foot.tag': 'Every agent in formation. A swim-lane editor for AI orchestration — task as atomic unit, plugin-native, local-first.',
     'foot.product': 'Product', 'foot.dev': 'Developers', 'foot.legal': 'Legal', 'foot.contact': 'Contact',
     'foot.download': 'Download', 'foot.docs': 'Documentation', 'foot.archive': 'Archive',
-    'foot.gh': 'GitHub ↗', 'foot.sdk': 'Plugin SDK', 'foot.discord': 'Discord',
+    'foot.gh': 'GitHub ↗', 'foot.sdk': 'Plugin SDK',
     'foot.terms': 'Terms of Service', 'foot.privacy': 'Privacy Policy', 'foot.license': 'License (MIT)',
-    'foot.security': 'Security', 'foot.status': 'Status ●',
     'foot.copyright': '© 2026 Tagma · All rights reserved',
   },
   zh: {
@@ -78,9 +77,8 @@ export const I18N: Record<Lang, Record<string, string>> = {
     'foot.tag': '让每个智能体列阵就位。一款 AI 编排的泳道式编辑器——任务为最小单元，插件原生，本地优先。',
     'foot.product': '产品', 'foot.dev': '开发者', 'foot.legal': '条款', 'foot.contact': '联系',
     'foot.download': '下载', 'foot.docs': '文档', 'foot.archive': '历史版本',
-    'foot.gh': 'GitHub ↗', 'foot.sdk': '插件 SDK', 'foot.discord': 'Discord',
+    'foot.gh': 'GitHub ↗', 'foot.sdk': '插件 SDK',
     'foot.terms': '服务条款', 'foot.privacy': '隐私政策', 'foot.license': '开源协议 (MIT)',
-    'foot.security': '安全', 'foot.status': '运行状态 ●',
     'foot.copyright': '© 2026 Tagma · 版权所有',
   },
 };
