@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import DemoYaml from '../components/DemoYaml.astro';
 import { site } from '../site.config';
 
 const channelUpper = site.channel.toUpperCase();
@@ -125,6 +126,7 @@ const DL = {
 
         <div class="zoom"><span>−</span><b>150%</b><span>+</span></div>
       </div>
+      <DemoYaml />
     </div>
     </div>
 
@@ -519,6 +521,18 @@ const DL = {
   [data-theme="light"] .approve-btn { color: #fff; }
   .approve-btn:hover { background: #ff8a3d; }
   .approve-btn .countdown { font-weight: 400; opacity: .75; }
+
+  .demo-yaml { background: var(--bg-1); }
+  .demo-yaml[hidden] { display: none !important; }
+  .demo-yaml-block[hidden] { display: none !important; }
+  .demo-yaml-header {
+    padding: 8px 14px; border-bottom: 1px solid var(--line);
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--fg-dim); background: var(--bg);
+  }
+  .demo-yaml-body { max-height: 420px; overflow: auto; padding: 16px 20px; font-size: 12.5px; }
+  .demo-yaml-body pre { margin: 0; background: transparent !important; }
+  .demo-yaml-body code { font-family: 'JetBrains Mono', monospace; }
 </style>
 
 <script>
