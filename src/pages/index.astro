@@ -708,6 +708,14 @@ const DL = {
     currentCtrl?.approve();
   });
 
+  document.querySelector('.stage-chrome')?.addEventListener('click', (e) => {
+    const pill = (e.target as HTMLElement).closest<HTMLElement>('.pill[data-role]');
+    if (!pill || !currentCtrl) return;
+    const role = pill.dataset.role;
+    if (role === 'run') currentCtrl.reset();
+    else if (role === 'reset') { currentCtrl.reset(); currentCtrl.pause(); }
+  });
+
   window.addEventListener('message', (ev) => {
     const d = (ev.data ?? {}) as { type?: string };
     if (d.type === '__activate_edit_mode') document.getElementById('tweaks')?.classList.add('show');
