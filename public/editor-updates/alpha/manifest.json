@@ -1,10 +1,10 @@
 {
-  "version": "0.1.30",
+  "version": "0.1.31",
   "channel": "alpha",
   "dist": {
-    "url": "https://github.com/GoTagma/tagma-mono/releases/download/desktop-v0.1.30/editor-dist-0.1.30.tar.gz",
-    "sha256": "0e8dd078a10e34a1f447c598d8d11662faa750cb72b5ef5c54e665633b6bb929",
-    "size": 223056
+    "url": "https://github.com/GoTagma/tagma-mono/releases/download/desktop-v0.1.31/editor-dist-0.1.31.tar.gz",
+    "sha256": "7f53c5bb6cce3b9f5b11f6160c2bd130ba463aa1dd1a0c06d4bc1504dc5bb406",
+    "size": 230058
   },
-  "releaseNotesUrl": "https://github.com/GoTagma/tagma-mono/releases/tag/desktop-v0.1.30"
+  "releaseNotesUrl": "https://github.com/GoTagma/tagma-mono/releases/tag/desktop-v0.1.31"
 }
