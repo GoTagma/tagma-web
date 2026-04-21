@@ -10,7 +10,10 @@ const docs = defineCollection({
     description: z.string().optional(),
     group: z.string().default('Getting Started'),
     order: z.number().default(100),
-    updated: z.string().optional(),
+    updated: z
+      .union([z.string(), z.date()])
+      .transform((v) => (v instanceof Date ? v.toISOString().slice(0, 10) : v))
+      .optional(),
   }),
 });
 
