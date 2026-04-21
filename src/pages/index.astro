@@ -533,6 +533,7 @@ const DL = {
   .demo-yaml-body { max-height: 420px; overflow: auto; padding: 16px 20px; font-size: 12.5px; }
   .demo-yaml-body pre { margin: 0; background: transparent !important; }
   .demo-yaml-body code { font-family: 'JetBrains Mono', monospace; }
+  .canvas[hidden] { display: none !important; }
 </style>
 
 <script>
@@ -700,6 +701,7 @@ const DL = {
     if (currentCtrl) currentCtrl.destroy();
     currentCtrl = mount(roots, sample);
     renderTabs(sample.id);
+    applyYamlView(sample.id);
   }
 
   window.addEventListener('load', () => switchSample(DEFAULT_SAMPLE_ID));
@@ -728,6 +730,27 @@ const DL = {
     const role = pill.dataset.role;
     if (role === 'run') currentCtrl.reset();
     else if (role === 'reset') { currentCtrl.reset(); currentCtrl.pause(); }
+  });
+
+  let yamlOpen = false;
+  function applyYamlView(sampleId: string) {
+    const host = document.getElementById('demoYaml');
+    const canvas = document.getElementById('canvas');
+    const pill = document.querySelector<HTMLElement>('.stage-chrome .pill[data-role="yaml"]');
+    if (!host || !canvas || !pill) return;
+    pill.classList.toggle('active', yamlOpen);
+    host.toggleAttribute('hidden', !yamlOpen);
+    canvas.toggleAttribute('hidden', yamlOpen);
+    host.querySelectorAll<HTMLElement>('.demo-yaml-block').forEach((b) => {
+      b.toggleAttribute('hidden', b.dataset.yamlId !== sampleId);
+    });
+  }
+
+  document.querySelector('.stage-chrome')?.addEventListener('click', (e) => {
+    const pill = (e.target as HTMLElement).closest<HTMLElement>('.pill[data-role="yaml"]');
+    if (!pill || !currentCtrl) return;
+    yamlOpen = !yamlOpen;
+    applyYamlView(currentCtrl.sampleId);
   });
 
   window.addEventListener('message', (ev) => {
