@@ -663,16 +663,44 @@ const DL = {
 
   let currentCtrl: Controller | null = null;
 
+  function renderTabs(activeId: string) {
+    const host = document.getElementById('sampleTabs');
+    if (!host) return;
+    const lang = (window as Window & { TAGMA_SHELL?: { get(): { lang: 'en' | 'zh' } } }).TAGMA_SHELL?.get().lang ?? 'en';
+    host.innerHTML = '';
+    SAMPLES.forEach((s) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'sample-tab' + (s.id === activeId ? ' active' : '');
+      btn.dataset.sampleId = s.id;
+      btn.setAttribute('role', 'tab');
+      btn.textContent = s.tabLabel[lang];
+      host.appendChild(btn);
+    });
+  }
+
   function switchSample(id: string) {
     const roots = demoRoots();
     if (!roots) return;
     const sample = SAMPLES.find((s) => s.id === id) ?? SAMPLES[0];
     if (currentCtrl) currentCtrl.destroy();
     currentCtrl = mount(roots, sample);
+    renderTabs(sample.id);
   }
 
   window.addEventListener('load', () => switchSample(DEFAULT_SAMPLE_ID));
   if (document.readyState === 'complete') switchSample(DEFAULT_SAMPLE_ID);
+
+  document.getElementById('sampleTabs')?.addEventListener('click', (e) => {
+    const btn = (e.target as HTMLElement).closest<HTMLElement>('.sample-tab');
+    if (!btn || !btn.dataset.sampleId) return;
+    if (currentCtrl?.sampleId === btn.dataset.sampleId) return;
+    switchSample(btn.dataset.sampleId);
+  });
+
+  document.addEventListener('tagma:apply', () => {
+    if (currentCtrl) renderTabs(currentCtrl.sampleId);
+  });
 
   window.addEventListener('message', (ev) => {
     const d = (ev.data ?? {}) as { type?: string };
