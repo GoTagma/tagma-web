@@ -93,12 +93,12 @@ const DL = {
     <div class="stage-wrap">
     <div class="stage">
       <div class="stage-chrome">
-        <span class="crumb"><b data-i18n="ed.proj">full-feature-smoke-test</b><span style="color:var(--line-2)">/</span><span>.tagma/test-pipeline.yaml</span></span>
+        <div class="sample-tabs" id="sampleTabs" role="tablist"></div>
         <span class="sp"></span>
-        <span class="pill" data-i18n="ed.history">⟲ HISTORY</span>
-        <span class="pill">&lt;/&gt; YAML</span>
+        <span class="pill" data-role="reset">⟲ <span data-i18n="ed.reset">RESET</span></span>
+        <span class="pill" data-role="yaml">&lt;/&gt; YAML</span>
         <span class="pill live"><span class="dot"></span>LIVE</span>
-        <span class="pill run">▶ RUN</span>
+        <span class="pill run" data-role="run">▶ RUN</span>
       </div>
 
       <div class="canvas" id="canvas">
@@ -484,6 +484,41 @@ const DL = {
     .foot { grid-template-columns: 1fr 1fr; gap: 24px; padding: 28px 24px; }
     .docs-link { display: none; }
   }
+
+  .sample-tabs {
+    display: flex; gap: 0; flex: 1; min-width: 0;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    overflow-x: auto; scrollbar-width: none;
+  }
+  .sample-tabs::-webkit-scrollbar { display: none; }
+  .sample-tab {
+    padding: 4px 12px; color: var(--fg-dim); cursor: pointer;
+    border: 0; background: transparent;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap; user-select: none;
+    font: inherit; text-transform: inherit; letter-spacing: inherit;
+    transition: color .12s, border-color .12s;
+  }
+  .sample-tab:hover { color: var(--fg); }
+  .sample-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .stage-chrome .pill { cursor: pointer; }
+  .stage-chrome .pill[data-role="yaml"].active { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+  [data-theme="light"] .stage-chrome .pill[data-role="yaml"].active { color: var(--bg); }
+
+  /* blocked state + approve button */
+  .task.blocked { border-color: var(--warn); box-shadow: 0 0 0 1px var(--warn), 0 0 20px -8px var(--warn); }
+  .task.blocked .glyph { color: var(--warn); }
+  .task .t1 .status.warn { color: var(--warn); }
+  .approve-btn {
+    margin-left: 6px; flex-shrink: 0;
+    font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.08em;
+    padding: 2px 8px; background: var(--accent); color: var(--accent-ink);
+    border: 0; cursor: pointer; font-weight: 600;
+  }
+  [data-theme="light"] .approve-btn { color: #fff; }
+  .approve-btn:hover { background: #ff8a3d; }
+  .approve-btn .countdown { font-weight: 400; opacity: .75; }
 </style>
 
 <script>
