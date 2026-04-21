@@ -102,59 +102,10 @@ const DL = {
       </div>
 
       <div class="canvas" id="canvas">
-        <div class="lane-rail">
-          <div class="lane-row">
-            <div class="lane-name"><span class="swatch" style="background:var(--blue)"></span><span data-i18n="lane.backend">Backend</span></div>
-            <div class="lane-meta">opencode · big-pickle</div>
-            <div class="lane-meta lane-status" data-lane="0">3 tasks · 2 ok</div>
-            <span class="cnt">3</span>
-          </div>
-          <div class="lane-row">
-            <div class="lane-name"><span class="swatch" style="background:var(--green)"></span><span data-i18n="lane.ops">Ops</span></div>
-            <div class="lane-meta">shell</div>
-            <div class="lane-meta lane-status" data-lane="1">2 tasks · 2 ok</div>
-            <span class="cnt">2</span>
-          </div>
-          <div class="lane-row">
-            <div class="lane-name"><span class="swatch" style="background:var(--pink)"></span><span data-i18n="lane.review">Review</span></div>
-            <div class="lane-meta">claude-code · opus</div>
-            <div class="lane-meta lane-status" data-lane="2">1 task · queued</div>
-            <span class="cnt">1</span>
-          </div>
-        </div>
+        <div class="lane-rail" id="laneRail"></div>
 
         <div class="lane-field" id="field">
-          <div class="lane-strip" style="top:33.33%;"></div>
-          <div class="lane-strip" style="top:66.66%;"></div>
-
           <svg id="wires"></svg>
-
-          <div class="task" data-color="teal"   data-id="t1" data-lane="0" data-col="0">
-            <div class="t1"><span class="glyph">◆</span><span class="title">Plan the change</span><span class="status ok">✓ 13.6s</span></div>
-            <div class="t2"><span class="driver">opencode</span><span>·</span><span>opencode/big</span><span class="chips"><span class="chip g"></span><span class="chip r"></span><span class="chip"></span></span></div>
-          </div>
-          <div class="task" data-color="orange" data-id="t2" data-lane="0" data-col="1">
-            <div class="t1"><span class="glyph">◆</span><span class="title">Implement /health</span><span class="status run">▶</span></div>
-            <div class="t2"><span class="driver">opencode</span><span>·</span><span>opencode/big</span><span class="chips"><span class="chip"></span><span class="chip y"></span><span class="chip r"></span></span></div>
-          </div>
-          <div class="task" data-color="muted"  data-id="t3" data-lane="0" data-col="2">
-            <div class="t1"><span class="glyph">◆</span><span class="title">Self-review the diff</span><span class="status">⌛ queued</span></div>
-            <div class="t2"><span class="driver">opencode</span><span>·</span><span>opencode/big</span><span class="chips"><span class="chip"></span><span class="chip"></span></span></div>
-          </div>
-
-          <div class="task" data-color="green"  data-id="t4" data-lane="1" data-col="0">
-            <div class="t1"><span class="glyph">▶</span><span class="title">Prepare signal dir</span><span class="status ok">✓ 7ms</span></div>
-            <div class="t2"><span class="driver">shell</span><span>·</span><span>mkdir -p .signals</span></div>
-          </div>
-          <div class="task" data-color="green"  data-id="t5" data-lane="1" data-col="1">
-            <div class="t1"><span class="glyph">▶</span><span class="title">Wait for signal</span><span class="status ok">✓ 4ms</span></div>
-            <div class="t2"><span class="driver">shell</span><span>·</span><span>poll ./signals/done</span></div>
-          </div>
-
-          <div class="task" data-color="pink"   data-id="t6" data-lane="2" data-col="3" data-nudge="28">
-            <div class="t1"><span class="glyph">◆</span><span class="title">Summarize backend run</span><span class="status">⌛ queued</span></div>
-            <div class="t2"><span class="driver">claude-code</span><span>·</span><span>opus-4.7</span><span class="chips"><span class="chip"></span><span class="chip b"></span></span></div>
-          </div>
         </div>
 
         <div class="minimap">
@@ -663,147 +614,30 @@ const DL = {
   })();
   updatePrimaryDl();
 
-  function positionTasks() {
+  import { SAMPLES, DEFAULT_SAMPLE_ID } from '../lib/demo/samples';
+  import { mount, type Controller, type ReplayRoots } from '../lib/demo/replay';
+
+  function demoRoots(): ReplayRoots | null {
+    const canvas = document.getElementById('canvas');
+    const rail = document.getElementById('laneRail');
     const field = document.getElementById('field');
-    if (!field) return;
-    const fieldW = field.clientWidth;
-    const fieldH = field.clientHeight;
-    const pad = 18;
-    const cols = 4;
-    const gap = 12;
-    const taskW = Math.max(158, Math.min(198, (fieldW - pad * 2 - gap * (cols - 1)) / cols));
-    const colStep = taskW + gap;
-    const laneH = fieldH / 3;
-    document.querySelectorAll<HTMLElement>('.task').forEach((el) => {
-      const lane = Number(el.dataset.lane);
-      const col = Number(el.dataset.col);
-      const nudge = Number(el.dataset.nudge ?? 0);
-      el.style.width = taskW + 'px';
-      const h = el.offsetHeight || 56;
-      const x = pad + col * colStep + nudge;
-      const y = lane * laneH + (laneH - h) / 2;
-      el.style.left = x + 'px';
-      el.style.top = y + 'px';
-    });
-    drawWires();
+    const wires = document.getElementById('wires') as unknown as SVGSVGElement | null;
+    if (!canvas || !rail || !field || !wires) return null;
+    return { canvas, rail, field, wires };
   }
 
-  type Edge = [string, string, 'active' | 'pending'];
-  let currentEdges: Edge[] = [
-    ['t1', 't2', 'active'],
-    ['t2', 't3', 'pending'],
-    ['t4', 't5', 'active'],
-    ['t3', 't6', 'pending'],
-    ['t5', 't6', 'pending'],
-  ];
+  let currentCtrl: Controller | null = null;
 
-  function drawWires() {
-    const svg = document.getElementById('wires') as unknown as SVGSVGElement | null;
-    const field = document.getElementById('field');
-    if (!svg || !field) return;
-    svg.setAttribute('width', String(field.clientWidth));
-    svg.setAttribute('height', String(field.clientHeight));
-    svg.innerHTML = '';
-    const ns = 'http://www.w3.org/2000/svg';
-    currentEdges.forEach(([a, b, state]) => {
-      const A = field.querySelector<HTMLElement>(`[data-id="${a}"]`);
-      const B = field.querySelector<HTMLElement>(`[data-id="${b}"]`);
-      if (!A || !B) return;
-      const ax = A.offsetLeft + A.offsetWidth;
-      const ay = A.offsetTop + A.offsetHeight / 2;
-      const bx = B.offsetLeft;
-      const by = B.offsetTop + B.offsetHeight / 2;
-      let d: string;
-      if (Math.abs(ay - by) < 4) {
-        d = `M ${ax} ${ay} L ${bx} ${by}`;
-      } else {
-        const entry = 18;
-        const mid = Math.max(ax + 16, bx - entry);
-        d = `M ${ax} ${ay} L ${mid} ${ay} L ${mid} ${by} L ${bx} ${by}`;
-      }
-      const p = document.createElementNS(ns, 'path');
-      p.setAttribute('d', d);
-      p.setAttribute('class', state);
-      svg.appendChild(p);
-    });
+  function switchSample(id: string) {
+    const roots = demoRoots();
+    if (!roots) return;
+    const sample = SAMPLES.find((s) => s.id === id) ?? SAMPLES[0];
+    if (currentCtrl) currentCtrl.destroy();
+    currentCtrl = mount(roots, sample);
   }
 
-  const ANIM_INTERVAL_MS = 2600;
-
-  type TaskState = 'ok' | 'running' | 'queued';
-  type Frame = { [k: string]: TaskState | Edge[] } & { e: Edge[] };
-  const BASE: Record<string, Partial<Record<'ok' | 'run' | 'queued', [string, string]>>> = {
-    t1: { ok: ['✓ 13.6s', 'ok'] },
-    t2: { run: ['▶', 'run'], ok: ['✓ 38.4s', 'ok'] },
-    t3: { queued: ['⌛ queued', ''], run: ['▶', 'run'], ok: ['✓ 21.7s', 'ok'] },
-    t4: { ok: ['✓ 7ms', 'ok'] },
-    t5: { ok: ['✓ 4ms', 'ok'] },
-    t6: { queued: ['⌛ queued', ''], run: ['▶', 'run'], ok: ['✓ 9.8s', 'ok'] },
-  };
-  const cycle: Frame[] = [
-    { t1: 'ok', t2: 'running', t3: 'queued', t4: 'ok', t5: 'ok', t6: 'queued',
-      e: [['t1', 't2', 'active'], ['t2', 't3', 'pending'], ['t4', 't5', 'pending'], ['t3', 't6', 'pending'], ['t5', 't6', 'pending']] },
-    { t1: 'ok', t2: 'ok', t3: 'running', t4: 'ok', t5: 'ok', t6: 'queued',
-      e: [['t1', 't2', 'pending'], ['t2', 't3', 'active'], ['t4', 't5', 'pending'], ['t3', 't6', 'pending'], ['t5', 't6', 'pending']] },
-    { t1: 'ok', t2: 'ok', t3: 'ok', t4: 'ok', t5: 'ok', t6: 'running',
-      e: [['t1', 't2', 'pending'], ['t2', 't3', 'pending'], ['t4', 't5', 'pending'], ['t3', 't6', 'active'], ['t5', 't6', 'active']] },
-  ];
-  const LANE_TASKS: Record<string, string[]> = { '0': ['t1', 't2', 't3'], '1': ['t4', 't5'], '2': ['t6'] };
-
-  function updateLaneStatuses(f: Frame) {
-    document.querySelectorAll<HTMLElement>('.lane-status').forEach((meta) => {
-      const lane = meta.getAttribute('data-lane') ?? '';
-      const ids = LANE_TASKS[lane] ?? [];
-      let ok = 0, run = 0, queued = 0;
-      ids.forEach((id) => {
-        const s = f[id] as TaskState | undefined;
-        if (s === 'ok') ok++;
-        else if (s === 'running') run++;
-        else if (s === 'queued') queued++;
-      });
-      const total = ids.length;
-      const parts = [`${total} ${total === 1 ? 'task' : 'tasks'}`];
-      if (ok) parts.push(`${ok} ok`);
-      if (run) parts.push(`${run} run`);
-      if (queued) parts.push(`${queued} queued`);
-      meta.textContent = parts.join(' · ');
-      if (run) meta.style.color = 'var(--accent)';
-      else if (ok && ok === total) meta.style.color = 'var(--green)';
-      else meta.style.color = '';
-    });
-  }
-
-  let frame = 0;
-  function applyFrame() {
-    const f = cycle[frame];
-    Object.keys(f).forEach((k) => {
-      if (k === 'e') return;
-      const el = document.querySelector<HTMLElement>(`[data-id="${k}"]`);
-      if (!el) return;
-      el.classList.remove('running', 'queued');
-      const state = f[k] as TaskState;
-      if (state === 'running') el.classList.add('running');
-      else if (state === 'queued') el.classList.add('queued');
-      const statusEl = el.querySelector<HTMLElement>('.status');
-      if (statusEl) {
-        const key = state === 'running' ? 'run' : state === 'queued' ? 'queued' : state === 'ok' ? 'ok' : null;
-        const spec = key && BASE[k] ? BASE[k][key] : null;
-        if (spec) {
-          statusEl.textContent = spec[0];
-          statusEl.className = 'status' + (spec[1] ? ' ' + spec[1] : '');
-        }
-      }
-    });
-    updateLaneStatuses(f);
-    currentEdges = f.e;
-    drawWires();
-  }
-
-  window.addEventListener('resize', positionTasks);
-  window.addEventListener('load', () => { positionTasks(); applyFrame(); });
-  positionTasks();
-  applyFrame();
-  setInterval(() => { frame = (frame + 1) % cycle.length; applyFrame(); }, ANIM_INTERVAL_MS);
+  window.addEventListener('load', () => switchSample(DEFAULT_SAMPLE_ID));
+  if (document.readyState === 'complete') switchSample(DEFAULT_SAMPLE_ID);
 
   window.addEventListener('message', (ev) => {
     const d = (ev.data ?? {}) as { type?: string };
