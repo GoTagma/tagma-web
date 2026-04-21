@@ -3,6 +3,7 @@ title: Using the Editor
 description: Compose, run, and inspect pipelines in the Tagma visual editor.
 group: Using the Editor
 order: 100
+updated: 2026-04-21
 ---
 
 The editor is a swim-lane canvas for pipelines: tracks are lanes, tasks are cards, arrows are dependencies. Everything saves to plain YAML on disk, so your pipelines are portable — commit them, hand them to the CLI, or keep editing them here.

@@ -3,6 +3,7 @@ title: Plugins
 description: Triggers, completions, and middlewares — what ships and how to add one.
 group: Reference
 order: 220
+updated: 2026-04-21
 ---
 
 Tagma pipelines are extended with four plugin categories: **drivers**, **triggers**, **completions**, and **middlewares**. Drivers have their own page; this page covers the other three and how external packages are loaded.
@@ -14,11 +15,13 @@ List package names under `pipeline.plugins`. They're resolved via standard `node
 ```yaml
 pipeline:
   plugins:
-    - "@tagma/driver-opencode"
+    - "@tagma/driver-claude-code"
     - "@tagma/trigger-webhook"
     - "@tagma/completion-llm-judge"
     - "@tagma/middleware-lightrag"
 ```
+
+`opencode` is the SDK's only built-in driver — it doesn't need to appear here. `claude-code` and `codex` ship as plugin packages and must be listed.
 
 A plugin package must declare a `tagmaPlugin` manifest in its `package.json`:
 

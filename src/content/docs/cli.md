@@ -3,6 +3,7 @@ title: CLI
 description: Run Tagma pipelines headlessly from the terminal.
 group: SDK & CLI
 order: 310
+updated: 2026-04-21
 ---
 
 The Tagma CLI ([`@tagma/cli`](https://github.com/GoTagma/tagma-cli)) is a thin wrapper around [`@tagma/sdk`](https://github.com/GoTagma/tagma-mono/tree/main/packages/sdk) — same runtime as the desktop editor, no daemon, no shared config. It reads a pipeline YAML from disk, loads declared plugins, and runs to completion.

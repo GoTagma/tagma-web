@@ -3,11 +3,12 @@ title: Writing Custom Plugins
 description: Package layout and per-category walkthroughs for drivers, triggers, completions, and middlewares.
 group: SDK & CLI
 order: 320
+updated: 2026-04-21
 ---
 
 Tagma has four plugin categories — `drivers`, `triggers`, `completions`, `middlewares`. Every category is a small TypeScript object that implements one interface from `@tagma/types`. Pipelines load plugins by package name under `pipeline.plugins`; the host reads your `package.json` manifest, imports the module, and registers the default export against `(category, type)`.
 
-> Five of [`tagma-mono`](https://github.com/GoTagma/tagma-mono)'s plugin packages ([`driver-codex`](https://github.com/GoTagma/tagma-mono/tree/main/packages/driver-codex), [`driver-opencode`](https://github.com/GoTagma/tagma-mono/tree/main/packages/driver-opencode), [`middleware-lightrag`](https://github.com/GoTagma/tagma-mono/tree/main/packages/middleware-lightrag), [`trigger-webhook`](https://github.com/GoTagma/tagma-mono/tree/main/packages/trigger-webhook), [`completion-llm-judge`](https://github.com/GoTagma/tagma-mono/tree/main/packages/completion-llm-judge)) are maintained as reference implementations. Copy any of them as a scaffold.
+> Five of [`tagma-mono`](https://github.com/GoTagma/tagma-mono)'s plugin packages ([`driver-claude-code`](https://github.com/GoTagma/tagma-mono/tree/main/packages/driver-claude-code), [`driver-codex`](https://github.com/GoTagma/tagma-mono/tree/main/packages/driver-codex), [`middleware-lightrag`](https://github.com/GoTagma/tagma-mono/tree/main/packages/middleware-lightrag), [`trigger-webhook`](https://github.com/GoTagma/tagma-mono/tree/main/packages/trigger-webhook), [`completion-llm-judge`](https://github.com/GoTagma/tagma-mono/tree/main/packages/completion-llm-judge)) are maintained as reference implementations — one per plugin category. Copy any of them as a scaffold. (`opencode` is the SDK's only built-in driver and lives inside `@tagma/sdk`, not as a separate package.)
 
 ## Package layout
 
@@ -108,7 +109,7 @@ Key interface points:
 - `parseResult` is optional; return `{ sessionId, normalizedOutput, forceFailure?, forceFailureReason? }` to classify the result. `forceFailure` marks the task failed even when the process exited 0 (useful when a CLI returns `{type:"error"}` JSON with status 0).
 - `resolveTools(permissions)` is an optional hook that drivers can use to map the Tagma `Permissions` shape (`{read, write, execute}`) onto tool whitelists specific to their CLI.
 
-Reference implementations: [`@tagma/driver-opencode`](https://github.com/GoTagma/tagma-mono/tree/main/packages/driver-opencode), [`@tagma/driver-codex`](https://github.com/GoTagma/tagma-mono/tree/main/packages/driver-codex).
+Reference implementations: [`@tagma/driver-claude-code`](https://github.com/GoTagma/tagma-mono/tree/main/packages/driver-claude-code), [`@tagma/driver-codex`](https://github.com/GoTagma/tagma-mono/tree/main/packages/driver-codex).
 
 ---
 

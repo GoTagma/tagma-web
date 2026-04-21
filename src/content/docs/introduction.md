@@ -3,6 +3,7 @@ title: Introduction
 description: A swim-lane editor and runtime for AI agent orchestration.
 group: Getting Started
 order: 10
+updated: 2026-04-21
 ---
 
 Tagma is a swim-lane editor and runtime for AI agent orchestration. You compose pipelines of **tasks** — prompts or shell commands — and they execute on the agent CLIs you already have installed locally (Claude Code, OpenCode, Codex, …).
@@ -37,6 +38,8 @@ A pipeline has one or more **tracks**. Tracks run in parallel; tasks inside a tr
 pipeline:
   name: hello
   driver: claude-code
+  plugins:
+    - "@tagma/driver-claude-code"   # claude-code is a plugin; opencode is the only built-in driver
   tracks:
     - id: backend
       name: Backend

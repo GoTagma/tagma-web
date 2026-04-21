@@ -49,6 +49,9 @@ const { prev, next } = findPrevNext(allDocs, entry.id);
         <h1>{entry.data.title}</h1>
         {entry.data.description && <p class="lede">{entry.data.description}</p>}
         <Content />
+        {entry.data.updated && (
+          <p class="doc-updated">Last updated: {entry.data.updated}</p>
+        )}
         <DocsPrevNext prev={prev} next={next} />
       </article>
 
@@ -155,6 +158,14 @@ const { prev, next } = findPrevNext(allDocs, entry.id);
   .doc-main th, .doc-main td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); }
   .doc-main th { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--fg-muted); font-weight: 500; }
   .doc-main td { color: var(--fg-dim); }
+  .doc-main .doc-updated {
+    margin-top: 48px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+  }
 
   .doc-toc { padding: 56px 24px; position: sticky; top: 56px; align-self: start; max-height: calc(100vh - 56px); overflow-y: auto; }
   .doc-toc h5 { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--fg-muted); margin-bottom: 14px; font-weight: 500; }

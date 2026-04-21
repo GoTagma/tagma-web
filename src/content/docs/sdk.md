@@ -3,6 +3,7 @@ title: SDK
 description: Write your own driver, trigger, completion, or middleware in TypeScript.
 group: SDK & CLI
 order: 300
+updated: 2026-04-21
 ---
 
 The Tagma runtime is [`@tagma/sdk`](https://github.com/GoTagma/tagma-mono/tree/main/packages/sdk). Plugins depend on [`@tagma/types`](https://github.com/GoTagma/tagma-mono/tree/main/packages/types) for the wire contracts and export a default object that implements the relevant plugin interface.

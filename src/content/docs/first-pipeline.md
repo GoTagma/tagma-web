@@ -3,6 +3,7 @@ title: Your First Pipeline
 description: Compose a two-track pipeline and run it end-to-end in five minutes.
 group: Getting Started
 order: 30
+updated: 2026-04-21
 ---
 
 This guide builds the smallest non-trivial pipeline in Tagma: two tracks, four tasks, one cross-track dependency.
@@ -17,6 +18,8 @@ Create `.tagma/hello.yaml`:
 pipeline:
   name: hello
   driver: claude-code
+  plugins:
+    - "@tagma/driver-claude-code"
   tracks:
     - id: plan
       name: Plan
@@ -42,6 +45,7 @@ pipeline:
 
 A few things worth noting:
 
+- `opencode` is the only built-in driver. `claude-code` and `codex` ship as plugins, so they must be declared under `pipeline.plugins` — that's the line above. To run this pipeline on OpenCode instead, drop the `plugins:` list and set `driver: opencode`.
 - Cross-track dependencies use `trackId.taskId` syntax (`plan.outline`). Same-track references can use the bare task id (`scaffold`).
 - `continue_from` does **not** imply `depends_on`; the DAG builder adds the edge for you, but listing both is explicit and safe.
 - The last task uses `command:` instead of `prompt:` — it's a plain shell command, no driver needed.

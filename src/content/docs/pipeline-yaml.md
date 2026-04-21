@@ -3,6 +3,7 @@ title: Pipeline YAML Reference
 description: Every field accepted by a Tagma pipeline file.
 group: Reference
 order: 200
+updated: 2026-04-21
 ---
 
 A Tagma pipeline is a YAML document with a single top-level `pipeline:` key. Everything in this page is resolved against `@tagma/types`' `RawPipelineConfig`; if the runtime ever disagrees with this page, the types are the source of truth.
@@ -17,7 +18,7 @@ pipeline:
   reasoning_effort: string    # "low" | "medium" | "high"
   timeout: string             # "30m", "2h", "45s" — pipeline-wide cap
   plugins:                    # external plugin packages to load
-    - "@tagma/driver-opencode"
+    - "@tagma/driver-claude-code"
   hooks: { ... }              # see "Hooks"
   tracks: [ ... ]             # required; see "Tracks"
 ```

@@ -10,6 +10,7 @@ const docs = defineCollection({
     description: z.string().optional(),
     group: z.string().default('Getting Started'),
     order: z.number().default(100),
+    updated: z.string().optional(),
   }),
 });
 

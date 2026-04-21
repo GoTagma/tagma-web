@@ -3,30 +3,33 @@ title: Install
 description: Get the desktop editor, the CLI, or the SDK — whichever fits your workflow.
 group: Getting Started
 order: 20
+updated: 2026-04-21
 ---
 
 Tagma ships in three pieces that all drive the same runtime. Pick the ones you need.
 
 ## Desktop editor
 
-The visual editor is an Electron app built from the `tagma-mono` monorepo.
+The visual editor is an Electron app built from the `tagma-mono` monorepo. The Electron app + the editor server live in `apps/`, which is tracked as a git submodule — clone with submodules or initialise them before the first build:
 
 ```sh
-git clone https://github.com/GoTagma/tagma-mono.git
+git clone --recurse-submodules https://github.com/GoTagma/tagma-mono.git
 cd tagma-mono
 bun install
 bun run dev:desktop
 ```
 
+If you already cloned without submodules, run `bun run apps:init` (or `git submodule update --init --recursive apps`) first.
+
 To produce a platform installer instead:
 
 ```sh
-bun run dist:desktop:win      # Windows
-bun run dist:desktop:mac      # macOS
-bun run dist:desktop:linux    # Linux
+bun run dist:desktop:win      # Windows (nsis)
+bun run dist:desktop:mac      # macOS (dmg)
+bun run dist:desktop:linux    # Linux (AppImage / deb / rpm / tar.gz)
 ```
 
-Installers land under `packages/electron/release/`.
+Installers land under `apps/electron/release/`. Each installer also bundles a platform-matched `opencode` CLI binary in `resources/opencode/`, so end users of the packaged app don't need a separate `opencode` or `bun` install.
 
 **Requires Bun ≥ 1.3.** On Windows: `powershell -c "irm bun.sh/install.ps1 | iex"`. On macOS / Linux: `curl -fsSL https://bun.sh/install | bash`.
 
@@ -63,20 +66,20 @@ The flow is always:
 
 1. Go to the vendor's official page and install their agent CLI.
 2. Authenticate it and confirm it runs from your terminal on its own.
-3. *Then* point Tagma at it — either by using the built-in driver (Claude Code) or by adding the plugin package under `pipeline.plugins`.
+3. *Then* point Tagma at it — either by using the built-in driver (OpenCode) or by adding the plugin package under `pipeline.plugins`.
 
 | Agent CLI | Driver | Install from |
 | --- | --- | --- |
-| Claude Code | built-in (`claude-code`) | [claude.com/claude-code](https://claude.com/claude-code) |
-| OpenCode | `@tagma/driver-opencode` | [github.com/anomalyco/opencode](https://github.com/anomalyco/opencode) — install the `opencode` CLI and ensure it is on your `PATH` |
+| OpenCode | built-in (`opencode`) | [github.com/anomalyco/opencode](https://github.com/anomalyco/opencode) — install the `opencode` CLI and ensure it is on your `PATH`. The desktop app ships a bundled copy; SDK / CLI direct users can also let the driver auto-install via `bun install -g opencode-ai` when `bun` is on `PATH`. |
+| Claude Code | `@tagma/driver-claude-code` | [claude.com/claude-code](https://claude.com/claude-code) |
 | Codex CLI | `@tagma/driver-codex` | [github.com/openai/codex](https://github.com/openai/codex) — `npm i -g @openai/codex`, ensure `codex` is on your `PATH` |
 
-For plugin drivers (OpenCode, Codex), you still need to declare the plugin in your pipeline:
+For plugin drivers (Claude Code, Codex), you still need to declare the plugin in your pipeline:
 
 ```yaml
 pipeline:
   plugins:
-    - "@tagma/driver-opencode"
+    - "@tagma/driver-claude-code"
     - "@tagma/driver-codex"
 ```
 
