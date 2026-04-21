@@ -1,0 +1,188 @@
+// src/lib/demo/samples.ts
+import type { Sample } from './types';
+
+const smokeTest: Sample = {
+  id: 'smoke-test',
+  tabLabel: { en: 'Smoke Test', zh: '全链路测试' },
+  filename: '.tagma/test-pipeline.yaml',
+  yamlId: 'smoke-test',
+  lanes: [
+    { color: 'blue',  name: { en: 'Backend', zh: '后端' },     driver: 'opencode · big-pickle' },
+    { color: 'green', name: { en: 'Ops',     zh: '运维' },     driver: 'shell' },
+    { color: 'pink',  name: { en: 'Review',  zh: '审查' },     driver: 'claude-code · opus' },
+  ],
+  tasks: [
+    { id: 't1', lane: 0, col: 0, color: 'teal',   glyph: '◆',
+      title: { en: 'Plan the change',      zh: '规划变更' },
+      driverLine: 'opencode · opencode/big', chips: ['g', 'r', 'default'] },
+    { id: 't2', lane: 0, col: 1, color: 'orange', glyph: '◆',
+      title: { en: 'Implement /health',    zh: '实现 /health' },
+      driverLine: 'opencode · opencode/big', chips: ['default', 'y', 'r'] },
+    { id: 't3', lane: 0, col: 2, color: 'muted',  glyph: '◆',
+      title: { en: 'Self-review the diff', zh: '自审 diff' },
+      driverLine: 'opencode · opencode/big', chips: ['default', 'default'] },
+    { id: 't4', lane: 1, col: 0, color: 'green',  glyph: '▶',
+      title: { en: 'Prepare signal dir',   zh: '准备信号目录' },
+      driverLine: 'shell · mkdir -p .signals' },
+    { id: 't5', lane: 1, col: 1, color: 'green',  glyph: '▶',
+      title: { en: 'Wait for signal',      zh: '等待信号' },
+      driverLine: 'shell · poll ./signals/done' },
+    { id: 't6', lane: 2, col: 3, nudge: 28, color: 'pink', glyph: '◆',
+      title: { en: 'Summarize backend run', zh: '汇总本次执行' },
+      driverLine: 'claude-code · opus-4.7', chips: ['default', 'b'] },
+  ],
+  frames: [
+    {
+      tasks: { t1: 'ok', t2: 'running', t3: 'queued', t4: 'ok', t5: 'ok', t6: 'queued' },
+      statusText: { t1: '✓ 13.6s', t2: '▶', t3: '⌛ queued', t4: '✓ 7ms', t5: '✓ 4ms', t6: '⌛ queued' },
+      edges: [['t1', 't2', 'active'], ['t2', 't3', 'pending'], ['t4', 't5', 'pending'], ['t3', 't6', 'pending'], ['t5', 't6', 'pending']],
+    },
+    {
+      tasks: { t1: 'ok', t2: 'ok', t3: 'running', t4: 'ok', t5: 'ok', t6: 'queued' },
+      statusText: { t1: '✓ 13.6s', t2: '✓ 38.4s', t3: '▶', t4: '✓ 7ms', t5: '✓ 4ms', t6: '⌛ queued' },
+      edges: [['t1', 't2', 'pending'], ['t2', 't3', 'active'], ['t4', 't5', 'pending'], ['t3', 't6', 'pending'], ['t5', 't6', 'pending']],
+    },
+    {
+      tasks: { t1: 'ok', t2: 'ok', t3: 'ok', t4: 'ok', t5: 'ok', t6: 'running' },
+      statusText: { t1: '✓ 13.6s', t2: '✓ 38.4s', t3: '✓ 21.7s', t4: '✓ 7ms', t5: '✓ 4ms', t6: '▶' },
+      edges: [['t1', 't2', 'pending'], ['t2', 't3', 'pending'], ['t4', 't5', 'pending'], ['t3', 't6', 'active'], ['t5', 't6', 'active']],
+    },
+  ],
+};
+
+const parallelReview: Sample = {
+  id: 'parallel-review',
+  tabLabel: { en: 'Parallel Review', zh: '并行审查' },
+  filename: '.tagma/review.yaml',
+  yamlId: 'parallel-review',
+  lanes: [
+    { color: 'blue',   name: { en: 'Security',    zh: '安全' },     driver: 'claude-code · sonnet' },
+    { color: 'teal',   name: { en: 'Performance', zh: '性能' },     driver: 'codex · gpt-5-codex' },
+    { color: 'pink',   name: { en: 'Style',       zh: '风格' },     driver: 'opencode · big-pickle' },
+    { color: 'orange', name: { en: 'Consolidate', zh: '汇总' },     driver: 'claude-code · opus' },
+  ],
+  tasks: [
+    { id: 'sec',  lane: 0, col: 1, color: 'blue',   glyph: '◆',
+      title: { en: 'Security review',     zh: '安全审查' },
+      driverLine: 'claude-code · sonnet',    chips: ['r', 'default', 'default'] },
+    { id: 'perf', lane: 1, col: 1, color: 'teal',   glyph: '◆',
+      title: { en: 'Perf hotpaths',       zh: '性能热点' },
+      driverLine: 'codex · gpt-5-codex',     chips: ['y', 'default', 'default'] },
+    { id: 'sty',  lane: 2, col: 1, color: 'pink',   glyph: '◆',
+      title: { en: 'Style & idioms',      zh: '风格与习惯' },
+      driverLine: 'opencode · big-pickle',   chips: ['g', 'default'] },
+    { id: 'sum',  lane: 3, col: 3, color: 'orange', glyph: '◆',
+      title: { en: 'Consolidate findings', zh: '汇总发现' },
+      driverLine: 'claude-code · opus',      chips: ['b', 'default'] },
+  ],
+  frames: [
+    {
+      tasks: { sec: 'queued', perf: 'queued', sty: 'queued', sum: 'queued' },
+      statusText: { sec: '⌛ queued', perf: '⌛ queued', sty: '⌛ queued', sum: '⌛ queued' },
+      edges: [['sec', 'sum', 'pending'], ['perf', 'sum', 'pending'], ['sty', 'sum', 'pending']],
+    },
+    {
+      tasks: { sec: 'running', perf: 'running', sty: 'running', sum: 'queued' },
+      statusText: { sec: '▶', perf: '▶', sty: '▶', sum: '⌛ queued' },
+      edges: [['sec', 'sum', 'pending'], ['perf', 'sum', 'pending'], ['sty', 'sum', 'pending']],
+    },
+    {
+      tasks: { sec: 'ok', perf: 'running', sty: 'ok', sum: 'queued' },
+      statusText: { sec: '✓ 18.2s', perf: '▶', sty: '✓ 11.5s', sum: '⌛ queued' },
+      edges: [['sec', 'sum', 'active'], ['perf', 'sum', 'pending'], ['sty', 'sum', 'active']],
+    },
+    {
+      tasks: { sec: 'ok', perf: 'ok', sty: 'ok', sum: 'running' },
+      statusText: { sec: '✓ 18.2s', perf: '✓ 24.7s', sty: '✓ 11.5s', sum: '▶' },
+      edges: [['sec', 'sum', 'active'], ['perf', 'sum', 'active'], ['sty', 'sum', 'active']],
+    },
+  ],
+};
+
+const bugTriage: Sample = {
+  id: 'bug-triage',
+  tabLabel: { en: 'Bug Triage', zh: '缺陷排查' },
+  filename: '.tagma/triage.yaml',
+  yamlId: 'bug-triage',
+  lanes: [
+    { color: 'green',  name: { en: 'Shell',    zh: 'Shell' },    driver: 'shell' },
+    { color: 'pink',   name: { en: 'Diagnose', zh: '诊断' },     driver: 'claude-code · sonnet' },
+    { color: 'orange', name: { en: 'Fix',      zh: '修复' },     driver: 'opencode · big-pickle' },
+  ],
+  tasks: [
+    { id: 'repro',    lane: 0, col: 0, color: 'green',  glyph: '▶',
+      title: { en: 'Reproduce failure',   zh: '复现问题' },
+      driverLine: 'shell · bun test --bail 1' },
+    { id: 'diag',     lane: 1, col: 1, color: 'pink',   glyph: '◆',
+      title: { en: 'Diagnose root cause', zh: '定位根因' },
+      driverLine: 'claude-code · sonnet',   chips: ['r', 'default', 'default'] },
+    { id: 'fix',      lane: 2, col: 2, color: 'orange', glyph: '◆',
+      title: { en: 'Patch the bug',       zh: '修复缺陷' },
+      driverLine: 'opencode · big-pickle',  chips: ['g', 'default', 'y'] },
+    { id: 'verify',   lane: 0, col: 3, color: 'green',  glyph: '▶',
+      title: { en: 'Re-run test',         zh: '回归验证' },
+      driverLine: 'shell · bun test' },
+  ],
+  frames: [
+    { tasks: { repro: 'running', diag: 'queued', fix: 'queued', verify: 'queued' },
+      statusText: { repro: '▶', diag: '⌛ queued', fix: '⌛ queued', verify: '⌛ queued' },
+      edges: [['repro', 'diag', 'active'], ['diag', 'fix', 'pending'], ['fix', 'verify', 'pending']] },
+    { tasks: { repro: 'ok', diag: 'running', fix: 'queued', verify: 'queued' },
+      statusText: { repro: '✓ 1.2s · exit 1', diag: '▶', fix: '⌛ queued', verify: '⌛ queued' },
+      edges: [['repro', 'diag', 'active'], ['diag', 'fix', 'pending'], ['fix', 'verify', 'pending']] },
+    { tasks: { repro: 'ok', diag: 'ok', fix: 'running', verify: 'queued' },
+      statusText: { repro: '✓ 1.2s · exit 1', diag: '✓ 14.8s', fix: '▶', verify: '⌛ queued' },
+      edges: [['repro', 'diag', 'pending'], ['diag', 'fix', 'active'], ['fix', 'verify', 'pending']] },
+    { tasks: { repro: 'ok', diag: 'ok', fix: 'ok', verify: 'running' },
+      statusText: { repro: '✓ 1.2s · exit 1', diag: '✓ 14.8s', fix: '✓ 27.3s', verify: '▶' },
+      edges: [['repro', 'diag', 'pending'], ['diag', 'fix', 'pending'], ['fix', 'verify', 'active']] },
+    { tasks: { repro: 'ok', diag: 'ok', fix: 'ok', verify: 'ok' },
+      statusText: { repro: '✓ 1.2s · exit 1', diag: '✓ 14.8s', fix: '✓ 27.3s', verify: '✓ 0.9s · exit 0' },
+      edges: [['repro', 'diag', 'pending'], ['diag', 'fix', 'pending'], ['fix', 'verify', 'pending']] },
+  ],
+};
+
+const migrationGate: Sample = {
+  id: 'migration-gate',
+  tabLabel: { en: 'Migration Gate', zh: '审批迁移' },
+  filename: '.tagma/migration.yaml',
+  yamlId: 'migration-gate',
+  interactive: { taskId: 'approve', kind: 'approve', autoApproveMs: 8000 },
+  lanes: [
+    { color: 'pink',   name: { en: 'Plan',     zh: '规划' }, driver: 'claude-code · opus' },
+    { color: 'muted',  name: { en: 'Approval', zh: '审批' }, driver: 'manual trigger' },
+    { color: 'orange', name: { en: 'Apply',    zh: '执行' }, driver: 'codex · workspace-write' },
+  ],
+  tasks: [
+    { id: 'plan',    lane: 0, col: 0, color: 'pink',   glyph: '◆',
+      title: { en: 'Plan migration',    zh: '规划迁移步骤' },
+      driverLine: 'claude-code · opus',        chips: ['b', 'default'] },
+    { id: 'approve', lane: 1, col: 1, color: 'muted',  glyph: '⚠',
+      title: { en: 'Human approval',    zh: '人工审批' },
+      driverLine: 'trigger · manual' },
+    { id: 'apply',   lane: 2, col: 2, color: 'orange', glyph: '◆',
+      title: { en: 'Apply migration',   zh: '应用迁移' },
+      driverLine: 'codex · workspace-write',   chips: ['r', 'y', 'default'] },
+    { id: 'verify',  lane: 2, col: 3, color: 'green',  glyph: '▶',
+      title: { en: 'Verify rollback',   zh: '验证回滚' },
+      driverLine: 'shell · migrate:verify' },
+  ],
+  frames: [
+    { tasks: { plan: 'running', approve: 'queued', apply: 'queued', verify: 'queued' },
+      statusText: { plan: '▶', approve: '⌛ queued', apply: '⌛ queued', verify: '⌛ queued' },
+      edges: [['plan', 'approve', 'active'], ['approve', 'apply', 'pending'], ['apply', 'verify', 'pending']] },
+    { tasks: { plan: 'ok', approve: 'blocked', apply: 'queued', verify: 'queued' },
+      statusText: { plan: '✓ 22.1s', approve: '🖐 waiting', apply: '⌛ queued', verify: '⌛ queued' },
+      edges: [['plan', 'approve', 'pending'], ['approve', 'apply', 'pending'], ['apply', 'verify', 'pending']],
+      blockUntilApprove: true },
+    { tasks: { plan: 'ok', approve: 'ok', apply: 'running', verify: 'queued' },
+      statusText: { plan: '✓ 22.1s', approve: '✓ approved', apply: '▶', verify: '⌛ queued' },
+      edges: [['plan', 'approve', 'pending'], ['approve', 'apply', 'active'], ['apply', 'verify', 'pending']] },
+    { tasks: { plan: 'ok', approve: 'ok', apply: 'ok', verify: 'running' },
+      statusText: { plan: '✓ 22.1s', approve: '✓ approved', apply: '✓ 41.0s', verify: '▶' },
+      edges: [['plan', 'approve', 'pending'], ['approve', 'apply', 'pending'], ['apply', 'verify', 'active']] },
+  ],
+};
+
+export const SAMPLES: Sample[] = [parallelReview, bugTriage, migrationGate, smokeTest];
+export const DEFAULT_SAMPLE_ID = 'parallel-review';

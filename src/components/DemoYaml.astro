@@ -1,0 +1,161 @@
+---
+// src/components/DemoYaml.astro
+import { Code } from 'astro:components';
+
+const parallelReviewYaml = `pipeline:
+  name: pr-review
+  driver: claude-code
+  plugins:
+    - "@tagma/driver-claude-code"
+    - "@tagma/driver-codex"
+  tracks:
+    - id: security
+      name: Security
+      tasks:
+        - id: review
+          prompt: "Review this PR for auth, injection, and secret-handling issues."
+
+    - id: performance
+      name: Performance
+      driver: codex
+      tasks:
+        - id: hotpaths
+          prompt: "Identify perf regressions in the PR diff."
+
+    - id: style
+      name: Style
+      driver: opencode
+      tasks:
+        - id: idioms
+          prompt: "Flag style and idiom issues."
+
+    - id: consolidate
+      name: Consolidate
+      tasks:
+        - id: summary
+          prompt: "Merge the three reviews into one report."
+          depends_on: [security.review, performance.hotpaths, style.idioms]
+          continue_from: security.review
+`;
+
+const bugTriageYaml = `pipeline:
+  name: bug-triage
+  driver: claude-code
+  plugins:
+    - "@tagma/driver-claude-code"
+  tracks:
+    - id: main
+      name: Triage
+      tasks:
+        - id: repro
+          command: "bun test --bail 1"
+
+        - id: diagnose
+          prompt: "Look at the failing test output and explain the root cause."
+          depends_on: [repro]
+          continue_from: repro
+
+        - id: fix
+          driver: opencode
+          prompt: "Patch the bug identified in diagnose."
+          permissions: { read: true, write: true, execute: false }
+          depends_on: [diagnose]
+          continue_from: diagnose
+
+        - id: verify
+          command: "bun test"
+          depends_on: [fix]
+          completion: { type: exit_code, expect: 0 }
+`;
+
+const migrationGateYaml = `pipeline:
+  name: migration
+  driver: claude-code
+  plugins:
+    - "@tagma/driver-claude-code"
+    - "@tagma/driver-codex"
+  tracks:
+    - id: plan
+      name: Plan
+      tasks:
+        - id: outline
+          prompt: "Outline the migration steps and rollback plan."
+
+    - id: gate
+      name: Approval
+      tasks:
+        - id: approve
+          trigger: { type: manual }
+          depends_on: [plan.outline]
+
+    - id: apply
+      name: Apply
+      driver: codex
+      permissions: { read: true, write: true, execute: true }
+      tasks:
+        - id: run
+          prompt: "Apply the migration from plan.outline."
+          depends_on: [gate.approve]
+          continue_from: plan.outline
+
+        - id: verify
+          command: "./scripts/migrate-verify.sh"
+          depends_on: [run]
+          completion: { type: exit_code, expect: 0 }
+`;
+
+const smokeTestYaml = `pipeline:
+  name: full-feature-smoke-test
+  driver: opencode
+  tracks:
+    - id: backend
+      name: Backend
+      tasks:
+        - id: plan
+          prompt: "Plan the /health endpoint change."
+        - id: implement
+          prompt: "Implement /health."
+          depends_on: [plan]
+          continue_from: plan
+        - id: review
+          prompt: "Self-review the diff."
+          depends_on: [implement]
+          continue_from: implement
+
+    - id: ops
+      name: Ops
+      tasks:
+        - id: prep
+          command: "mkdir -p .signals"
+        - id: wait
+          command: "while [ ! -f .signals/done ]; do sleep 0.1; done"
+          depends_on: [prep]
+
+    - id: review
+      name: Review
+      driver: claude-code
+      tasks:
+        - id: summarize
+          prompt: "Summarize the backend run for the release notes."
+          depends_on: [backend.review, ops.wait]
+          continue_from: backend.review
+`;
+
+const samples = [
+  { id: 'parallel-review', file: '.tagma/review.yaml',    code: parallelReviewYaml },
+  { id: 'bug-triage',      file: '.tagma/triage.yaml',    code: bugTriageYaml },
+  { id: 'migration-gate',  file: '.tagma/migration.yaml', code: migrationGateYaml },
+  { id: 'smoke-test',      file: '.tagma/test-pipeline.yaml', code: smokeTestYaml },
+];
+---
+
+<div class="demo-yaml" id="demoYaml" hidden>
+  {samples.map((s) => (
+    <div class="demo-yaml-block" data-yaml-id={s.id} hidden>
+      <div class="demo-yaml-header">{s.file}</div>
+      <div class="demo-yaml-body">
+        <Code code={s.code} lang="yaml" theme="github-dark" />
+      </div>
+    </div>
+  ))}
+</div>
