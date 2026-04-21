@@ -702,6 +702,12 @@ const DL = {
     if (currentCtrl) renderTabs(currentCtrl.sampleId);
   });
 
+  document.getElementById('field')?.addEventListener('click', (e) => {
+    const btn = (e.target as HTMLElement).closest<HTMLElement>('[data-role="approve"]');
+    if (!btn) return;
+    currentCtrl?.approve();
+  });
+
   window.addEventListener('message', (ev) => {
     const d = (ev.data ?? {}) as { type?: string };
     if (d.type === '__activate_edit_mode') document.getElementById('tweaks')?.classList.add('show');
