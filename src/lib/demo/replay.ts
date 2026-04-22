@@ -30,6 +30,10 @@ export interface Controller {
   approve(): void;
   isRunning(): boolean;
   getFrameIdx(): number;
+  // Force a re-layout of tasks + wires + minimap from current DOM sizes.
+  // Needed when the canvas was hidden (display: none → clientWidth == 0)
+  // during mount and has just become visible again.
+  relayout(): void;
 }
 
 type Lang = 'en' | 'zh';
@@ -462,6 +466,7 @@ export function mount(roots: ReplayRoots, sample: Sample, opts: MountOptions = {
     },
     isRunning() { return running; },
     getFrameIdx() { return frameIdx; },
+    relayout() { resize(); },
     destroy() {
       destroyed = true;
       clearTimer();
