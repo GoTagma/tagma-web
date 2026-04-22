@@ -91,9 +91,44 @@ const DL = {
       </div>
     </section>
 
+    <section class="spec-strip" aria-hidden="true">
+      <div>
+        <span class="sk">Lanes</span>
+        <span class="sv">∞</span>
+        <span class="sn" data-i18n="spec.lanes">Unbounded swim-lanes</span>
+      </div>
+      <div>
+        <span class="sk">Drivers</span>
+        <span class="sv">3<span class="unit">+</span></span>
+        <span class="sn">Claude · Codex · OpenCode</span>
+      </div>
+      <div>
+        <span class="sk">Runtime</span>
+        <span class="sv">local<span class="unit">-first</span></span>
+        <span class="sn" data-i18n="spec.runtime">No cloud lock-in</span>
+      </div>
+      <div>
+        <span class="sk">SDK</span>
+        <span class="sv">TS</span>
+        <span class="sn">@tagma/sdk · typed</span>
+      </div>
+      <div>
+        <span class="sk">Bundle</span>
+        <span class="sv"><span class="em">{site.sizeMB}</span><span class="unit">MB</span></span>
+        <span class="sn">macOS · Win · Linux</span>
+      </div>
+    </section>
+
     <div class="stage-wrap">
+    <div class="stage-eyebrow eyebrow" aria-hidden="true">
+      <span class="square"></span>
+      <span><span class="em">§</span> FIG. 01 · DESKTOP EDITOR — SWIM-LANE VIEW</span>
+      <span class="bar"></span>
+      <span class="coord">X:0 Y:0 · 1280×420</span>
+    </div>
     <div class="stage">
       <div class="stage-chrome">
+        <div class="mac-dots" aria-hidden="true"><span></span><span></span><span></span></div>
         <div class="sample-tabs" id="sampleTabs" role="tablist"></div>
         <span class="sp"></span>
         <span class="pill" data-role="reset">⟲ <span data-i18n="ed.reset">RESET</span></span>
@@ -121,6 +156,19 @@ const DL = {
 
       </div>
       <DemoYaml />
+      <div class="stage-status" aria-hidden="true">
+        <span><span class="k">SCHEMA</span><span class="v">v1</span></span>
+        <span><span class="k">RUNTIME</span><span class="v em">local-first</span></span>
+        <span><span class="k">DRIVERS</span><span class="v">3+</span></span>
+        <span class="sp"></span>
+        <span class="chart">
+          <span style="height:30%"></span><span style="height:60%"></span><span style="height:40%"></span>
+          <span style="height:80%"></span><span class="hi" style="height:100%"></span><span class="hi" style="height:70%"></span>
+          <span style="height:45%"></span><span style="height:55%"></span><span style="height:30%"></span>
+          <span style="height:65%"></span><span style="height:50%"></span><span class="hi" style="height:90%"></span>
+        </span>
+        <span><span class="k">SDK</span><span class="v">@tagma/sdk</span></span>
+      </div>
     </div>
     </div>
 
@@ -212,6 +260,61 @@ const DL = {
     padding: 64px 40px 32px;
     display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px;
     border-bottom: 1px solid var(--line);
+    position: relative;
+  }
+  /* Tech-drawing corner brackets */
+  .hero::before, .hero::after {
+    content: ""; position: absolute; width: 14px; height: 14px;
+    border: 1px solid var(--line-2);
+    pointer-events: none;
+  }
+  .hero::before { top: 28px; left: 28px; border-right: 0; border-bottom: 0; }
+  .hero::after  { top: 28px; right: 28px; border-left: 0; border-bottom: 0; }
+  @media (max-width: 960px) { .hero::before, .hero::after { display: none; } }
+
+  /* ─── SPEC STRIP ─── */
+  .spec-strip {
+    max-width: 1360px; margin: 0 auto;
+    display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
+    border-bottom: 1px solid var(--line);
+  }
+  .spec-strip > div {
+    padding: 22px 28px 20px; border-right: 1px solid var(--line);
+    display: flex; flex-direction: column; gap: 6px;
+    position: relative; min-width: 0;
+  }
+  .spec-strip > div:last-child { border-right: 0; }
+  .spec-strip > div::before {
+    content: ""; position: absolute; left: 28px; top: 14px;
+    width: 6px; height: 1px; background: var(--accent);
+  }
+  .spec-strip .sk {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    color: var(--fg-muted); letter-spacing: 0.14em; text-transform: uppercase;
+  }
+  .spec-strip .sv {
+    font-family: 'JetBrains Mono', monospace; font-size: 24px;
+    color: var(--fg); letter-spacing: -0.01em; font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+  .spec-strip .sv .unit { font-size: 11px; color: var(--fg-muted); margin-left: 4px; letter-spacing: 0.1em; }
+  .spec-strip .sv .em { color: var(--accent); }
+  .spec-strip .sn {
+    font-size: 11px; color: var(--fg-dim);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  @media (max-width: 1100px) {
+    .spec-strip { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .spec-strip > div:nth-child(3) { border-right: 0; }
+    .spec-strip > div:nth-child(4),
+    .spec-strip > div:nth-child(5) { border-top: 1px solid var(--line); }
+  }
+  @media (max-width: 760px) {
+    .spec-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .spec-strip > div:nth-child(odd) { border-right: 1px solid var(--line); }
+    .spec-strip > div:nth-child(even) { border-right: 0; }
+    .spec-strip > div:nth-child(n+3) { border-top: 1px solid var(--line); }
+    .spec-strip > div:last-child:nth-child(odd) { grid-column: span 2; border-right: 0; }
   }
   .eyebrow {
     display: flex; align-items: center; gap: 14px;
@@ -259,8 +362,14 @@ const DL = {
     display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0;
     border: 1px solid var(--line-2); margin-top: 32px;
   }
-  .way { padding: 28px 26px 26px; border-right: 1px solid var(--line-2); display: flex; flex-direction: column; min-width: 0; }
+  .way { padding: 28px 26px 26px; border-right: 1px solid var(--line-2); display: flex; flex-direction: column; min-width: 0; position: relative; transition: background .2s; }
   .way:last-child { border-right: 0; }
+  .way::before {
+    content: ""; position: absolute; top: 0; left: 0;
+    width: 0; height: 2px; background: var(--accent);
+    transition: width .35s ease;
+  }
+  .way:hover::before { width: 100%; }
   .way-head {
     display: flex; align-items: baseline; gap: 10px;
     font-family: 'JetBrains Mono', monospace; font-size: 11px;
@@ -364,11 +473,22 @@ const DL = {
     background: var(--bg-1);
     border-top: 1px solid var(--line);
     border-bottom: 1px solid var(--line);
-    padding: 72px 40px;
-    display: flex; align-items: center; justify-content: center;
+    padding: 56px 40px 72px;
+    display: flex; flex-direction: column; align-items: center; gap: 24px;
     min-height: 640px;
   }
   [data-theme="light"] .stage-wrap { background: #fafaf7; }
+  /* FIG. 01 eyebrow above the stage — same width + rhythm as hero eyebrow */
+  .stage-eyebrow {
+    width: 100%; max-width: 1280px; margin: 0;
+    user-select: none;
+  }
+  .stage-eyebrow .em { color: var(--accent); margin-right: 4px; }
+  .stage-eyebrow .bar { flex: 1; height: 1px; background: var(--line-2); max-width: none; }
+  .stage-eyebrow .coord { color: var(--fg-dim); letter-spacing: 0.06em; }
+  @media (max-width: 960px) {
+    .stage-eyebrow .coord { display: none; }
+  }
   .stage { width: 100%; max-width: 1280px; margin: 0; border: 1px solid var(--line-2); background: var(--bg-1); overflow: hidden; position: relative; }
   .stage-chrome {
     display: flex; align-items: center; gap: 12px;
@@ -396,9 +516,24 @@ const DL = {
   .stage-chrome .pill.run:not(.running):hover { color: var(--accent); border-color: var(--accent); }
   .stage-chrome .pill.run .pill-glyph { font-size: 9px; line-height: 1; }
 
+  /* macOS-window dots in chrome — purely decorative */
+  .mac-dots { display: inline-flex; gap: 6px; flex-shrink: 0; padding-right: 4px; }
+  .mac-dots span { width: 10px; height: 10px; border-radius: 50%; background: var(--line-2); }
+  .mac-dots span:nth-child(1) { background: #ff5f57; }
+  .mac-dots span:nth-child(2) { background: #febc2e; }
+  .mac-dots span:nth-child(3) { background: #28c840; }
+  @media (max-width: 720px) { .mac-dots { display: none; } }
+
   .canvas { position: relative; height: 420px; background-image: radial-gradient(circle, var(--line-2) 1px, transparent 1px); background-size: 22px 22px; background-color: var(--bg-1); overflow: hidden; }
-  .lane-rail { position: absolute; left: 0; top: 0; bottom: 0; width: 152px; background: var(--bg); border-right: 1px solid var(--line); display: flex; flex-direction: column; }
-  .lane-rail .lane-row { flex: 1; padding: 12px 14px; border-bottom: 1px solid var(--line); position: relative; display: flex; flex-direction: column; gap: 5px; }
+  .lane-rail { position: absolute; left: 0; top: 0; bottom: 0; width: 152px; background: var(--bg); border-right: 1px solid var(--line); display: flex; flex-direction: column; counter-reset: laneidx; }
+  .lane-rail .lane-row { flex: 1; padding: 12px 14px 18px; border-bottom: 1px solid var(--line); position: relative; display: flex; flex-direction: column; gap: 5px; counter-increment: laneidx; }
+  .lane-rail .lane-row::after {
+    content: "L" counter(laneidx, decimal-leading-zero);
+    position: absolute; left: 14px; bottom: 6px;
+    font-family: 'JetBrains Mono', monospace; font-size: 9px;
+    color: var(--fg-muted); letter-spacing: 0.1em;
+    pointer-events: none; user-select: none;
+  }
   .lane-rail .lane-row:last-child { border-bottom: 0; }
   .lane-rail .lane-name { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; }
   .lane-rail .lane-name .swatch { width: 10px; height: 10px; }
@@ -475,6 +610,30 @@ const DL = {
   .minimap-i .mm-stripe { position: absolute; left: 0; right: 0; pointer-events: none; }
   .mm-block { position: absolute; height: 8px; }
   .mm-view { position: absolute; border: 1px solid var(--accent); opacity: .5; pointer-events: none; left: 2%; right: 2%; top: 2px; bottom: 2px; }
+
+  /* Stage status footer (descriptive metadata + ambient sparkline) */
+  .stage-status {
+    display: flex; align-items: center; gap: 18px;
+    padding: 8px 14px; border-top: 1px solid var(--line);
+    background: var(--bg);
+    font-family: 'JetBrains Mono', monospace; font-size: 10.5px;
+    color: var(--fg-muted); letter-spacing: 0.06em;
+    overflow: hidden;
+  }
+  .stage-status .k { color: var(--fg-muted); }
+  .stage-status .v { color: var(--fg); margin-left: 6px; }
+  .stage-status .v.em { color: var(--accent); }
+  .stage-status .sp { flex: 1; }
+  .stage-status .chart {
+    display: inline-flex; align-items: flex-end; gap: 1px; height: 14px;
+    flex-shrink: 0;
+  }
+  .stage-status .chart span { display: inline-block; width: 2px; background: var(--fg-muted); }
+  .stage-status .chart .hi { background: var(--accent); }
+  @media (max-width: 720px) {
+    .stage-status { gap: 10px; font-size: 10px; flex-wrap: wrap; }
+    .stage-status .chart { display: none; }
+  }
 
 
   #tweaks { position: fixed; right: 20px; bottom: 20px; z-index: 100; display: none; background: var(--bg); border: 1px solid var(--line-2); width: 240px; }

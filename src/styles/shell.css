@@ -40,6 +40,27 @@ body::before {
   background-size:24px 24px; opacity:.35;
 }
 [data-theme="light"] body::before { opacity:.55; }
+/* Side rails — opencode-style vertical guides framing the content.
+   Sit above section bodies (z-index:40) but below topbar/dropdowns (50+).
+   --rail-x is the inset from each viewport edge: pinned to the content
+   max-width edge, but never closer than 20px to the screen edge. */
+body { --rail-x: max(20px, calc(50% - 680px)); }
+body::after {
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:40;
+  background:
+    linear-gradient(to right,
+      transparent var(--rail-x),
+      var(--line) var(--rail-x),
+      var(--line) calc(var(--rail-x) + 1px),
+      transparent calc(var(--rail-x) + 1px)),
+    linear-gradient(to left,
+      transparent var(--rail-x),
+      var(--line) var(--rail-x),
+      var(--line) calc(var(--rail-x) + 1px),
+      transparent calc(var(--rail-x) + 1px));
+  background-repeat:no-repeat;
+}
+@media (max-width: 720px) { body::after { display:none; } }
 main,header,footer { position:relative; z-index:1; }
 
 /* ───── TOP BAR (shared, horizontally centered) ───── */
@@ -127,6 +148,28 @@ main,header,footer { position:relative; z-index:1; }
 
 /* ───── FOOTER (shared, horizontally centered) ───── */
 footer { border-top:1px solid var(--line); background:var(--bg); }
+.foot-mark-wrap {
+  max-width:var(--shell-max); margin:0 auto;
+  padding:56px 40px 0; overflow:hidden;
+  border-bottom:1px solid var(--line);
+}
+.foot-mark {
+  font-family:'Space Grotesk',sans-serif;
+  font-size:clamp(96px,17vw,240px);
+  line-height:.82; letter-spacing:-.06em; font-weight:600;
+  margin:0 0 -8px;
+  color:transparent;
+  -webkit-text-stroke:1.5px color-mix(in srgb, var(--fg-muted) 75%, transparent);
+  text-rendering:geometricPrecision;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  transform:translateZ(0);
+  user-select:none;
+}
+[data-theme="light"] .foot-mark {
+  -webkit-text-stroke:1.5px color-mix(in srgb, var(--fg-muted) 60%, transparent);
+}
+.foot-mark .dot { color:var(--accent); -webkit-text-stroke:0; }
 .foot-inner { max-width:var(--shell-max); margin:0 auto; }
 .foot {
   display:grid; grid-template-columns:minmax(0,2fr) auto auto auto auto;
@@ -157,4 +200,5 @@ footer { border-top:1px solid var(--line); background:var(--bg); }
   .page-head { padding:40px 24px 24px; }
   .foot { grid-template-columns:1fr 1fr; gap:24px; padding:28px 24px; }
   .foot-base { padding:16px 24px; }
+  .foot-mark-wrap { padding:36px 24px 0; }
 }
