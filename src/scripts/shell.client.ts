@@ -57,7 +57,7 @@ function applyLang(): void {
 }
 
 function apply(): void {
-  document.body.dataset.theme = TWEAKS.theme;
+  document.documentElement.dataset.theme = TWEAKS.theme;
   document.querySelectorAll<HTMLElement>('#lang .opt').forEach((b) => {
     b.classList.toggle('active', b.dataset.v === TWEAKS.lang);
   });

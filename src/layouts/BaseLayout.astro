@@ -34,8 +34,19 @@ const cfgJson = JSON.stringify({
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href={FONTS_URL}>
   <script type="application/json" id="tagma-cfg" set:html={cfgJson} />
+  <script is:inline>
+    // Apply saved theme before first paint to avoid FOUC (dark → light flash).
+    // Must run synchronously in <head> — module scripts are deferred and paint first.
+    try {
+      var saved = JSON.parse(localStorage.getItem('tagma_tweaks') || '{}');
+      var theme = saved.theme === 'light' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', theme);
+    } catch (e) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    }
+  </script>
 </head>
-<body data-theme="dark">
+<body>
   <header class="topbar"><Header currentPath={currentPath} /></header>
 
   <slot />
