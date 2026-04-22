@@ -3,8 +3,8 @@
   "channel": "alpha",
   "dist": {
     "url": "https://github.com/GoTagma/tagma-mono/releases/download/desktop-v0.1.38/editor-dist-0.1.38.tar.gz",
-    "sha256": "a2728f2198b32a54b7ad72c7a980b135f96ea217923c656be4b58f113149b501",
-    "size": 285043
+    "sha256": "2deea9585e09b331cd4df5361431c53a7a1742cde9de8f07a705a97e73c9a262",
+    "size": 285481
   },
   "releaseNotesUrl": "https://github.com/GoTagma/tagma-mono/releases/tag/desktop-v0.1.38"
 }
