@@ -1,50 +1,49 @@
 {
-  "version": "0.2.2",
+  "version": "0.3.0",
   "channel": "alpha",
-  "minShellVersion": "0.2.2",
   "dist": {
-    "url": "https://github.com/GoTagma/tagma-mono/releases/download/desktop-v0.2.2/editor-dist-0.2.2.tar.gz",
-    "sha256": "74e2009ae8ddbd96c11f462230d3794be0f78b0fcc13759b51127d8620d0f5e8",
-    "size": 287293
+    "url": "https://github.com/GoTagma/tagma-mono/releases/download/desktop-v0.3.0/editor-dist-0.3.0.tar.gz",
+    "sha256": "5f65a01727854dc16e13e88ec1c30d48cec197d2ceb4ec7bdc14aabfe0550c2c",
+    "size": 287292
   },
   "sidecar": {
     "targets": [
       {
         "platform": "win32",
         "arch": "x64",
-        "url": "https://github.com/GoTagma/tagma-mono/releases/download/desktop-v0.2.2/tagma-editor-server-0.2.2-win32-x64.exe",
+        "url": "https://github.com/GoTagma/tagma-mono/releases/download/desktop-v0.3.0/tagma-editor-server-0.3.0-win32-x64.exe",
         "sha256": "acdbc6d4fc2d41d1f85b8d2f390a367d28849c9778d19b77056a72aff1a5cdb0",
         "size": 116406784
       },
       {
         "platform": "linux",
         "arch": "x64",
-        "url": "https://github.com/GoTagma/tagma-mono/releases/download/desktop-v0.2.2/tagma-editor-server-0.2.2-linux-x64",
+        "url": "https://github.com/GoTagma/tagma-mono/releases/download/desktop-v0.3.0/tagma-editor-server-0.3.0-linux-x64",
         "sha256": "32ef8218cafe9fe17a8b2469764768d1dd74874d2893f9ea22e8212376e91caf",
         "size": 100114280
       },
       {
         "platform": "linux",
         "arch": "arm64",
-        "url": "https://github.com/GoTagma/tagma-mono/releases/download/desktop-v0.2.2/tagma-editor-server-0.2.2-linux-arm64",
+        "url": "https://github.com/GoTagma/tagma-mono/releases/download/desktop-v0.3.0/tagma-editor-server-0.3.0-linux-arm64",
         "sha256": "9afe0001f13d5b4be9c211588a86a567ab6302f67abf8b2dbc140c32c0a23669",
         "size": 100399113
       },
       {
         "platform": "darwin",
         "arch": "x64",
-        "url": "https://github.com/GoTagma/tagma-mono/releases/download/desktop-v0.2.2/tagma-editor-server-0.2.2-darwin-x64",
+        "url": "https://github.com/GoTagma/tagma-mono/releases/download/desktop-v0.3.0/tagma-editor-server-0.3.0-darwin-x64",
         "sha256": "c729090751dee015201a758eca7d646a9c257622dbe49945413350f045edeb2b",
         "size": 67783232
       },
       {
         "platform": "darwin",
         "arch": "arm64",
-        "url": "https://github.com/GoTagma/tagma-mono/releases/download/desktop-v0.2.2/tagma-editor-server-0.2.2-darwin-arm64",
+        "url": "https://github.com/GoTagma/tagma-mono/releases/download/desktop-v0.3.0/tagma-editor-server-0.3.0-darwin-arm64",
         "sha256": "ed9ad94cbdace4dca9160ed85e1b38facf422ba96bd57dd5d33e783f0f2e92b2",
         "size": 62736928
       }
     ]
   },
-  "releaseNotesUrl": "https://github.com/GoTagma/tagma-mono/releases/tag/desktop-v0.2.2"
+  "releaseNotesUrl": "https://github.com/GoTagma/tagma-mono/releases/tag/desktop-v0.3.0"
 }
