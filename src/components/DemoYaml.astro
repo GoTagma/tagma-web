@@ -1,150 +1,248 @@
 ---
 // src/components/DemoYaml.astro
+// YAML samples mirror the canonical schema used by @tagma/sdk:
+// see tagma-mono/packages/sdk/examples/*.yaml
 import { Code } from 'astro:components';
 
-const parallelReviewYaml = `pipeline:
+const parallelReviewYaml = `# .tagma/review.yaml
+# Parallel reviewers fan in to a consolidation task. Cross-track
+# dependencies use the qualified \`<trackId>.<taskId>\` form.
+pipeline:
   name: pr-review
-  driver: claude-code
+  timeout: 15m
   plugins:
-    - "@tagma/driver-claude-code"
-    - "@tagma/driver-codex"
+    - '@tagma/driver-claude-code'
+    - '@tagma/driver-codex'
+    - '@tagma/driver-opencode'
+
   tracks:
     - id: security
       name: Security
+      color: '#3b82f6'
+      driver: claude-code
+      model: sonnet
+      permissions: { read: true, write: false, execute: false }
       tasks:
         - id: review
-          prompt: "Review this PR for auth, injection, and secret-handling issues."
+          name: Audit auth + secret handling
+          prompt: 'Review this PR for auth, injection and secret-handling issues.'
 
     - id: performance
       name: Performance
+      color: '#14b8a6'
       driver: codex
+      model: gpt-5-codex
+      permissions: { read: true, write: false, execute: false }
       tasks:
         - id: hotpaths
-          prompt: "Identify perf regressions in the PR diff."
+          name: Flag perf regressions
+          prompt: 'Identify perf regressions in the PR diff.'
 
     - id: style
       name: Style
+      color: '#ec4899'
       driver: opencode
+      model: big-pickle
+      permissions: { read: true, write: false, execute: false }
       tasks:
         - id: idioms
-          prompt: "Flag style and idiom issues."
+          name: Flag style + idiom issues
+          prompt: 'Flag style and idiom issues in the PR diff.'
 
     - id: consolidate
       name: Consolidate
+      color: '#f97316'
+      driver: claude-code
+      model: opus
       tasks:
         - id: summary
-          prompt: "Merge the three reviews into one report."
-          depends_on: [security.review, performance.hotpaths, style.idioms]
+          name: Merge reviewer reports
+          prompt: 'Merge the three reviews into one report. Preserve severity.'
+          depends_on:
+            - security.review
+            - performance.hotpaths
+            - style.idioms
           continue_from: security.review
 `;
 
-const bugTriageYaml = `pipeline:
+const bugTriageYaml = `# .tagma/triage.yaml
+# Single-track triage: reproduce → diagnose → fix → verify.
+# Bare \`depends_on\` names are scoped to the current track.
+pipeline:
   name: bug-triage
-  driver: claude-code
+  timeout: 10m
   plugins:
-    - "@tagma/driver-claude-code"
+    - '@tagma/driver-claude-code'
+    - '@tagma/driver-opencode'
+
   tracks:
-    - id: main
+    - id: triage
       name: Triage
+      color: '#22c55e'
+      permissions: { read: true, write: true, execute: true }
+      on_failure: skip_downstream
       tasks:
         - id: repro
-          command: "bun test --bail 1"
+          name: Reproduce the failure
+          command: 'bun test --bail 1'
+          completion:
+            type: exit_code
+            expect: [0, 1]
 
         - id: diagnose
-          prompt: "Look at the failing test output and explain the root cause."
+          name: Locate the root cause
+          driver: claude-code
+          model: sonnet
+          prompt: 'Read the failing test output and explain the root cause.'
           depends_on: [repro]
           continue_from: repro
 
         - id: fix
+          name: Patch the defect
           driver: opencode
-          prompt: "Patch the bug identified in diagnose."
+          model: big-pickle
+          prompt: 'Patch the bug identified in diagnose. Keep the diff tight.'
           permissions: { read: true, write: true, execute: false }
           depends_on: [diagnose]
           continue_from: diagnose
 
         - id: verify
-          command: "bun test"
+          name: Regression check
+          command: 'bun test'
           depends_on: [fix]
-          completion: { type: exit_code, expect: 0 }
+          completion:
+            type: exit_code
+            expect: 0
 `;
 
-const migrationGateYaml = `pipeline:
+const migrationGateYaml = `# .tagma/migration.yaml
+# A write-enabled track gated by a manual approval.
+# The \`trigger: manual\` task pauses the run until a human approves.
+pipeline:
   name: migration
-  driver: claude-code
+  timeout: 30m
   plugins:
-    - "@tagma/driver-claude-code"
-    - "@tagma/driver-codex"
+    - '@tagma/driver-claude-code'
+    - '@tagma/driver-codex'
+  hooks:
+    pipeline_start: 'echo "migration run $(date -u +%FT%TZ)"'
+    pipeline_complete: './scripts/notify-release.sh'
+
   tracks:
     - id: plan
       name: Plan
+      color: '#ec4899'
+      driver: claude-code
+      model: opus
       tasks:
         - id: outline
-          prompt: "Outline the migration steps and rollback plan."
+          name: Outline migration + rollback
+          prompt: 'Outline the migration steps and rollback plan in bullets.'
 
     - id: gate
       name: Approval
+      color: '#64748b'
       tasks:
         - id: approve
-          trigger: { type: manual }
+          name: Human approval gate
           depends_on: [plan.outline]
+          trigger:
+            type: manual
+            message: 'Apply this migration to production?'
+            timeout: 10m
+            metadata:
+              stage: pre-apply
+              requester: release-bot
 
     - id: apply
       name: Apply
+      color: '#f97316'
       driver: codex
+      model: gpt-5-codex
       permissions: { read: true, write: true, execute: true }
       tasks:
         - id: run
-          prompt: "Apply the migration from plan.outline."
+          name: Apply the migration
+          prompt: 'Apply the migration from plan.outline. Stop on any non-zero exit.'
           depends_on: [gate.approve]
           continue_from: plan.outline
 
         - id: verify
-          command: "./scripts/migrate-verify.sh"
+          name: Rollback smoke test
+          command: './scripts/migrate-verify.sh'
           depends_on: [run]
-          completion: { type: exit_code, expect: 0 }
+          completion:
+            type: exit_code
+            expect: 0
 `;
 
-const smokeTestYaml = `pipeline:
+const smokeTestYaml = `# .tagma/test-pipeline.yaml
+# Full-feature smoke test: three tracks in parallel, a file trigger
+# synchronizes Ops → Backend, and Review fans in at the end.
+pipeline:
   name: full-feature-smoke-test
-  driver: opencode
+  timeout: 5m
+  plugins:
+    - '@tagma/driver-opencode'
+    - '@tagma/driver-claude-code'
+
   tracks:
     - id: backend
       name: Backend
+      color: '#3b82f6'
+      driver: opencode
+      model: big-pickle
+      permissions: { read: true, write: true, execute: false }
       tasks:
         - id: plan
-          prompt: "Plan the /health endpoint change."
+          name: Plan the /health change
+          prompt: 'Plan the /health endpoint change in three bullets.'
         - id: implement
-          prompt: "Implement /health."
+          name: Implement /health
+          prompt: 'Implement /health. Return 200 with a JSON body.'
           depends_on: [plan]
           continue_from: plan
         - id: review
-          prompt: "Self-review the diff."
+          name: Self-review the diff
+          prompt: 'Self-review the diff. Flag anything risky for the reviewer.'
           depends_on: [implement]
           continue_from: implement
 
     - id: ops
       name: Ops
+      color: '#22c55e'
+      permissions: { read: true, write: true, execute: true }
       tasks:
         - id: prep
-          command: "mkdir -p .signals"
+          name: Prepare signal dir
+          command: 'mkdir -p ./.signals'
         - id: wait
-          command: "while [ ! -f .signals/done ]; do sleep 0.1; done"
+          name: Wait for backend signal
           depends_on: [prep]
+          trigger:
+            type: file
+            path: ./.signals/done
+            timeout: 2m
 
     - id: review
       name: Review
+      color: '#ec4899'
       driver: claude-code
+      model: opus
       tasks:
         - id: summarize
-          prompt: "Summarize the backend run for the release notes."
-          depends_on: [backend.review, ops.wait]
+          name: Summarize for release notes
+          prompt: 'Summarize the backend run for the release notes.'
+          depends_on:
+            - backend.review
+            - ops.wait
           continue_from: backend.review
 `;
 
 const samples = [
-  { id: 'parallel-review', file: '.tagma/review.yaml',    code: parallelReviewYaml },
-  { id: 'bug-triage',      file: '.tagma/triage.yaml',    code: bugTriageYaml },
-  { id: 'migration-gate',  file: '.tagma/migration.yaml', code: migrationGateYaml },
+  { id: 'parallel-review', file: '.tagma/review.yaml',        code: parallelReviewYaml },
+  { id: 'bug-triage',      file: '.tagma/triage.yaml',        code: bugTriageYaml },
+  { id: 'migration-gate',  file: '.tagma/migration.yaml',     code: migrationGateYaml },
   { id: 'smoke-test',      file: '.tagma/test-pipeline.yaml', code: smokeTestYaml },
 ];
 ---

@@ -4,8 +4,21 @@ import type { Sample, Task, Lane, Frame, Edge } from './types';
 export interface ReplayRoots {
   canvas: HTMLElement;      // .canvas
   rail: HTMLElement;        // .lane-rail
-  field: HTMLElement;       // .lane-field (contains tasks + strips + svg)
-  wires: SVGSVGElement;     // #wires
+  field: HTMLElement;       // .lane-field — outer, clips, hosts lane strips, captures pan
+  content: HTMLElement;     // .field-content — inner, translates for pan, hosts wires + tasks
+  wires: SVGSVGElement;     // #wires (child of content)
+  minimap?: HTMLElement;    // .minimap-i (optional — per-sample minimap contents)
+}
+
+// Horizontal pan margin — each side of the "world" extends this fraction of
+// the field width beyond the visible viewport. Controls both the maximum pan
+// range and the minimap's task-strip inset.
+const PAN_MARGIN = 0.25;
+
+export interface MountOptions {
+  onStateChange?: (running: boolean) => void;
+  startFrame?: number;    // resume from this frame (default 0)
+  autoStart?: boolean;    // start autoplaying after mount (default true)
 }
 
 export interface Controller {
@@ -15,6 +28,8 @@ export interface Controller {
   reset(): void;
   destroy(): void;
   approve(): void;
+  isRunning(): boolean;
+  getFrameIdx(): number;
 }
 
 type Lang = 'en' | 'zh';
@@ -24,6 +39,21 @@ function currentLang(): Lang {
   return w.TAGMA_SHELL?.get().lang ?? 'en';
 }
 
+// Map lane/task color tokens to CSS variables. `orange` and `muted` are
+// aliases that don't have a `--orange` / `--muted` var defined, so render
+// them from the right token instead of letting them fall through to black.
+const COLOR_VAR: Record<string, string> = {
+  teal:   'var(--teal)',
+  green:  'var(--green)',
+  orange: 'var(--accent)',
+  pink:   'var(--pink)',
+  blue:   'var(--blue)',
+  muted:  'var(--fg-muted)',
+};
+function colorVar(name: string): string {
+  return COLOR_VAR[name] ?? 'var(--fg-muted)';
+}
+
 function createLaneRail(rail: HTMLElement, lanes: Lane[], lang: Lang) {
   rail.innerHTML = '';
   lanes.forEach((lane, idx) => {
@@ -31,7 +61,7 @@ function createLaneRail(rail: HTMLElement, lanes: Lane[], lang: Lang) {
     row.className = 'lane-row';
     row.dataset.lane = String(idx);
     row.innerHTML = `
-      <div class="lane-name"><span class="swatch" style="background:var(--${lane.color})"></span><span class="lane-label">${lane.name[lang]}</span></div>
+      <div class="lane-name"><span class="swatch" style="background:${colorVar(lane.color)}"></span><span class="lane-label">${lane.name[lang]}</span></div>
       <div class="lane-meta">${lane.driver}</div>
       <div class="lane-meta lane-status" data-lane="${idx}"></div>
       <span class="cnt"></span>
@@ -50,8 +80,8 @@ function createStrips(field: HTMLElement, laneCount: number) {
   }
 }
 
-function createTasks(field: HTMLElement, tasks: Task[], lang: Lang, interactiveTaskId: string | null) {
-  field.querySelectorAll('.task').forEach((n) => n.remove());
+function createTasks(content: HTMLElement, tasks: Task[], lang: Lang, interactiveTaskId: string | null) {
+  content.querySelectorAll('.task').forEach((n) => n.remove());
   tasks.forEach((t) => {
     const el = document.createElement('div');
     el.className = 'task';
@@ -70,13 +100,13 @@ function createTasks(field: HTMLElement, tasks: Task[], lang: Lang, interactiveT
       <div class="t1"><span class="glyph">${t.glyph}</span><span class="title">${t.title[lang]}</span><span class="status"></span>${approveHtml}</div>
       <div class="t2"><span class="driver">${t.driverLine}</span><span class="chips">${chipsHtml}</span></div>
     `;
-    field.appendChild(el);
+    content.appendChild(el);
   });
 }
 
-function positionTasks(field: HTMLElement, tasks: Task[], laneCount: number) {
-  const fieldW = field.clientWidth;
-  const fieldH = field.clientHeight;
+function positionTasks(content: HTMLElement, tasks: Task[], laneCount: number) {
+  const fieldW = content.clientWidth;
+  const fieldH = content.clientHeight;
   const pad = 18;
   const cols = 4;
   const gap = 12;
@@ -84,7 +114,7 @@ function positionTasks(field: HTMLElement, tasks: Task[], laneCount: number) {
   const colStep = taskW + gap;
   const laneH = fieldH / laneCount;
   tasks.forEach((t) => {
-    const el = field.querySelector<HTMLElement>(`[data-id="${t.id}"]`);
+    const el = content.querySelector<HTMLElement>(`[data-id="${t.id}"]`);
     if (!el) return;
     el.style.width = taskW + 'px';
     const h = el.offsetHeight || 56;
@@ -95,32 +125,97 @@ function positionTasks(field: HTMLElement, tasks: Task[], laneCount: number) {
   });
 }
 
+// Cubic bezier wire, mirroring apps/editor BoardCanvas.stepPath(): a smooth
+// horizontal-handle curve that tightens when start/end are close.
+function bezierPath(ax: number, ay: number, bx: number, by: number): string {
+  const c = Math.max(40, Math.abs(bx - ax) * 0.5);
+  return `M ${ax} ${ay} C ${ax + c} ${ay}, ${bx - c} ${by}, ${bx} ${by}`;
+}
+
 function drawWires(roots: ReplayRoots, edges: Edge[]) {
-  const { wires, field } = roots;
-  wires.setAttribute('width', String(field.clientWidth));
-  wires.setAttribute('height', String(field.clientHeight));
+  const { wires, content } = roots;
+  wires.setAttribute('width', String(content.clientWidth));
+  wires.setAttribute('height', String(content.clientHeight));
   wires.innerHTML = '';
   const ns = 'http://www.w3.org/2000/svg';
   edges.forEach(([a, b, state]) => {
-    const A = field.querySelector<HTMLElement>(`[data-id="${a}"]`);
-    const B = field.querySelector<HTMLElement>(`[data-id="${b}"]`);
+    const A = content.querySelector<HTMLElement>(`[data-id="${a}"]`);
+    const B = content.querySelector<HTMLElement>(`[data-id="${b}"]`);
     if (!A || !B) return;
     const ax = A.offsetLeft + A.offsetWidth;
     const ay = A.offsetTop + A.offsetHeight / 2;
     const bx = B.offsetLeft;
     const by = B.offsetTop + B.offsetHeight / 2;
-    let d: string;
-    if (Math.abs(ay - by) < 4) d = `M ${ax} ${ay} L ${bx} ${by}`;
-    else {
-      const entry = 18;
-      const mid = Math.max(ax + 16, bx - entry);
-      d = `M ${ax} ${ay} L ${mid} ${ay} L ${mid} ${by} L ${bx} ${by}`;
-    }
     const p = document.createElementNS(ns, 'path');
-    p.setAttribute('d', d);
+    p.setAttribute('d', bezierPath(ax, ay, bx, by));
     p.setAttribute('class', state);
     wires.appendChild(p);
   });
+}
+
+function renderMinimap(mm: HTMLElement, sample: Sample) {
+  mm.innerHTML = '';
+  const laneCount = sample.lanes.length;
+  for (let i = 1; i < laneCount; i++) {
+    const line = document.createElement('div');
+    line.className = 'mm-lane';
+    line.style.top = `${(i / laneCount) * 100}%`;
+    mm.appendChild(line);
+  }
+  // inner track stripes: subtle tint per lane color so a 3-lane and
+  // 4-lane pipeline look visibly different in the minimap.
+  sample.lanes.forEach((lane, i) => {
+    const stripe = document.createElement('div');
+    stripe.className = 'mm-stripe';
+    stripe.style.top = `${(i / laneCount) * 100}%`;
+    stripe.style.height = `${(1 / laneCount) * 100}%`;
+    stripe.style.background = `color-mix(in srgb, ${colorVar(lane.color)} 10%, transparent)`;
+    mm.appendChild(stripe);
+  });
+  // one placeholder per task — concrete position set by updateMinimapPositions.
+  sample.tasks.forEach((t) => {
+    const b = document.createElement('div');
+    b.className = 'mm-block';
+    b.dataset.id = t.id;
+    b.style.background = colorVar(t.color);
+    mm.appendChild(b);
+  });
+  const view = document.createElement('div');
+  view.className = 'mm-view';
+  mm.appendChild(view);
+}
+
+// Drive minimap block positions from the real DOM positions of the tasks, and
+// paint the viewport rectangle from the current pan offset. The "world" is a
+// virtual strip `1 + 2*PAN_MARGIN` times the field width, so pan range stays
+// a visible subset of the minimap.
+const WORLD_RATIO = 1 + 2 * PAN_MARGIN;
+function updateMinimapPositions(mm: HTMLElement, content: HTMLElement, panX: number) {
+  const fw = content.clientWidth;
+  const fh = content.clientHeight;
+  if (fw === 0 || fh === 0) return;
+  mm.querySelectorAll<HTMLElement>('.mm-block').forEach((b) => {
+    const id = b.dataset.id;
+    if (!id) return;
+    const task = content.querySelector<HTMLElement>(`[data-id="${id}"]`);
+    if (!task) return;
+    const xf = (task.offsetLeft / fw + PAN_MARGIN) / WORLD_RATIO;
+    const wf = (task.offsetWidth / fw) / WORLD_RATIO;
+    b.style.left = `${xf * 100}%`;
+    b.style.width = `${wf * 100}%`;
+    b.style.top = `${(task.offsetTop / fh) * 100}%`;
+    b.style.height = `${Math.max(4, (task.offsetHeight / fh) * 100)}%`;
+  });
+  const view = mm.querySelector<HTMLElement>('.mm-view');
+  if (view) {
+    const vwf = 1 / WORLD_RATIO;
+    const vxf = Math.max(0, Math.min(1 - vwf, (PAN_MARGIN - panX / fw) / WORLD_RATIO));
+    view.style.left = `${vxf * 100}%`;
+    view.style.width = `${vwf * 100}%`;
+    view.style.right = 'auto';
+    view.style.top = '0';
+    view.style.bottom = '0';
+  }
 }
 
 const LANE_PLURAL = { en: (n: number) => `${n} ${n === 1 ? 'task' : 'tasks'}`, zh: (n: number) => `${n} 个任务` };
@@ -161,7 +256,7 @@ function updateLaneStatuses(roots: ReplayRoots, sample: Sample, frame: Frame, la
 
 function applyFrame(roots: ReplayRoots, sample: Sample, frame: Frame, lang: Lang) {
   sample.tasks.forEach((t) => {
-    const el = roots.field.querySelector<HTMLElement>(`[data-id="${t.id}"]`);
+    const el = roots.content.querySelector<HTMLElement>(`[data-id="${t.id}"]`);
     if (!el) return;
     el.classList.remove('running', 'queued', 'blocked');
     const state = frame.tasks[t.id] ?? 'queued';
@@ -184,21 +279,35 @@ function applyFrame(roots: ReplayRoots, sample: Sample, frame: Frame, lang: Lang
   drawWires(roots, frame.edges);
 }
 
-export function mount(roots: ReplayRoots, sample: Sample): Controller {
+export function mount(roots: ReplayRoots, sample: Sample, opts: MountOptions = {}): Controller {
   const lang = currentLang();
   const interactiveTaskId = sample.interactive?.taskId ?? null;
+  const startFrame = Math.min(Math.max(0, opts.startFrame ?? 0), sample.frames.length - 1);
+  let panX = 0;
+  roots.content.style.transform = 'translateX(0px)';
   createLaneRail(roots.rail, sample.lanes, lang);
   createStrips(roots.field, sample.lanes.length);
-  createTasks(roots.field, sample.tasks, lang, interactiveTaskId);
-  positionTasks(roots.field, sample.tasks, sample.lanes.length);
-  applyFrame(roots, sample, sample.frames[0], lang);
+  createTasks(roots.content, sample.tasks, lang, interactiveTaskId);
+  positionTasks(roots.content, sample.tasks, sample.lanes.length);
+  applyFrame(roots, sample, sample.frames[startFrame], lang);
+  if (roots.minimap) {
+    renderMinimap(roots.minimap, sample);
+    updateMinimapPositions(roots.minimap, roots.content, panX);
+  }
 
-  let frameIdx = 0;
+  let frameIdx = startFrame;
   let timer: ReturnType<typeof setTimeout> | null = null;
   let countdownTimer: ReturnType<typeof setInterval> | null = null;
   let destroyed = false;
+  let running = false;
   const intervalMs = sample.frameIntervalMs ?? 2600;
   const autoApproveMs = sample.interactive?.autoApproveMs ?? 8000;
+
+  function setRunning(r: boolean, force = false) {
+    if (!force && running === r) return;
+    running = r;
+    opts.onStateChange?.(running);
+  }
 
   function advance() {
     if (destroyed) return;
@@ -210,6 +319,7 @@ export function mount(roots: ReplayRoots, sample: Sample): Controller {
 
   function scheduleNext(current: Frame) {
     clearTimer();
+    setRunning(true);
     if (current.blockUntilApprove) {
       startApproveCountdown();
       return;
@@ -220,12 +330,12 @@ export function mount(roots: ReplayRoots, sample: Sample): Controller {
   function clearTimer() {
     if (timer) { clearTimeout(timer); timer = null; }
     if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
-    const cd = roots.field.querySelector<HTMLElement>('[data-role="approve"] .countdown');
+    const cd = roots.content.querySelector<HTMLElement>('[data-role="approve"] .countdown');
     if (cd) cd.textContent = '';
   }
 
   function startApproveCountdown() {
-    const cd = roots.field.querySelector<HTMLElement>('[data-role="approve"] .countdown');
+    const cd = roots.content.querySelector<HTMLElement>('[data-role="approve"] .countdown');
     let remaining = Math.ceil(autoApproveMs / 1000);
     if (cd) cd.textContent = ` · ${remaining}s`;
     countdownTimer = setInterval(() => {
@@ -240,14 +350,89 @@ export function mount(roots: ReplayRoots, sample: Sample): Controller {
   }
 
   function resize() {
-    positionTasks(roots.field, sample.tasks, sample.lanes.length);
+    positionTasks(roots.content, sample.tasks, sample.lanes.length);
+    clampPan();
     drawWires(roots, sample.frames[frameIdx].edges);
+    if (roots.minimap) updateMinimapPositions(roots.minimap, roots.content, panX);
   }
+
+  function clampPan() {
+    const range = roots.content.clientWidth * PAN_MARGIN;
+    panX = Math.max(-range, Math.min(range, panX));
+    roots.content.style.transform = `translateX(${panX}px)`;
+  }
+
+  // ── Drag ─────────────────────────────────────────────────────────────
+  // Two gestures share the same pointer pipeline:
+  //   • grab a `.task`  → horizontal task-drag (stays in its lane row)
+  //   • grab background → pan the canvas via a translateX on .field-content
+  // Wires + minimap are recomputed on every pointer tick in both modes.
+  type Mode = 'task' | 'pan' | null;
+  let mode: Mode = null;
+  let dragging: HTMLElement | null = null;
+  let dragDx = 0;
+  let panStart = 0;
+  let panStartClientX = 0;
+
+  function onDragStart(e: PointerEvent) {
+    const target = e.target as HTMLElement;
+    if (target.closest('button, [data-role="approve"]')) return;
+    const el = target.closest<HTMLElement>('.task');
+    if (el && roots.content.contains(el)) {
+      mode = 'task';
+      dragging = el;
+      const rect = el.getBoundingClientRect();
+      dragDx = e.clientX - rect.left;
+      el.classList.add('dragging');
+      try { el.setPointerCapture(e.pointerId); } catch { /* ignore */ }
+    } else if (roots.field.contains(target)) {
+      mode = 'pan';
+      panStart = panX;
+      panStartClientX = e.clientX;
+      roots.field.classList.add('panning');
+      try { roots.field.setPointerCapture(e.pointerId); } catch { /* ignore */ }
+    } else {
+      return;
+    }
+    e.preventDefault();
+  }
+  function onDragMove(e: PointerEvent) {
+    if (mode === 'task' && dragging) {
+      // Horizontal-only task drag — never leaves its lane row.
+      const fr = roots.content.getBoundingClientRect();
+      const fw = roots.content.clientWidth;
+      const w = dragging.offsetWidth;
+      let x = e.clientX - fr.left - dragDx;
+      x = Math.max(0, Math.min(fw - w, x));
+      dragging.style.left = `${x}px`;
+      drawWires(roots, sample.frames[frameIdx].edges);
+      if (roots.minimap) updateMinimapPositions(roots.minimap, roots.content, panX);
+    } else if (mode === 'pan') {
+      panX = panStart + (e.clientX - panStartClientX);
+      clampPan();
+      if (roots.minimap) updateMinimapPositions(roots.minimap, roots.content, panX);
+    }
+  }
+  function onDragEnd(e: PointerEvent) {
+    if (mode === 'task' && dragging) {
+      dragging.classList.remove('dragging');
+      try { dragging.releasePointerCapture(e.pointerId); } catch { /* ignore */ }
+      dragging = null;
+    } else if (mode === 'pan') {
+      roots.field.classList.remove('panning');
+      try { roots.field.releasePointerCapture(e.pointerId); } catch { /* ignore */ }
+    }
+    mode = null;
+  }
+  roots.field.addEventListener('pointerdown', onDragStart);
+  roots.field.addEventListener('pointermove', onDragMove);
+  roots.field.addEventListener('pointerup', onDragEnd);
+  roots.field.addEventListener('pointercancel', onDragEnd);
 
   function onApplyLang() {
     const newLang = currentLang();
     sample.tasks.forEach((t) => {
-      const el = roots.field.querySelector<HTMLElement>(`[data-id="${t.id}"] .title`);
+      const el = roots.content.querySelector<HTMLElement>(`[data-id="${t.id}"] .title`);
       if (el) el.textContent = t.title[newLang];
     });
     sample.lanes.forEach((lane, i) => {
@@ -259,11 +444,12 @@ export function mount(roots: ReplayRoots, sample: Sample): Controller {
 
   window.addEventListener('resize', resize);
   document.addEventListener('tagma:apply', onApplyLang);
-  scheduleNext(sample.frames[0]);
+  if (opts.autoStart === false) setRunning(false, true);
+  else scheduleNext(sample.frames[frameIdx]);
 
   return {
     sampleId: sample.id,
-    pause() { clearTimer(); },
+    pause() { clearTimer(); setRunning(false); },
     start() { scheduleNext(sample.frames[frameIdx]); },
     reset() {
       clearTimer();
@@ -274,11 +460,18 @@ export function mount(roots: ReplayRoots, sample: Sample): Controller {
     approve() {
       if (sample.frames[frameIdx].blockUntilApprove) advance();
     },
+    isRunning() { return running; },
+    getFrameIdx() { return frameIdx; },
     destroy() {
       destroyed = true;
       clearTimer();
+      setRunning(false);
       window.removeEventListener('resize', resize);
       document.removeEventListener('tagma:apply', onApplyLang);
+      roots.field.removeEventListener('pointerdown', onDragStart);
+      roots.field.removeEventListener('pointermove', onDragMove);
+      roots.field.removeEventListener('pointerup', onDragEnd);
+      roots.field.removeEventListener('pointercancel', onDragEnd);
     },
   };
 }

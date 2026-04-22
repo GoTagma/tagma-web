@@ -99,32 +99,26 @@ const DL = {
         <span class="pill" data-role="reset">⟲ <span data-i18n="ed.reset">RESET</span></span>
         <span class="pill" data-role="yaml">&lt;/&gt; YAML</span>
         <span class="pill live"><span class="dot"></span>LIVE</span>
-        <span class="pill run" data-role="run">▶ RUN</span>
+        <span class="pill run running" data-role="run">
+          <span class="pill-glyph">■</span>
+          <span class="pill-label" data-i18n="ed.stop">STOP</span>
+        </span>
       </div>
 
       <div class="canvas" id="canvas">
         <div class="lane-rail" id="laneRail"></div>
 
         <div class="lane-field" id="field">
-          <svg id="wires"></svg>
-        </div>
-
-        <div class="minimap">
-          <div class="minimap-h"><span>MINIMAP</span><span style="color:var(--fg-dim)">×</span></div>
-          <div class="minimap-i">
-            <div class="mm-lane" style="top:33.33%;"></div>
-            <div class="mm-lane" style="top:66.66%;"></div>
-            <div class="mm-block" style="left:4%;  top:8px;  width:18%; background:var(--teal);"></div>
-            <div class="mm-block" style="left:24%; top:8px;  width:18%; background:var(--accent);"></div>
-            <div class="mm-block" style="left:44%; top:8px;  width:18%; background:var(--line-2);"></div>
-            <div class="mm-block" style="left:4%;  top:28px; width:18%; background:var(--green);"></div>
-            <div class="mm-block" style="left:24%; top:28px; width:18%; background:var(--green);"></div>
-            <div class="mm-block" style="left:70%; top:48px; width:18%; background:var(--pink); opacity:.7;"></div>
-            <div class="mm-view"></div>
+          <div class="field-content" id="fieldContent">
+            <svg id="wires"></svg>
           </div>
         </div>
 
-        <div class="zoom"><span>−</span><b>150%</b><span>+</span></div>
+        <div class="minimap">
+          <div class="minimap-h"><span>MINIMAP</span><span class="mm-label" id="minimapLabel"></span></div>
+          <div class="minimap-i" id="minimapInner"></div>
+        </div>
+
       </div>
       <DemoYaml />
     </div>
@@ -254,7 +248,7 @@ const DL = {
   .hero-meta b { color: var(--fg); font-weight: 500; }
   .hero-meta .pipe { color: var(--line-2); user-select: none; }
 
-  .topbar, .stage-chrome, .lane-rail, .minimap, .zoom, .pill, .status, .eyebrow,
+  .topbar, .stage-chrome, .lane-rail, .minimap, .pill, .status, .eyebrow,
   .hero-meta, .dl-group .os, .docs-link, .chips, .glyph,
   .foot-base, #tweaks, .seg button { user-select: none; -webkit-user-select: none; }
 
@@ -392,8 +386,15 @@ const DL = {
   .stage-chrome .pill.live { color: var(--green); border-color: color-mix(in srgb, var(--green) 35%, var(--line-2)); }
   .stage-chrome .pill.live .dot { width: 6px; height: 6px; background: var(--green); border-radius: 50%; box-shadow: 0 0 8px var(--green); animation: pulse 1.6s ease-in-out infinite; }
   @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
-  .stage-chrome .pill.run { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+  .stage-chrome .pill.run { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; min-width: 62px; justify-content: center; }
   [data-theme="light"] .stage-chrome .pill.run { color: #fff; }
+  .stage-chrome .pill.run:not(.running) {
+    background: transparent; color: var(--fg-dim);
+    border-color: var(--line-2); font-weight: 500;
+  }
+  [data-theme="light"] .stage-chrome .pill.run:not(.running) { color: var(--fg-dim); }
+  .stage-chrome .pill.run:not(.running):hover { color: var(--accent); border-color: var(--accent); }
+  .stage-chrome .pill.run .pill-glyph { font-size: 9px; line-height: 1; }
 
   .canvas { position: relative; height: 420px; background-image: radial-gradient(circle, var(--line-2) 1px, transparent 1px); background-size: 22px 22px; background-color: var(--bg-1); overflow: hidden; }
   .lane-rail { position: absolute; left: 0; top: 0; bottom: 0; width: 152px; background: var(--bg); border-right: 1px solid var(--line); display: flex; flex-direction: column; }
@@ -404,7 +405,9 @@ const DL = {
   .lane-rail .lane-meta { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--fg-muted); letter-spacing: 0.04em; font-variant-numeric: tabular-nums; }
   .lane-rail .cnt { position: absolute; right: 12px; top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--fg-muted); font-variant-numeric: tabular-nums; }
 
-  .lane-field { position: absolute; left: 152px; right: 0; top: 0; bottom: 0; }
+  .lane-field { position: absolute; left: 152px; right: 0; top: 0; bottom: 0; overflow: hidden; cursor: grab; }
+  .lane-field.panning { cursor: grabbing; }
+  .field-content { position: absolute; inset: 0; will-change: transform; }
   .lane-strip { position: absolute; left: 0; right: 0; border-bottom: 1px solid var(--line); }
 
   .task {
@@ -415,8 +418,16 @@ const DL = {
     padding: 8px 10px 10px;
     display: flex; flex-direction: column; gap: 4px;
     z-index: 2;
-    transition: border-color .25s, box-shadow .25s, transform .25s cubic-bezier(.6,.1,.2,1);
+    cursor: grab;
+    touch-action: none;
+    transition: border-color .25s, box-shadow .25s;
   }
+  .task.dragging {
+    cursor: grabbing; z-index: 10;
+    box-shadow: 0 10px 24px -10px rgba(0,0,0,.55), 0 0 0 1px var(--accent);
+    transition: none;
+  }
+  .task .approve-btn { cursor: pointer; }
   .task .t1 { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--fg); font-weight: 500; }
   .task .t1 .title { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
   .task .t1 .glyph { font-size: 10px; color: var(--fg-muted); flex-shrink: 0; }
@@ -458,13 +469,13 @@ const DL = {
 
   .minimap { position: absolute; right: 12px; bottom: 12px; width: 210px; height: 96px; background: var(--bg); border: 1px solid var(--line-2); padding: 8px; }
   .minimap-h { display: flex; justify-content: space-between; align-items: center; font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--fg-muted); letter-spacing: 0.1em; margin-bottom: 6px; }
+  .minimap-h .mm-label { color: var(--fg-dim); letter-spacing: 0.06em; }
   .minimap-i { position: relative; height: 64px; background: var(--bg-2); border: 1px solid var(--line); overflow: hidden; }
   .minimap-i .mm-lane { position: absolute; left: 0; right: 0; height: 1px; background: var(--line); }
+  .minimap-i .mm-stripe { position: absolute; left: 0; right: 0; pointer-events: none; }
   .mm-block { position: absolute; height: 8px; }
   .mm-view { position: absolute; border: 1px solid var(--accent); opacity: .5; pointer-events: none; left: 2%; right: 2%; top: 2px; bottom: 2px; }
 
-  .zoom { position: absolute; left: 12px; bottom: 12px; display: flex; gap: 8px; align-items: center; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--fg-muted); }
-  .zoom b { color: var(--fg); }
 
   #tweaks { position: fixed; right: 20px; bottom: 20px; z-index: 100; display: none; background: var(--bg); border: 1px solid var(--line-2); width: 240px; }
   #tweaks.show { display: block; }
@@ -522,18 +533,21 @@ const DL = {
   .approve-btn:hover { background: #ff8a3d; }
   .approve-btn .countdown { font-weight: 400; opacity: .75; }
 
-  .demo-yaml { background: var(--bg-1); }
+  .demo-yaml { background: var(--bg-1); height: 420px; }
   .demo-yaml[hidden] { display: none !important; }
+  .demo-yaml-block { height: 100%; display: flex; flex-direction: column; }
   .demo-yaml-block[hidden] { display: none !important; }
   .demo-yaml-header {
+    flex: none;
     padding: 8px 14px; border-bottom: 1px solid var(--line);
     font-family: 'JetBrains Mono', monospace; font-size: 11px;
     color: var(--fg-dim); background: var(--bg);
   }
-  .demo-yaml-body { max-height: 420px; overflow: auto; padding: 16px 20px; font-size: 12.5px; }
+  .demo-yaml-body { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 16px 20px; font-size: 12.5px; }
   .demo-yaml-body pre { margin: 0; background: transparent !important; }
   .demo-yaml-body code { font-family: 'JetBrains Mono', monospace; }
   .canvas[hidden] { display: none !important; }
+  @media (max-width: 960px) { .demo-yaml { height: 360px; } }
 </style>
 
 <script>
@@ -671,12 +685,40 @@ const DL = {
     const canvas = document.getElementById('canvas');
     const rail = document.getElementById('laneRail');
     const field = document.getElementById('field');
+    const content = document.getElementById('fieldContent');
     const wires = document.getElementById('wires') as unknown as SVGSVGElement | null;
-    if (!canvas || !rail || !field || !wires) return null;
-    return { canvas, rail, field, wires };
+    const minimap = document.getElementById('minimapInner');
+    if (!canvas || !rail || !field || !content || !wires) return null;
+    return { canvas, rail, field, content, wires, minimap: minimap ?? undefined };
   }
 
   let currentCtrl: Controller | null = null;
+  // Remember per-sample playback state so switching tabs doesn't restart.
+  const sampleState = new Map<string, { frameIdx: number; running: boolean }>();
+
+  function setRunPill(running: boolean) {
+    const pill = document.querySelector<HTMLElement>('.stage-chrome .pill[data-role="run"]');
+    if (!pill) return;
+    pill.classList.toggle('running', running);
+    const glyph = pill.querySelector<HTMLElement>('.pill-glyph');
+    const label = pill.querySelector<HTMLElement>('.pill-label');
+    const lang = window.TAGMA_SHELL?.get().lang ?? 'en';
+    if (glyph) glyph.textContent = running ? '■' : '▶';
+    if (label) {
+      label.dataset.i18n = running ? 'ed.stop' : 'ed.run';
+      label.textContent = running
+        ? (lang === 'zh' ? '停止' : 'STOP')
+        : (lang === 'zh' ? '运行' : 'RUN');
+    }
+  }
+
+  function setMinimapLabel(sampleId: string) {
+    const label = document.getElementById('minimapLabel');
+    if (!label) return;
+    const sample = SAMPLES.find((s) => s.id === sampleId);
+    if (!sample) { label.textContent = ''; return; }
+    label.textContent = `${sample.lanes.length}×${sample.tasks.length}`;
+  }
 
   function renderTabs(activeId: string) {
     const host = document.getElementById('sampleTabs');
@@ -698,9 +740,21 @@ const DL = {
     const roots = demoRoots();
     if (!roots) return;
     const sample = SAMPLES.find((s) => s.id === id) ?? SAMPLES[0];
-    if (currentCtrl) currentCtrl.destroy();
-    currentCtrl = mount(roots, sample);
+    if (currentCtrl) {
+      sampleState.set(currentCtrl.sampleId, {
+        frameIdx: currentCtrl.getFrameIdx(),
+        running: currentCtrl.isRunning(),
+      });
+      currentCtrl.destroy();
+    }
+    const saved = sampleState.get(sample.id);
+    currentCtrl = mount(roots, sample, {
+      onStateChange: setRunPill,
+      startFrame: saved?.frameIdx ?? 0,
+      autoStart: saved ? saved.running : true,
+    });
     renderTabs(sample.id);
+    setMinimapLabel(sample.id);
     applyYamlView(sample.id);
   }
 
@@ -728,8 +782,18 @@ const DL = {
     const pill = (e.target as HTMLElement).closest<HTMLElement>('.pill[data-role]');
     if (!pill || !currentCtrl) return;
     const role = pill.dataset.role;
-    if (role === 'run') currentCtrl.reset();
-    else if (role === 'reset') { currentCtrl.reset(); currentCtrl.pause(); }
+    if (role === 'run') {
+      if (currentCtrl.isRunning()) {
+        // Stop → rewind to frame 0 and stay paused.
+        currentCtrl.reset();
+        currentCtrl.pause();
+      } else {
+        currentCtrl.start();
+      }
+    } else if (role === 'reset') {
+      currentCtrl.reset();
+      currentCtrl.pause();
+    }
   });
 
   let yamlOpen = false;
