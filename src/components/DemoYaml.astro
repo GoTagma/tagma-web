@@ -1,19 +1,30 @@
 ---
 // src/components/DemoYaml.astro
-// YAML samples mirror the canonical schema used by @tagma/sdk:
-// see tagma-mono/packages/sdk/examples/*.yaml
+// YAML samples mirror the canonical schema used by @tagma/sdk. Source of truth:
+//   tagma-mono/packages/sdk/src/schema.ts
+//   tagma-mono/packages/sdk/examples/*.yaml
+//
+// Built-in at the SDK level (no plugin required):
+//   - driver:      opencode
+//   - triggers:    manual, file
+//   - completions: exit_code, output_check, file_exists
+//   - middleware:  static_context
+// External plugins that MUST be declared under `plugins:` when used:
+//   - '@tagma/driver-claude-code'   (models: opus, sonnet, haiku, …)
+//   - '@tagma/driver-codex'         (models: gpt-5.3-codex, …; accepts reasoning_effort)
 import { Code } from 'astro:components';
 
 const parallelReviewYaml = `# .tagma/review.yaml
-# Parallel reviewers fan in to a consolidation task. Cross-track
-# dependencies use the qualified \`<trackId>.<taskId>\` form.
+# Four reviewers run in parallel, then one task fans them in to a single
+# report. Cross-track dependencies use the qualified \`<trackId>.<taskId>\`
+# form. opencode is an SDK built-in, so only claude-code + codex need to
+# be registered under \`plugins\`.
 pipeline:
   name: pr-review
   timeout: 15m
   plugins:
     - '@tagma/driver-claude-code'
     - '@tagma/driver-codex'
-    - '@tagma/driver-opencode'
 
   tracks:
     - id: security
@@ -26,12 +37,14 @@ pipeline:
         - id: review
           name: Audit auth + secret handling
           prompt: 'Review this PR for auth, injection and secret-handling issues.'
+          timeout: 5m
 
     - id: performance
       name: Performance
       color: '#14b8a6'
       driver: codex
-      model: gpt-5-codex
+      model: gpt-5.3-codex
+      reasoning_effort: medium
       permissions: { read: true, write: false, execute: false }
       tasks:
         - id: hotpaths
@@ -42,7 +55,7 @@ pipeline:
       name: Style
       color: '#ec4899'
       driver: opencode
-      model: big-pickle
+      model: opencode/big-pickle
       permissions: { read: true, write: false, execute: false }
       tasks:
         - id: idioms
@@ -66,14 +79,14 @@ pipeline:
 `;
 
 const bugTriageYaml = `# .tagma/triage.yaml
-# Single-track triage: reproduce → diagnose → fix → verify.
-# Bare \`depends_on\` names are scoped to the current track.
+# Single-track triage: reproduce → diagnose → fix → verify. Bare
+# \`depends_on\` names resolve against the current track. \`on_failure:
+# skip_downstream\` is the default; shown here for clarity.
 pipeline:
   name: bug-triage
   timeout: 10m
   plugins:
     - '@tagma/driver-claude-code'
-    - '@tagma/driver-opencode'
 
   tracks:
     - id: triage
@@ -100,7 +113,7 @@ pipeline:
         - id: fix
           name: Patch the defect
           driver: opencode
-          model: big-pickle
+          model: opencode/big-pickle
           prompt: 'Patch the bug identified in diagnose. Keep the diff tight.'
           permissions: { read: true, write: true, execute: false }
           depends_on: [diagnose]
@@ -111,13 +124,15 @@ pipeline:
           command: 'bun test'
           depends_on: [fix]
           completion:
-            type: exit_code
-            expect: 0
+            type: output_check
+            check: 'grep -qE "^(ok|pass)" '
+            timeout: 30s
 `;
 
 const migrationGateYaml = `# .tagma/migration.yaml
-# A write-enabled track gated by a manual approval.
-# The \`trigger: manual\` task pauses the run until a human approves.
+# A write-enabled track is gated by a built-in \`manual\` trigger, so the
+# run pauses until a human approves. Hooks attach to pipeline lifecycle
+# events (see tagma-mono/packages/sdk/src/hooks.ts for the full list).
 pipeline:
   name: migration
   timeout: 30m
@@ -125,7 +140,9 @@ pipeline:
     - '@tagma/driver-claude-code'
     - '@tagma/driver-codex'
   hooks:
-    pipeline_start: 'echo "migration run $(date -u +%FT%TZ)"'
+    pipeline_start: 'echo "[hook] migration run $(date -u +%FT%TZ)"'
+    task_success:
+      - 'echo "[hook] task_success"'
     pipeline_complete: './scripts/notify-release.sh'
 
   tracks:
@@ -141,11 +158,12 @@ pipeline:
 
     - id: gate
       name: Approval
-      color: '#64748b'
+      color: '#94a3b8'
       tasks:
         - id: approve
           name: Human approval gate
           depends_on: [plan.outline]
+          command: 'echo "approved — proceeding"'
           trigger:
             type: manual
             message: 'Apply this migration to production?'
@@ -158,7 +176,8 @@ pipeline:
       name: Apply
       color: '#f97316'
       driver: codex
-      model: gpt-5-codex
+      model: gpt-5.3-codex
+      reasoning_effort: high
       permissions: { read: true, write: true, execute: true }
       tasks:
         - id: run
@@ -177,52 +196,79 @@ pipeline:
 `;
 
 const smokeTestYaml = `# .tagma/test-pipeline.yaml
-# Full-feature smoke test: three tracks in parallel, a file trigger
-# synchronizes Ops → Backend, and Review fans in at the end.
+# End-to-end smoke test covering the full plugin surface. opencode,
+# static_context, file trigger, and exit_code/output_check completions
+# are all SDK built-ins — the only plugin declared here is claude-code
+# for the final summarizer.
 pipeline:
   name: full-feature-smoke-test
-  timeout: 5m
+  driver: opencode
+  model: opencode/big-pickle
+  timeout: 30m
   plugins:
-    - '@tagma/driver-opencode'
     - '@tagma/driver-claude-code'
+  hooks:
+    pipeline_start: 'echo "[hook] pipeline_start"'
+    task_success:
+      - 'echo "[hook] task_success #1"'
+      - 'echo "[hook] task_success #2"'
+    pipeline_complete: 'echo "[hook] pipeline_complete"'
 
   tracks:
     - id: backend
       name: Backend
       color: '#3b82f6'
-      driver: opencode
-      model: big-pickle
+      agent_profile: senior
       permissions: { read: true, write: true, execute: false }
+      on_failure: skip_downstream
+      middlewares:
+        - type: static_context
+          file: ./README.md
+          label: Project Readme
       tasks:
         - id: plan
           name: Plan the /health change
           prompt: 'Plan the /health endpoint change in three bullets.'
+
         - id: implement
           name: Implement /health
-          prompt: 'Implement /health. Return 200 with a JSON body.'
+          prompt: 'Based on the plan, modify the code to implement /health.'
           depends_on: [plan]
           continue_from: plan
+          permissions: { read: true, write: true, execute: true }
+
         - id: review
           name: Self-review the diff
-          prompt: 'Self-review the diff. Flag anything risky for the reviewer.'
+          prompt: 'Self-review the diff. Output a single line starting with PASS or FAIL.'
           depends_on: [implement]
           continue_from: implement
+          middlewares: []
+          completion:
+            type: output_check
+            check: 'grep -q "^PASS"'
+            timeout: 30s
 
     - id: ops
       name: Ops
       color: '#22c55e'
       permissions: { read: true, write: true, execute: true }
+      on_failure: ignore
       tasks:
         - id: prep
           name: Prepare signal dir
-          command: 'mkdir -p ./.signals'
-        - id: wait
-          name: Wait for backend signal
+          command: 'mkdir -p ./.tagma/signal && echo ready > ./.tagma/signal/.ready'
+
+        - id: wait-signal
+          name: Wait for signal file
+          command: 'echo "signal received"'
           depends_on: [prep]
           trigger:
             type: file
-            path: ./.signals/done
-            timeout: 2m
+            path: ./.tagma/signal/.ready
+            timeout: 1m
+          completion:
+            type: exit_code
+            expect: [0]
 
     - id: review
       name: Review
@@ -235,8 +281,11 @@ pipeline:
           prompt: 'Summarize the backend run for the release notes.'
           depends_on:
             - backend.review
-            - ops.wait
+            - ops.wait-signal
           continue_from: backend.review
+          completion:
+            type: exit_code
+            expect: 0
 `;
 
 const samples = [
