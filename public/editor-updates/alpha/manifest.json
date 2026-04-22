@@ -4,8 +4,8 @@
   "minShellVersion": "0.2.2",
   "dist": {
     "url": "https://github.com/GoTagma/tagma-mono/releases/download/desktop-v0.2.2/editor-dist-0.2.2.tar.gz",
-    "sha256": "5bc6ce7ba96f2fafa9e8fd7b1c974c1cb0b0082353d5974749be57a150d6446c",
-    "size": 287290
+    "sha256": "74e2009ae8ddbd96c11f462230d3794be0f78b0fcc13759b51127d8620d0f5e8",
+    "size": 287293
   },
   "sidecar": {
     "targets": [
