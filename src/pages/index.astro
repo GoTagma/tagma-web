@@ -539,10 +539,20 @@ const DL = {
   .demo-yaml-block[hidden] { display: none !important; }
   .demo-yaml-header {
     flex: none;
-    padding: 8px 14px; border-bottom: 1px solid var(--line);
+    display: flex; align-items: center; gap: 12px;
+    padding: 6px 10px 6px 14px; border-bottom: 1px solid var(--line);
     font-family: 'JetBrains Mono', monospace; font-size: 11px;
     color: var(--fg-dim); background: var(--bg);
   }
+  .demo-yaml-header .demo-yaml-file { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .demo-yaml-copy {
+    font-family: inherit; font-size: 10px; letter-spacing: 0.1em;
+    color: var(--fg-dim); background: transparent;
+    border: 1px solid var(--line-2); padding: 3px 10px; cursor: pointer;
+    user-select: none;
+    transition: color .12s, border-color .12s;
+  }
+  .demo-yaml-copy:hover { color: var(--accent); border-color: var(--accent); }
   .demo-yaml-body { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 16px 20px; font-size: 12.5px; }
   .demo-yaml-body pre { margin: 0; background: transparent !important; }
   .demo-yaml-body code { font-family: 'JetBrains Mono', monospace; }
@@ -653,7 +663,7 @@ const DL = {
     });
   });
 
-  document.querySelectorAll<HTMLButtonElement>('.way-install .copy').forEach((btn) => {
+  document.querySelectorAll<HTMLButtonElement>('.way-install .copy, .demo-yaml-copy').forEach((btn) => {
     btn.addEventListener('click', async () => {
       const text = btn.dataset.copy ?? '';
       try { await navigator.clipboard.writeText(text); } catch { /* ignore */ }

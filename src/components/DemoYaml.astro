@@ -250,7 +250,10 @@ const samples = [
 <div class="demo-yaml" id="demoYaml" hidden>
   {samples.map((s) => (
     <div class="demo-yaml-block" data-yaml-id={s.id} hidden>
-      <div class="demo-yaml-header">{s.file}</div>
+      <div class="demo-yaml-header">
+        <span class="demo-yaml-file">{s.file}</span>
+        <button class="demo-yaml-copy" type="button" data-copy={s.code}>COPY</button>
+      </div>
       <div class="demo-yaml-body">
         <Code code={s.code} lang="yaml" theme="github-dark" />
       </div>
