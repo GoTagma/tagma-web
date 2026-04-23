@@ -25,6 +25,13 @@ const DL = {
   <main>
 
     <section class="hero" id="download">
+      <div class="hero-track" aria-hidden="true">
+        <div class="track-line"></div>
+        <div class="track-block main"></div>
+        <div class="track-block trail-1"></div>
+        <div class="track-block trail-2"></div>
+        <div class="track-glow"></div>
+      </div>
       <div class="eyebrow reveal">
         <span class="square"></span>
         <span data-i18n="hero.eyebrow">§ TAGMA · DESKTOP EDITOR · v{site.version} {channelUpper}</span>
@@ -271,6 +278,75 @@ const DL = {
   .hero::before { top: 28px; left: 28px; border-right: 0; border-bottom: 0; }
   .hero::after  { top: 28px; right: 28px; border-left: 0; border-bottom: 0; }
   @media (max-width: 960px) { .hero::before, .hero::after { display: none; } }
+
+  .hero-track {
+    position: absolute; inset: 0; pointer-events: none; overflow: hidden;
+    -webkit-mask-image: radial-gradient(ellipse 70% 55% at 50% 60%, black 25%, transparent 75%);
+    mask-image: radial-gradient(ellipse 70% 55% at 50% 60%, black 25%, transparent 75%);
+  }
+  .track-line {
+    position: absolute; left: 0; right: 0; top: 58%;
+    height: 1px;
+    background: linear-gradient(90deg,
+      transparent 0%,
+      color-mix(in srgb, var(--accent) 18%, transparent) 15%,
+      color-mix(in srgb, var(--accent) 18%, transparent) 85%,
+      transparent 100%
+    );
+  }
+  .track-block {
+    position: absolute; width: 14px; height: 14px;
+    top: calc(58% - 6.5px);
+    left: -20px;
+    background: var(--accent);
+    border-radius: 2px;
+    animation: trackMove 7s cubic-bezier(.4, 0, .2, 1) infinite;
+  }
+  .track-block.main {
+    box-shadow:
+      0 0 12px color-mix(in srgb, var(--accent) 70%, transparent),
+      0 0 32px color-mix(in srgb, var(--accent) 40%, transparent),
+      0 0 64px color-mix(in srgb, var(--accent) 20%, transparent);
+    z-index: 2;
+  }
+  .track-block.trail-1 {
+    width: 10px; height: 10px;
+    top: calc(58% - 4.5px);
+    opacity: .45;
+    animation-delay: -.35s;
+    box-shadow: 0 0 8px color-mix(in srgb, var(--accent) 50%, transparent);
+    z-index: 1;
+  }
+  .track-block.trail-2 {
+    width: 7px; height: 7px;
+    top: calc(58% - 3px);
+    opacity: .2;
+    animation-delay: -.65s;
+    box-shadow: 0 0 4px color-mix(in srgb, var(--accent) 40%, transparent);
+    z-index: 0;
+  }
+  .track-glow {
+    position: absolute; left: 0; right: 0; top: calc(58% - 40px);
+    height: 80px;
+    background: radial-gradient(ellipse 120px 30px at 50% 50%, color-mix(in srgb, var(--accent) 12%, transparent) 0%, transparent 70%);
+    animation: trackGlow 7s cubic-bezier(.4, 0, .2, 1) infinite;
+    pointer-events: none;
+  }
+  @keyframes trackMove {
+    0%   { left: -4%; opacity: 0; transform: scale(.6); }
+    8%   { opacity: 1; transform: scale(1); }
+    92%  { opacity: 1; transform: scale(1); }
+    100% { left: 104%; opacity: 0; transform: scale(.6); }
+  }
+  @keyframes trackGlow {
+    0%   { opacity: 0; }
+    8%   { opacity: 1; }
+    92%  { opacity: 1; }
+    100% { opacity: 0; }
+  }
+  @media (max-width: 960px) {
+    .hero-track { display: none; }
+  }
 
   /* ─── SPEC STRIP ─── */
   .spec-strip {
