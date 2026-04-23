@@ -1,6 +1,7 @@
 // Client-side shell runtime. Ported from shell.js.
 // Mounted by BaseLayout.astro on every page.
 import { I18N, type Lang } from '../i18n';
+import { mountAnimations } from './animations';
 
 type Theme = 'dark' | 'light';
 interface Tweaks { theme: Theme; lang: Lang }
@@ -111,3 +112,4 @@ if (document.readyState === 'loading') {
 }
 
 window.TAGMA_SHELL = { persist, get: () => ({ ...TWEAKS }), apply };
+mountAnimations();

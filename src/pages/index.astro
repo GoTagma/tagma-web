@@ -25,23 +25,23 @@ const DL = {
   <main>
 
     <section class="hero" id="download">
-      <div class="eyebrow">
+      <div class="eyebrow reveal">
         <span class="square"></span>
         <span data-i18n="hero.eyebrow">§ TAGMA · DESKTOP EDITOR · v{site.version} {channelUpper}</span>
         <span class="bar"></span>
         <span style="color:var(--fg-dim)" data-i18n="hero.tagline">LOCAL-FIRST · PLUGIN-NATIVE</span>
       </div>
 
-      <h1 data-i18n="hero.h1">
+      <h1 class="reveal reveal-delay-1" data-i18n="hero.h1">
         <span>Every agent</span><br>
         <span class="nowrap">in <span class="accent">formation<span class="dot">.</span></span></span>
       </h1>
 
-      <p class="hero-sub" data-i18n="hero.sub">
+      <p class="hero-sub reveal reveal-delay-2" data-i18n="hero.sub">
         A swim-lane editor for AI orchestration. <b>Task</b> is the atom — <b>prompt</b> or <b>command</b> — driven by the agent CLIs you already run: <b>Claude Code</b>, <b>Codex</b>, <b>OpenCode</b>, and anything you wire up through the SDK.
       </p>
 
-      <div class="hero-meta">
+      <div class="hero-meta reveal reveal-delay-3">
         <span data-i18n="meta.size"><b>~{site.sizeMB} MB</b> · lightweight</span>
         <span class="pipe">│</span>
         <span data-i18n="meta.os"><b>{site.platforms.join(' · ')}</b></span>
@@ -49,7 +49,7 @@ const DL = {
         <span data-i18n="meta.lic"><b>{site.license}</b> core · TypeScript SDK</span>
       </div>
 
-      <div class="hero-cta">
+      <div class="hero-cta reveal reveal-delay-4">
         <div class="dl-group">
           <div class="primary-wrap">
             <a class="primary" href={DL.mac} id="primaryDl">
@@ -92,34 +92,34 @@ const DL = {
     </section>
 
     <section class="spec-strip" aria-hidden="true">
-      <div>
+      <div class="reveal">
         <span class="sk">Lanes</span>
         <span class="sv">∞</span>
         <span class="sn" data-i18n="spec.lanes">Unbounded swim-lanes</span>
       </div>
-      <div>
+      <div class="reveal reveal-delay-1">
         <span class="sk">Drivers</span>
-        <span class="sv">3<span class="unit">+</span></span>
+        <span class="sv"><span data-count-target="3">0</span><span class="unit">+</span></span>
         <span class="sn">Claude · Codex · OpenCode</span>
       </div>
-      <div>
+      <div class="reveal reveal-delay-2">
         <span class="sk">Runtime</span>
         <span class="sv">local<span class="unit">-first</span></span>
         <span class="sn" data-i18n="spec.runtime">No cloud lock-in</span>
       </div>
-      <div>
+      <div class="reveal reveal-delay-3">
         <span class="sk">SDK</span>
         <span class="sv">TS</span>
         <span class="sn">@tagma/sdk · typed</span>
       </div>
-      <div>
+      <div class="reveal reveal-delay-4">
         <span class="sk">Bundle</span>
-        <span class="sv"><span class="em">{site.sizeMB}</span><span class="unit">MB</span></span>
+        <span class="sv"><span class="em" data-count-target="154">0</span><span class="unit">MB</span></span>
         <span class="sn">macOS · Win · Linux</span>
       </div>
     </section>
 
-    <div class="stage-wrap">
+    <div class="stage-wrap reveal">
     <div class="stage-eyebrow eyebrow" aria-hidden="true">
       <span class="square"></span>
       <span><span class="em">§</span> FIG. 01 · DESKTOP EDITOR — SWIM-LANE VIEW</span>
@@ -181,7 +181,7 @@ const DL = {
       </div>
 
       <div class="ways-grid">
-        <div class="way">
+        <div class="way reveal reveal-delay-1">
           <div class="way-head"><span class="num">01</span><span data-i18n="ways.editor.kind">DESKTOP EDITOR</span></div>
           <h3 data-i18n="ways.editor.title">Tagma Editor</h3>
           <p data-i18n="ways.editor.desc">The full swim-lane UI — design, run, replay. The fastest way to see a pipeline working end-to-end.</p>
@@ -195,7 +195,7 @@ const DL = {
           </div>
         </div>
 
-        <div class="way">
+        <div class="way reveal reveal-delay-2">
           <div class="way-head"><span class="num">02</span><span data-i18n="ways.sdk.kind">TYPESCRIPT SDK</span></div>
           <h3>@tagma/sdk</h3>
           <p data-i18n="ways.sdk.desc">Build and run pipelines from your own code. The same runtime the editor uses — just imported as a library.</p>
@@ -210,7 +210,7 @@ const DL = {
           </div>
         </div>
 
-        <div class="way">
+        <div class="way reveal reveal-delay-3">
           <div class="way-head"><span class="num">03</span><span data-i18n="ways.cli.kind">COMMAND LINE</span></div>
           <h3>@tagma/cli</h3>
           <p data-i18n="ways.cli.desc">Run any <code style="font-family:inherit;color:var(--fg)">pipeline.yaml</code> from a shell. Ideal for CI, cron, or gluing agents into existing scripts.</p>
@@ -406,7 +406,7 @@ const DL = {
     .way p { min-height: 0; }
   }
 
-  .hero-cta { margin-top: 36px; display: flex; gap: 14px; flex-wrap: wrap; align-items: stretch; }
+  .hero-cta { margin-top: 36px; display: flex; gap: 14px; flex-wrap: wrap; align-items: stretch; position: relative; z-index: 1; }
   .dl-group { display: inline-flex; align-items: stretch; border: 1px solid var(--line-2); height: 50px; }
   .dl-group .primary {
     background: var(--accent); color: var(--accent-ink);
