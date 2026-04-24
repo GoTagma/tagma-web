@@ -1,23 +1,4 @@
 ---
-/**
- * Header.astro — V2
- *
- * Top bar with Product + Resources mega menus, ⌘K search trigger,
- * Sign in, and Download CTA.
- *
- * Layout uses the existing `.topbar` / `.topbar-inner` grid from shell.css
- * (auto 1fr auto, each cell padded 0 20px). The left cell holds brand +
- * primary nav; the center cell is empty (spacer); the right cell holds
- * search, language, theme, sign-in, and download.
- *
- * Mega menu panels are rendered as siblings of `.topbar-inner` and hang
- * off `top: 100%`. They live INSIDE the same `.topbar` so they inherit
- * the sticky header's stacking context.
- *
- * The ⌘K command palette lives in CommandPalette.astro, mounted globally
- * by BaseLayout.astro. This component just dispatches a custom event
- * when the search button is clicked.
- */
 import { site } from '../site.config';
 
 interface Props { currentPath: string }
@@ -28,13 +9,11 @@ function isActive(href: string): boolean {
   return currentPath === href || currentPath.startsWith(href + '/');
 }
 
-// Flat links shown after the two dropdown triggers.
 const flatNav = [
   { href: '/pricing',  key: 'pricing',  i18n: 'nav.pricing',  label: 'Pricing' },
   { href: '/showcase', key: 'showcase', i18n: 'nav.showcase', label: 'Showcase' },
 ];
 
-// Mega menu: Product — three cards (Editor / SDK / CLI).
 const products = [
   { key: 'editor', num: '01',
     kindI18n: 'nav.mega.kind.desktop', kindLabel: 'DESKTOP',
@@ -62,7 +41,6 @@ const products = [
   },
 ];
 
-// Mega menu: Resources — 2-column list.
 const resources = [
   { key: 'docs',      href: '/docs',      external: false,
     nameI18n: 'nav.res.docs',      name: 'Docs',
@@ -83,10 +61,21 @@ const resources = [
     nameI18n: 'nav.res.community', name: 'Community',
     subI18n:  'nav.res.community.sub', sub: 'Discord · X · discussions' },
 ];
+
+const communityLinks = [
+  { key: 'discord', href: site.community.discord, external: true,
+    name: 'Discord', sub: 'Real-time chat · plugin help',
+    icon: 'M13.5 3.3A12 12 0 0 0 10.4 2.4l-.15.3a10.5 10.5 0 0 1 3 1.3C11.4 3.2 9.4 3 8 3s-3.4.2-5.3 1A10.5 10.5 0 0 1 5.8 2.7l-.2-.3A12 12 0 0 0 2.5 3.3 13 13 0 0 0 .1 12a11.5 11.5 0 0 0 3.5 1.8l.7-1.1a7.5 7.5 0 0 1-1.2-.6l.3-.2a8.6 8.6 0 0 0 9.2 0l.3.2c-.4.2-.8.4-1.2.6l.7 1.1A11.5 11.5 0 0 0 15.9 12a13 13 0 0 0-2.4-8.7ZM5.8 10c-.7 0-1.3-.7-1.3-1.5S5 7 5.8 7c.7 0 1.3.7 1.3 1.5S6.5 10 5.8 10Zm4.4 0c-.7 0-1.3-.7-1.3-1.5S9.5 7 10.2 7c.8 0 1.3.7 1.3 1.5S11 10 10.2 10Z' },
+  { key: 'x',       href: site.community.x,       external: true,
+    name: 'X (Twitter)', sub: 'Release notes · dev logs',
+    icon: 'M9.3 6.8 14.7 .6h-1.3L8.7 6 4.9.6H.5L6.2 8.8.5 15.4h1.3l5-5.8 4 5.8h4.4L9.3 6.8Zm-1.8 2L7 8.2 2.3 1.5H4l3.7 5.4.5.8 4.7 6.8H11.2L7.5 8.9Z' },
+  { key: 'youtube', href: site.community.youtube, external: true,
+    name: 'YouTube', sub: 'Demos · tutorials · walkthroughs',
+    icon: 'M15.5 4.5a2 2 0 0 0-1.4-1.4C12.9 2.8 8 2.8 8 2.8s-4.9 0-6.1.3A2 2 0 0 0 .5 4.5 21 21 0 0 0 .2 8a21 21 0 0 0 .3 3.5 2 2 0 0 0 1.4 1.4c1.2.3 6.1.3 6.1.3s4.9 0 6.1-.3a2 2 0 0 0 1.4-1.4A21 21 0 0 0 15.8 8a21 21 0 0 0-.3-3.5ZM6.4 10.3V5.7L10.4 8l-4 2.3Z' },
+];
 ---
 
 <div class="topbar-inner v2-topbar">
-  {/* ─── LEFT: brand + primary nav ─── */}
   <div class="v2-left">
     <a class="brand" href="/">
       <span class="mark" aria-hidden="true"></span>
@@ -114,45 +103,6 @@ const resources = [
           <span data-i18n="nav.community">Community</span>
           <span class="chev" aria-hidden="true">▾</span>
         </button>
-
-        {/* Compact dropdown anchored to this trigger. */}
-        <div class="v2-drop" data-mega="community" hidden>
-          <div class="v2-drop-head">
-            <span class="sq" aria-hidden="true"></span>
-            <span data-i18n="nav.mega.community.eyebrow">§ COMMUNITY</span>
-            <span class="bar" aria-hidden="true"></span>
-          </div>
-          <a class="v2-drop-row" href={site.community.discord} target="_blank" rel="noopener">
-            <span class="icn" aria-hidden="true">
-              <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M13.5 3.3A12 12 0 0 0 10.4 2.4l-.15.3a10.5 10.5 0 0 1 3 1.3C11.4 3.2 9.4 3 8 3s-3.4.2-5.3 1A10.5 10.5 0 0 1 5.8 2.7l-.2-.3A12 12 0 0 0 2.5 3.3 13 13 0 0 0 .1 12a11.5 11.5 0 0 0 3.5 1.8l.7-1.1a7.5 7.5 0 0 1-1.2-.6l.3-.2a8.6 8.6 0 0 0 9.2 0l.3.2c-.4.2-.8.4-1.2.6l.7 1.1A11.5 11.5 0 0 0 15.9 12a13 13 0 0 0-2.4-8.7ZM5.8 10c-.7 0-1.3-.7-1.3-1.5S5 7 5.8 7c.7 0 1.3.7 1.3 1.5S6.5 10 5.8 10Zm4.4 0c-.7 0-1.3-.7-1.3-1.5S9.5 7 10.2 7c.8 0 1.3.7 1.3 1.5S11 10 10.2 10Z"/></svg>
-            </span>
-            <div>
-              <div class="rn" data-i18n="nav.community.discord">Discord</div>
-              <div class="rs" data-i18n="nav.community.discord.sub">Real-time chat · plugin help</div>
-            </div>
-            <span class="chev-r" aria-hidden="true">↗</span>
-          </a>
-          <a class="v2-drop-row" href={site.community.x} target="_blank" rel="noopener">
-            <span class="icn" aria-hidden="true">
-              <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M9.3 6.8 14.7 .6h-1.3L8.7 6 4.9.6H.5L6.2 8.8.5 15.4h1.3l5-5.8 4 5.8h4.4L9.3 6.8Zm-1.8 2L7 8.2 2.3 1.5H4l3.7 5.4.5.8 4.7 6.8H11.2L7.5 8.9Z"/></svg>
-            </span>
-            <div>
-              <div class="rn" data-i18n="nav.community.x">X (Twitter)</div>
-              <div class="rs" data-i18n="nav.community.x.sub">Release notes · dev logs</div>
-            </div>
-            <span class="chev-r" aria-hidden="true">↗</span>
-          </a>
-          <a class="v2-drop-row" href={site.community.youtube} target="_blank" rel="noopener">
-            <span class="icn" aria-hidden="true">
-              <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M15.5 4.5a2 2 0 0 0-1.4-1.4C12.9 2.8 8 2.8 8 2.8s-4.9 0-6.1.3A2 2 0 0 0 .5 4.5 21 21 0 0 0 .2 8a21 21 0 0 0 .3 3.5 2 2 0 0 0 1.4 1.4c1.2.3 6.1.3 6.1.3s4.9 0 6.1-.3a2 2 0 0 0 1.4-1.4A21 21 0 0 0 15.8 8a21 21 0 0 0-.3-3.5ZM6.4 10.3V5.7L10.4 8l-4 2.3Z"/></svg>
-            </span>
-            <div>
-              <div class="rn" data-i18n="nav.community.youtube">YouTube</div>
-              <div class="rs" data-i18n="nav.community.youtube.sub">Demos · tutorials · walkthroughs</div>
-            </div>
-            <span class="chev-r" aria-hidden="true">↗</span>
-          </a>
-        </div>
       </div>
 
       {flatNav.map((item) => (
@@ -166,19 +116,9 @@ const resources = [
     </nav>
   </div>
 
-  {/* Middle spacer — grid-template-columns: auto 1fr auto */}
   <div class="v2-mid" aria-hidden="true"></div>
 
-  {/* ─── RIGHT: search, language, theme, account, download ─── */}
   <div class="topbar-right v2-right">
-    <button type="button" class="v2-search" id="cmdkOpen" aria-label="Open search">
-      <span class="icon" aria-hidden="true">⌕</span>
-      <span class="ph" data-i18n="nav.search.ph">Search docs &amp; commands…</span>
-      <span class="kbd" aria-hidden="true"><span class="cmdk-mod">⌘</span>K</span>
-    </button>
-
-    <div class="v2-divider" aria-hidden="true"></div>
-
     <div class="lang-menu" id="lang">
       <button class="trigger" type="button" aria-haspopup="listbox" aria-expanded="false">
         <span class="label">EN</span><span class="caret">▾</span>
@@ -200,7 +140,7 @@ const resources = [
       <div class="dl-tip" id="dlTip" role="tooltip">
         <div class="dl-tip-head">
           <span class="sq" aria-hidden="true"></span>
-          <span class="kicker" data-i18n="dl.tip.kicker">§ LATEST RELEASE</span>
+          <span class="kicker" data-i18n="dl.tip.kicker">LATEST RELEASE</span>
         </div>
         <dl class="dl-tip-rows">
           <div><dt data-i18n="dl.tip.ver">Version</dt><dd>v{site.version} · <span class="muted">{site.channel.toUpperCase()}</span></dd></div>
@@ -208,21 +148,15 @@ const resources = [
           <div><dt data-i18n="dl.tip.size">Size</dt><dd>{site.sizeMB} MB · <span class="muted">{site.platforms.join(' · ')}</span></dd></div>
           <div><dt data-i18n="dl.tip.sha">SHA-256</dt><dd class="mono-tight">{site.sha256Short}</dd></div>
         </dl>
-        <div class="dl-tip-foot" data-i18n="dl.tip.foot">↓ Click to download · signed build</div>
+        <div class="dl-tip-foot" data-i18n="dl.tip.foot">Click to download · signed build</div>
       </div>
     </div>
   </div>
 </div>
 
-{/* ─── Mega: Product (sibling of .topbar-inner, inside .topbar) ─── */}
+{/* ─── Mega: Product ─── */}
 <div class="v2-mega" data-mega="product" hidden>
   <div class="v2-mega-inner">
-    <div class="v2-mega-eyebrow">
-      <span class="sq" aria-hidden="true"></span>
-      <span data-i18n="nav.mega.product.eyebrow">§ THREE WAYS TO RUN TAGMA</span>
-      <span class="bar" aria-hidden="true"></span>
-      <span class="tagline" data-i18n="nav.mega.product.tagline">EDITOR · SDK · CLI</span>
-    </div>
     <div class="v2-mega-grid">
       {products.map((p) => (
         <a class="v2-mega-cell" href={p.href} {...(p.external ? { target: '_blank', rel: 'noopener' } : {})}>
@@ -237,8 +171,6 @@ const resources = [
       ))}
     </div>
     <div class="v2-mega-foot">
-      <span data-i18n="nav.mega.fig">§ FIG. 02 · ENTRY POINTS</span>
-      <span class="dot">│</span>
       <a href="/#download"><span data-i18n="nav.mega.foot.dl">↓ Download desktop</span> · {site.sizeMB} MB</a>
       <span class="dot">│</span>
       <a href="/docs" data-i18n="nav.mega.foot.api">API reference →</a>
@@ -262,12 +194,6 @@ const resources = [
 {/* ─── Mega: Resources ─── */}
 <div class="v2-mega" data-mega="resources" hidden>
   <div class="v2-mega-inner">
-    <div class="v2-mega-eyebrow">
-      <span class="sq" aria-hidden="true"></span>
-      <span data-i18n="nav.mega.resources.eyebrow">§ RESOURCES</span>
-      <span class="bar" aria-hidden="true"></span>
-      <span class="tagline" data-i18n="nav.mega.resources.tagline">DOCS · CHANGELOG · API</span>
-    </div>
     <div class="v2-mega-list">
       {resources.map((r) => (
         <a class="v2-mega-row" href={r.href} {...(r.external ? { target: '_blank', rel: 'noopener' } : {})}>
@@ -285,27 +211,45 @@ const resources = [
   </div>
 </div>
 
+{/* ─── Mega: Community ─── */}
+<div class="v2-mega" data-mega="community" hidden>
+  <div class="v2-mega-inner">
+    <div class="v2-mega-list v2-mega-list--community">
+      {communityLinks.map((c) => (
+        <a class="v2-mega-row" href={c.href} target="_blank" rel="noopener">
+          <div>
+            <div class="rn">
+              <span class="icn" aria-hidden="true">
+                <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d={c.icon}/></svg>
+              </span>
+              <span>{c.name}</span>
+            </div>
+            <div class="rs">{c.sub}</div>
+          </div>
+          <span class="chev-r" aria-hidden="true">↗</span>
+        </a>
+      ))}
+    </div>
+  </div>
+</div>
+
 <script>
-  /**
-   * Mega menu controller
-   * --------------------
-   * Opens on hover (desktop) with a small close delay so diagonal mouse
-   * movement into the panel doesn't dismiss it. Also click-toggleable for
-   * touch and keyboard users.
-   */
   (function megaMenu() {
     const items = document.querySelectorAll<HTMLElement>('.v2-nav-item[data-menu]');
     const panels = document.querySelectorAll<HTMLElement>('[data-mega]');
     let openKey: string | null = null;
     let closeTimer: number | null = null;
+    let openTimer: number | null = null;
+    let hoveringPanel = false;
 
     const panelFor   = (k: string) => document.querySelector<HTMLElement>(`[data-mega="${k}"]`);
     const triggerFor = (k: string) => document.querySelector<HTMLElement>(`.v2-nav-item[data-menu="${k}"] .v2-nav-trigger`);
 
     function open(key: string) {
+      if (openTimer) { clearTimeout(openTimer); openTimer = null; }
       if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
       if (openKey === key) return;
-      close();
+      if (openKey) closeNow();
       const p = panelFor(key), t = triggerFor(key);
       if (!p || !t) return;
       p.removeAttribute('hidden');
@@ -313,7 +257,7 @@ const resources = [
       t.classList.add('open');
       openKey = key;
     }
-    function close() {
+    function closeNow() {
       if (!openKey) return;
       const p = panelFor(openKey), t = triggerFor(openKey);
       p?.setAttribute('hidden', '');
@@ -321,72 +265,60 @@ const resources = [
       t?.classList.remove('open');
       openKey = null;
     }
+    function scheduleOpen(key: string) {
+      if (openTimer) clearTimeout(openTimer);
+      openTimer = window.setTimeout(() => open(key), 60);
+    }
     function scheduleClose() {
+      if (openTimer) { clearTimeout(openTimer); openTimer = null; }
       if (closeTimer) clearTimeout(closeTimer);
-      closeTimer = window.setTimeout(close, 120);
+      closeTimer = window.setTimeout(() => {
+        if (!hoveringPanel) closeNow();
+      }, 250);
     }
 
     items.forEach((item) => {
       const key = item.dataset.menu;
       if (!key) return;
       const trigger = item.querySelector<HTMLElement>('.v2-nav-trigger');
-      item.addEventListener('mouseenter', () => open(key));
+      item.addEventListener('mouseenter', () => {
+        if (openKey && openKey !== key) {
+          open(key);
+        } else {
+          scheduleOpen(key);
+        }
+      });
       item.addEventListener('mouseleave', scheduleClose);
       trigger?.addEventListener('click', (e) => {
         e.preventDefault();
-        openKey === key ? close() : open(key);
+        openKey === key ? closeNow() : open(key);
       });
     });
     panels.forEach((p) => {
       p.addEventListener('mouseenter', () => {
+        hoveringPanel = true;
         if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
       });
-      p.addEventListener('mouseleave', scheduleClose);
+      p.addEventListener('mouseleave', () => {
+        hoveringPanel = false;
+        scheduleClose();
+      });
     });
     document.querySelectorAll<HTMLElement>('.v2-nav-link').forEach((a) => {
-      a.addEventListener('mouseenter', close);
+      a.addEventListener('mouseenter', () => {
+        if (openTimer) { clearTimeout(openTimer); openTimer = null; }
+        closeNow();
+      });
     });
     document.addEventListener('click', (e) => {
       const t = e.target as HTMLElement;
-      if (!t.closest('.v2-nav-item') && !t.closest('.v2-mega')) close();
+      if (!t.closest('.v2-nav-item') && !t.closest('.v2-mega')) closeNow();
     });
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') close();
+      if (e.key === 'Escape') closeNow();
     });
   })();
 
-  /**
-   * Platform-aware ⌘K hint
-   * ----------------------
-   * Show "Ctrl" on Windows/Linux so the keyboard hint matches reality.
-   */
-  (function platformHint() {
-    const ua = navigator.userAgent + ' ' + navigator.platform;
-    const isMac = /Mac|iPhone|iPad|iPod/.test(ua);
-    if (!isMac) {
-      document.querySelectorAll<HTMLElement>('.cmdk-mod').forEach((el) => {
-        el.textContent = 'Ctrl';
-        el.style.fontSize = '9.5px';
-      });
-    }
-  })();
-
-  /**
-   * Search button → open command palette
-   * ------------------------------------
-   * The palette component listens for this event globally.
-   */
-  document.getElementById('cmdkOpen')?.addEventListener('click', () => {
-    document.dispatchEvent(new CustomEvent('tagma:cmdk:open'));
-  });
-
-  /**
-   * One-click install copy chips (Product mega foot)
-   * -------------------------------------------------
-   * Copies the data-install-copy value to clipboard and shows a
-   * "✓ Copied" confirmation for 1.4s. Falls back to textarea.select()
-   * where navigator.clipboard is unavailable (non-HTTPS).
-   */
   document.querySelectorAll<HTMLButtonElement>('.v2-install-chip').forEach((btn) => {
     btn.addEventListener('click', async () => {
       const cmd = btn.dataset.installCopy || '';
@@ -399,7 +331,7 @@ const resources = [
         ta.style.position = 'fixed'; ta.style.opacity = '0';
         document.body.appendChild(ta);
         ta.select();
-        try { document.execCommand('copy'); } catch { /* best effort */ }
+        try { document.execCommand('copy'); } catch { }
         ta.remove();
       }
       btn.classList.add('is-copied');

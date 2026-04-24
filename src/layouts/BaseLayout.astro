@@ -2,7 +2,6 @@
 import '../styles/shell.css';
 import AnnouncementBar from '../components/AnnouncementBar.astro';
 import Header from '../components/Header.astro';
-import CommandPalette from '../components/CommandPalette.astro';
 import Footer from '../components/Footer.astro';
 import { site } from '../site.config';
 
@@ -37,22 +36,23 @@ const cfgJson = JSON.stringify({
   <link rel="stylesheet" href={FONTS_URL}>
   <script type="application/json" id="tagma-cfg" set:html={cfgJson} />
   <script is:inline>
-    // Apply saved theme before first paint to avoid FOUC (dark → light flash).
-    // Must run synchronously in <head> — module scripts are deferred and paint first.
-    try {
-      var saved = JSON.parse(localStorage.getItem('tagma_tweaks') || '{}');
-      var theme = saved.theme === 'light' ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', theme);
-    } catch (e) {
-      document.documentElement.setAttribute('data-theme', 'dark');
-    }
+    (function() {
+      var DARK_BG  = '#0d0f12';
+      var LIGHT_BG = '#f6f5f1';
+      var theme = 'dark';
+      try {
+        var saved = JSON.parse(localStorage.getItem('tagma_tweaks') || '{}');
+        if (saved.theme === 'light') theme = 'light';
+      } catch (e) {}
+      var html = document.documentElement;
+      html.setAttribute('data-theme', theme);
+      html.style.backgroundColor = theme === 'light' ? LIGHT_BG : DARK_BG;
+    })();
   </script>
 </head>
 <body>
   <AnnouncementBar />
   <header class="topbar"><Header currentPath={currentPath} /></header>
-
-  <CommandPalette />
 
   <slot />
 
