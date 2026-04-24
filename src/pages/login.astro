@@ -76,15 +76,10 @@ import '../styles/login.css';
             <span class="v" data-i18n="login.brand.v">v0.3.6 · ALPHA</span>
           </div>
 
-          <div class="ab-tabs" role="tablist" id="authTabs">
-            <button type="button" role="tab" class="on" data-tab="signin" aria-selected="true" data-i18n="nav.signin">Sign in</button>
-            <button type="button" role="tab" data-tab="signup" aria-selected="false" data-i18n="nav.signup">Sign up</button>
-          </div>
-
-          <h2 class="ab-h" id="authH" data-tab-content="signin" data-i18n="login.h.signin">
+          <h2 class="ab-h" data-i18n="login.h">
             Only when you <span class="accent">need the cloud</span>.
           </h2>
-          <p class="ab-sub" id="authSub" data-tab-content="signin" data-i18n="login.sub.signin">
+          <p class="ab-sub" data-i18n="login.sub">
             The local Tagma doesn't know who you are — that's on purpose. Sign in only if you want sync, SSO, or the driver registry.
           </p>
 
@@ -136,6 +131,10 @@ import '../styles/login.css';
               <span data-i18n="login.cta">Send magic link</span>
             </button>
 
+            <p class="ab-newhint" data-i18n="login.newhint">
+              New to Tagma? We'll create your account on first sign-in — no separate sign-up step.
+            </p>
+
             <div class="ab-status" id="authStatus" role="status" aria-live="polite">
               <span class="dot" aria-hidden="true"></span>
               <span class="msg"></span>
@@ -174,31 +173,6 @@ import '../styles/login.css';
     function t(key: string, lang: Lang = currentLang()): string {
       return I18N[lang]?.[key] ?? I18N.en[key] ?? '';
     }
-
-    /* Tab switch — Sign in ↔ Sign up. Rewrites the data-i18n key on the
-       heading + lede, then re-renders them from the live dictionary so
-       language changes + tab changes both work. */
-    const tabs = document.getElementById('authTabs');
-    const h    = document.getElementById('authH') as HTMLElement | null;
-    const sub  = document.getElementById('authSub') as HTMLElement | null;
-
-    function setTab(which: 'signin' | 'signup'): void {
-      if (!tabs || !h || !sub) return;
-      tabs.querySelectorAll<HTMLButtonElement>('button[data-tab]').forEach((b) => {
-        const on = b.dataset.tab === which;
-        b.classList.toggle('on', on);
-        b.setAttribute('aria-selected', on ? 'true' : 'false');
-      });
-      h.dataset.i18n   = `login.h.${which}`;
-      sub.dataset.i18n = `login.sub.${which}`;
-      h.innerHTML   = t(h.dataset.i18n);
-      sub.innerHTML = t(sub.dataset.i18n);
-    }
-
-    tabs?.addEventListener('click', (e) => {
-      const t = (e.target as HTMLElement).closest('button[data-tab]') as HTMLButtonElement | null;
-      if (t?.dataset.tab) setTab(t.dataset.tab as 'signin' | 'signup');
-    });
 
     /* Placeholder translation — shell.client.ts only translates innerHTML;
        <input> placeholders need a separate pass, re-run on lang change. */

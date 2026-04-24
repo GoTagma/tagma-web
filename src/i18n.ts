@@ -239,10 +239,9 @@ export const I18N: Record<Lang, Record<string, string>> = {
     'login.stat.size.k':    'desktop app',
 
     'login.brand.v':        'v{v} \u00b7 {ch}',
-    'login.h.signin':       'Only when you <span class="accent">need the cloud</span>.',
-    'login.h.signup':       'Create an account \u2014 <span class="accent">only when it helps</span>.',
-    'login.sub.signin':     "The local Tagma doesn't know who you are \u2014 that's on purpose. Sign in only if you want sync, SSO, or the driver registry.",
-    'login.sub.signup':     'One account for sync, the driver registry, and Team features. No credit card, no feature gate on the local editor.',
+    'login.h':              'Only when you <span class="accent">need the cloud</span>.',
+    'login.sub':            "The local Tagma doesn't know who you are \u2014 that's on purpose. Sign in only if you want sync, SSO, or the driver registry.",
+    'login.newhint':        "New to Tagma? We'll create your account on first sign-in \u2014 no separate sign-up step.",
 
     'login.oauth.github':   'Continue with GitHub',
     'login.oauth.google':   'Continue with Google',
@@ -494,10 +493,9 @@ export const I18N: Record<Lang, Record<string, string>> = {
     'login.stat.size.k':    '\u684c\u9762\u7aef',
 
     'login.brand.v':        'v{v} \u00b7 {ch}',
-    'login.h.signin':       '\u53ea\u5728<span class="accent">\u9700\u8981\u4e91\u7aef</span>\u65f6\u767b\u5f55\u3002',
-    'login.h.signup':       '\u6ce8\u518c\u8d26\u53f7\u2014\u2014<span class="accent">\u53ea\u5728\u6709\u7528\u65f6</span>\u3002',
-    'login.sub.signin':     '\u672c\u5730\u7684 Tagma \u4e0d\u8ba4\u8bc6\u4f60\u2014\u2014\u8fd9\u662f\u523b\u610f\u8bbe\u8ba1\u3002\u53ea\u6709\u5f53\u4f60\u9700\u8981\u4e91\u540c\u6b65\u3001SSO \u6216\u9a71\u52a8 Registry \u65f6\u624d\u9700\u8981\u767b\u5f55\u3002',
-    'login.sub.signup':     '\u4e00\u4e2a\u8d26\u53f7\u7528\u4e8e\u540c\u6b65\u3001\u9a71\u52a8 Registry \u548c Team \u529f\u80fd\u3002\u4e0d\u6536\u4fe1\u7528\u5361\uff0c\u672c\u5730\u7f16\u8f91\u5668\u6c38\u8fdc\u4e0d\u9501\u529f\u80fd\u3002',
+    'login.h':              '\u53ea\u5728<span class="accent">\u9700\u8981\u4e91\u7aef</span>\u65f6\u767b\u5f55\u3002',
+    'login.sub':            '\u672c\u5730\u7684 Tagma \u4e0d\u8ba4\u8bc6\u4f60\u2014\u2014\u8fd9\u662f\u523b\u610f\u8bbe\u8ba1\u3002\u53ea\u6709\u5f53\u4f60\u9700\u8981\u4e91\u540c\u6b65\u3001SSO \u6216\u9a71\u52a8 Registry \u65f6\u624d\u9700\u8981\u767b\u5f55\u3002',
+    'login.newhint':        '\u7b2c\u4e00\u6b21\u6765\uff1f\u9996\u6b21\u767b\u5f55\u65f6\u81ea\u52a8\u4e3a\u4f60\u521b\u5efa\u8d26\u53f7\uff0c\u6ca1\u6709\u5355\u72ec\u7684\u6ce8\u518c\u6b65\u9aa4\u3002',
 
     'login.oauth.github':   '\u4f7f\u7528 GitHub \u7ee7\u7eed',
     'login.oauth.google':   '\u4f7f\u7528 Google \u7ee7\u7eed',

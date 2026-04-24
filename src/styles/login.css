@@ -148,37 +148,6 @@
   letter-spacing: .08em;
 }
 
-/* Sign in / Sign up tabs */
-.ab-tabs {
-  display: flex;
-  gap: 0;
-  border: 1px solid var(--line-2);
-  background: var(--bg-1);
-  font: 500 11px/1 'JetBrains Mono', ui-monospace, monospace;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  margin-bottom: 28px;
-}
-.ab-tabs button {
-  flex: 1;
-  padding: 12px 14px;
-  background: transparent;
-  color: var(--fg-dim);
-  border: 0;
-  border-right: 1px solid var(--line-2);
-  cursor: pointer;
-  font: inherit;
-  letter-spacing: inherit;
-  text-transform: inherit;
-  transition: color .12s, background .12s;
-}
-.ab-tabs button:last-child { border-right: 0; }
-.ab-tabs button:hover { color: var(--fg); }
-.ab-tabs button.on {
-  background: var(--accent);
-  color: var(--accent-ink);
-}
-
 /* Heading + lede */
 .ab-h {
   font: 600 clamp(24px, 2.6vw, 32px)/1.12 'Space Grotesk', 'Noto Sans SC', sans-serif;
@@ -304,6 +273,17 @@
 .ab-cta:active { transform: translateY(1px); }
 .ab-cta[disabled] { opacity: .6; cursor: not-allowed; }
 .ab-cta svg { flex: 0 0 16px; }
+
+/* Helper line — "We'll create your account on first sign-in" */
+.ab-newhint {
+  margin-top: 14px;
+  padding: 10px 12px;
+  font: 500 11px/1.55 'JetBrains Mono', ui-monospace, monospace;
+  letter-spacing: .02em;
+  color: var(--fg-muted);
+  border-left: 2px solid var(--line-2);
+  background: transparent;
+}
 
 /* Status (loading / success / error) */
 .ab-status {
