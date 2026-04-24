@@ -1,0 +1,17 @@
+{
+  "name": "@tagma/cloud",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "hono": "^4.6.14"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250418.0",
+    "typescript": "^5.8.3"
+  }
+}

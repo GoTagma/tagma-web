@@ -1,7 +1,7 @@
 {
   // Single Worker that serves the Astro static site (./dist via ASSETS binding)
-  // and routes /api/* to the @tagma/cloud Hono app (src/cloud, private
-  // submodule). See wrangler.dev.jsonc for the local-dev overlay.
+  // and routes /api/* to the @tagma/cloud Hono app (bun workspace at
+  // src/cloud). See wrangler.dev.jsonc for the local-dev overlay.
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "tagma-web",
   "main": "src/worker.ts",
