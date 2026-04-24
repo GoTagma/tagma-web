@@ -25,13 +25,6 @@ const DL = {
   <main>
 
     <section class="hero" id="download">
-      <div class="hero-track" aria-hidden="true">
-        <div class="track-line"></div>
-        <div class="track-block main"></div>
-        <div class="track-block trail-1"></div>
-        <div class="track-block trail-2"></div>
-        <div class="track-glow"></div>
-      </div>
       <div class="eyebrow reveal">
         <span class="square"></span>
         <span data-i18n="hero.eyebrow">§ TAGMA · DESKTOP EDITOR · v{site.version} {channelUpper}</span>
@@ -39,16 +32,16 @@ const DL = {
         <span style="color:var(--fg-dim)" data-i18n="hero.tagline">LOCAL-FIRST · PLUGIN-NATIVE</span>
       </div>
 
-      <h1 class="reveal reveal-delay-1" data-i18n="hero.h1">
+      <h1 class="reveal" data-i18n="hero.h1">
         <span>Every agent</span><br>
         <span class="nowrap">in <span class="accent">formation<span class="dot">.</span></span></span>
       </h1>
 
-      <p class="hero-sub reveal reveal-delay-2" data-i18n="hero.sub">
+      <p class="hero-sub reveal" data-i18n="hero.sub">
         A swim-lane editor for AI orchestration. <b>Task</b> is the atom — <b>prompt</b> or <b>command</b> — driven by the agent CLIs you already run: <b>Claude Code</b>, <b>Codex</b>, <b>OpenCode</b>, and anything you wire up through the SDK.
       </p>
 
-      <div class="hero-meta reveal reveal-delay-3">
+      <div class="hero-meta reveal">
         <span data-i18n="meta.size"><b>~{site.sizeMB} MB</b> · lightweight</span>
         <span class="pipe">│</span>
         <span data-i18n="meta.os"><b>{site.platforms.join(' · ')}</b></span>
@@ -56,7 +49,7 @@ const DL = {
         <span data-i18n="meta.lic"><b>{site.license}</b> core · TypeScript SDK</span>
       </div>
 
-      <div class="hero-cta reveal reveal-delay-4">
+      <div class="hero-cta reveal">
         <div class="dl-group">
           <div class="primary-wrap">
             <a class="primary" href={DL.mac} id="primaryDl">
@@ -99,29 +92,29 @@ const DL = {
     </section>
 
     <section class="spec-strip" aria-hidden="true">
-      <div class="reveal">
+      <div>
         <span class="sk">Lanes</span>
         <span class="sv">∞</span>
         <span class="sn" data-i18n="spec.lanes">Unbounded swim-lanes</span>
       </div>
-      <div class="reveal reveal-delay-1">
+      <div>
         <span class="sk">Drivers</span>
-        <span class="sv"><span data-count-target="3">0</span><span class="unit">+</span></span>
+        <span class="sv">3+</span>
         <span class="sn">Claude · Codex · OpenCode</span>
       </div>
-      <div class="reveal reveal-delay-2">
+      <div>
         <span class="sk">Runtime</span>
-        <span class="sv">local<span class="unit">-first</span></span>
+        <span class="sv">local-first</span>
         <span class="sn" data-i18n="spec.runtime">No cloud lock-in</span>
       </div>
-      <div class="reveal reveal-delay-3">
+      <div>
         <span class="sk">SDK</span>
-        <span class="sv">TS</span>
+        <span class="sv">TypeScript</span>
         <span class="sn">@tagma/sdk · typed</span>
       </div>
-      <div class="reveal reveal-delay-4">
+      <div>
         <span class="sk">Bundle</span>
-        <span class="sv"><span class="em" data-count-target="154">0</span><span class="unit">MB</span></span>
+        <span class="sv">{site.sizeMB} MB</span>
         <span class="sn">macOS · Win · Linux</span>
       </div>
     </section>
@@ -129,9 +122,8 @@ const DL = {
     <div class="stage-wrap reveal">
     <div class="stage-eyebrow eyebrow" aria-hidden="true">
       <span class="square"></span>
-      <span><span class="em">§</span> FIG. 01 · DESKTOP EDITOR — SWIM-LANE VIEW</span>
+      <span><span class="em">§</span> FIG. 01 · DESKTOP EDITOR</span>
       <span class="bar"></span>
-      <span class="coord">INTERACTIVE PREVIEW</span>
     </div>
     <div class="stage">
       <div class="stage-chrome">
@@ -165,30 +157,19 @@ const DL = {
       <DemoYaml />
       <div class="stage-status" aria-hidden="true">
         <span><span class="k">SCHEMA</span><span class="v">v1</span></span>
-        <span><span class="k">RUNTIME</span><span class="v em">local-first</span></span>
+        <span><span class="k">RUNTIME</span><span class="v">local-first</span></span>
         <span><span class="k">DRIVERS</span><span class="v">3+</span></span>
         <span class="sp"></span>
-        <span class="chart">
-          <span style="height:30%"></span><span style="height:60%"></span><span style="height:40%"></span>
-          <span style="height:80%"></span><span class="hi" style="height:100%"></span><span class="hi" style="height:70%"></span>
-          <span style="height:45%"></span><span style="height:55%"></span><span style="height:30%"></span>
-          <span style="height:65%"></span><span style="height:50%"></span><span class="hi" style="height:90%"></span>
-        </span>
         <span><span class="k">SDK</span><span class="v">@tagma/sdk</span></span>
       </div>
     </div>
     </div>
 
     <section class="ways" id="ways">
-      <div class="eyebrow">
-        <span class="square"></span>
-        <span data-i18n="ways.eyebrow">§ THREE WAYS TO RUN TAGMA</span>
-        <span class="bar"></span>
-        <span style="color:var(--fg-dim)" data-i18n="ways.tagline">EDITOR · SDK · CLI</span>
-      </div>
+      <h2 class="ways-title" data-i18n="ways.eyebrow">Three ways to run Tagma</h2>
 
       <div class="ways-grid">
-        <div class="way reveal reveal-delay-1">
+        <div class="way reveal">
           <div class="way-head"><span class="num">01</span><span data-i18n="ways.editor.kind">DESKTOP EDITOR</span></div>
           <h3 data-i18n="ways.editor.title">Tagma Editor</h3>
           <p data-i18n="ways.editor.desc">The full swim-lane UI — design, run, replay. The fastest way to see a pipeline working end-to-end.</p>
@@ -202,7 +183,7 @@ const DL = {
           </div>
         </div>
 
-        <div class="way reveal reveal-delay-2">
+        <div class="way reveal">
           <div class="way-head"><span class="num">02</span><span data-i18n="ways.sdk.kind">TYPESCRIPT SDK</span></div>
           <h3>@tagma/sdk</h3>
           <p data-i18n="ways.sdk.desc">Build and run pipelines from your own code. The same runtime the editor uses — just imported as a library.</p>
@@ -217,7 +198,7 @@ const DL = {
           </div>
         </div>
 
-        <div class="way reveal reveal-delay-3">
+        <div class="way reveal">
           <div class="way-head"><span class="num">03</span><span data-i18n="ways.cli.kind">COMMAND LINE</span></div>
           <h3>@tagma/cli</h3>
           <p data-i18n="ways.cli.desc">Run any <code style="font-family:inherit;color:var(--fg)">pipeline.yaml</code> from a shell. Ideal for CI, cron, or gluing agents into existing scripts.</p>
@@ -279,75 +260,6 @@ const DL = {
   .hero::after  { top: 28px; right: 28px; border-left: 0; border-bottom: 0; }
   @media (max-width: 960px) { .hero::before, .hero::after { display: none; } }
 
-  .hero-track {
-    position: absolute; inset: 0; pointer-events: none; overflow: hidden;
-    -webkit-mask-image: radial-gradient(ellipse 70% 55% at 50% 60%, black 25%, transparent 75%);
-    mask-image: radial-gradient(ellipse 70% 55% at 50% 60%, black 25%, transparent 75%);
-  }
-  .track-line {
-    position: absolute; left: 0; right: 0; top: 58%;
-    height: 1px;
-    background: linear-gradient(90deg,
-      transparent 0%,
-      color-mix(in srgb, var(--accent) 18%, transparent) 15%,
-      color-mix(in srgb, var(--accent) 18%, transparent) 85%,
-      transparent 100%
-    );
-  }
-  .track-block {
-    position: absolute; width: 14px; height: 14px;
-    top: calc(58% - 6.5px);
-    left: -20px;
-    background: var(--accent);
-    border-radius: 2px;
-    animation: trackMove 7s cubic-bezier(.4, 0, .2, 1) infinite;
-  }
-  .track-block.main {
-    box-shadow:
-      0 0 12px color-mix(in srgb, var(--accent) 70%, transparent),
-      0 0 32px color-mix(in srgb, var(--accent) 40%, transparent),
-      0 0 64px color-mix(in srgb, var(--accent) 20%, transparent);
-    z-index: 2;
-  }
-  .track-block.trail-1 {
-    width: 10px; height: 10px;
-    top: calc(58% - 4.5px);
-    opacity: .45;
-    animation-delay: -.35s;
-    box-shadow: 0 0 8px color-mix(in srgb, var(--accent) 50%, transparent);
-    z-index: 1;
-  }
-  .track-block.trail-2 {
-    width: 7px; height: 7px;
-    top: calc(58% - 3px);
-    opacity: .2;
-    animation-delay: -.65s;
-    box-shadow: 0 0 4px color-mix(in srgb, var(--accent) 40%, transparent);
-    z-index: 0;
-  }
-  .track-glow {
-    position: absolute; left: 0; right: 0; top: calc(58% - 40px);
-    height: 80px;
-    background: radial-gradient(ellipse 120px 30px at 50% 50%, color-mix(in srgb, var(--accent) 12%, transparent) 0%, transparent 70%);
-    animation: trackGlow 7s cubic-bezier(.4, 0, .2, 1) infinite;
-    pointer-events: none;
-  }
-  @keyframes trackMove {
-    0%   { left: -4%; opacity: 0; transform: scale(.6); }
-    8%   { opacity: 1; transform: scale(1); }
-    92%  { opacity: 1; transform: scale(1); }
-    100% { left: 104%; opacity: 0; transform: scale(.6); }
-  }
-  @keyframes trackGlow {
-    0%   { opacity: 0; }
-    8%   { opacity: 1; }
-    92%  { opacity: 1; }
-    100% { opacity: 0; }
-  }
-  @media (max-width: 960px) {
-    .hero-track { display: none; }
-  }
-
   /* ─── SPEC STRIP ─── */
   .spec-strip {
     max-width: 1360px; margin: 0 auto;
@@ -369,12 +281,10 @@ const DL = {
     color: var(--fg-muted); letter-spacing: 0.14em; text-transform: uppercase;
   }
   .spec-strip .sv {
-    font-family: 'JetBrains Mono', monospace; font-size: 24px;
+    font-family: 'JetBrains Mono', monospace; font-size: 22px;
     color: var(--fg); letter-spacing: -0.01em; font-weight: 500;
     font-variant-numeric: tabular-nums;
   }
-  .spec-strip .sv .unit { font-size: 11px; color: var(--fg-muted); margin-left: 4px; letter-spacing: 0.1em; }
-  .spec-strip .sv .em { color: var(--accent); }
   .spec-strip .sn {
     font-size: 11px; color: var(--fg-dim);
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
@@ -434,9 +344,15 @@ const DL = {
   body { scrollbar-width: none; -ms-overflow-style: none; }
   body::-webkit-scrollbar { display: none; }
   .ways { max-width: 1360px; margin: 0 auto; padding: 72px 40px 48px; }
+  .ways-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(22px, 2.4vw, 28px);
+    font-weight: 500; letter-spacing: -0.02em;
+    color: var(--fg);
+  }
   .ways-grid {
     display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0;
-    border: 1px solid var(--line-2); margin-top: 32px;
+    border: 1px solid var(--line-2); margin-top: 24px;
   }
   .way { padding: 28px 26px 26px; border-right: 1px solid var(--line-2); display: flex; flex-direction: column; min-width: 0; position: relative; transition: background .2s; }
   .way:last-child { border-right: 0; }
@@ -454,7 +370,7 @@ const DL = {
   }
   .way-head .num { color: var(--accent); }
   .way h3 { font-family: 'Space Grotesk', sans-serif; font-size: 28px; font-weight: 500; letter-spacing: -0.02em; margin: 12px 0 8px; }
-  .way p { font-size: 13.5px; color: var(--fg-dim); line-height: 1.55; margin: 0 0 22px; min-height: 64px; }
+  .way p { font-size: 13.5px; color: var(--fg-dim); line-height: 1.55; margin: 0 0 22px; }
   .way-install {
     border: 1px solid var(--line-2); background: var(--bg-1);
     padding: 10px 12px; font-family: 'JetBrains Mono', monospace; font-size: 12.5px;
@@ -698,17 +614,9 @@ const DL = {
   }
   .stage-status .k { color: var(--fg-muted); }
   .stage-status .v { color: var(--fg); margin-left: 6px; }
-  .stage-status .v.em { color: var(--accent); }
   .stage-status .sp { flex: 1; }
-  .stage-status .chart {
-    display: inline-flex; align-items: flex-end; gap: 1px; height: 14px;
-    flex-shrink: 0;
-  }
-  .stage-status .chart span { display: inline-block; width: 2px; background: var(--fg-muted); }
-  .stage-status .chart .hi { background: var(--accent); }
   @media (max-width: 720px) {
     .stage-status { gap: 10px; font-size: 10px; flex-wrap: wrap; }
-    .stage-status .chart { display: none; }
   }
 
 

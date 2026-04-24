@@ -37,9 +37,9 @@ button { font:inherit; cursor:pointer; background:none; border:0; color:inherit;
 body::before {
   content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
   background-image:radial-gradient(circle,var(--line-2) 1px,transparent 1px);
-  background-size:24px 24px; opacity:.35;
+  background-size:28px 28px; opacity:.2;
 }
-[data-theme="light"] body::before { opacity:.55; }
+[data-theme="light"] body::before { opacity:.35; }
 /* Side rails - opencode-style vertical guides framing the content.
    Sit above section bodies (z-index:40) but below topbar/dropdowns (50+).
    --rail-x is the inset from each viewport edge: pinned to the content
@@ -85,7 +85,7 @@ main,header,footer { position:relative; z-index:1; }
   width: 6px; height: 6px; background: var(--accent); flex: 0 0 6px;
 }
 .announce-kicker {
-  color: var(--accent);
+  color: var(--fg);
   letter-spacing: .16em;
   text-transform: uppercase;
   white-space: nowrap;
@@ -227,46 +227,19 @@ footer { border-top:1px solid var(--line); background:var(--bg); }
   line-height:.82; letter-spacing:-.06em; font-weight:600;
   margin:0 0 -8px;
   color:transparent;
-  -webkit-text-stroke:2px color-mix(in srgb, var(--fg-muted) 70%, transparent);
+  -webkit-text-stroke:1px color-mix(in srgb, var(--fg-muted) 55%, transparent);
   text-rendering:geometricPrecision;
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
   transform:translateZ(0);
   user-select:none;
-  transition: text-shadow .6s ease, -webkit-text-stroke-color .6s ease;
-  text-shadow:
-    0 0 48px color-mix(in srgb, var(--accent) 14%, transparent),
-    0 0 96px color-mix(in srgb, var(--accent)  7%, transparent),
-    0 0 160px color-mix(in srgb, var(--accent) 3%, transparent);
 }
 [data-theme="light"] .foot-mark {
-  -webkit-text-stroke:2px color-mix(in srgb, var(--fg-muted) 55%, transparent);
-  text-shadow:
-    0 0 48px color-mix(in srgb, var(--accent)  8%, transparent),
-    0 0 96px color-mix(in srgb, var(--accent)  4%, transparent),
-    0 0 160px color-mix(in srgb, var(--accent) 2%, transparent);
+  -webkit-text-stroke:1px color-mix(in srgb, var(--fg-muted) 45%, transparent);
 }
 .foot-mark .dot {
   color:var(--accent);
   -webkit-text-stroke:0;
-  text-shadow:
-    0 0 16px color-mix(in srgb, var(--accent) 60%, transparent),
-    0 0 32px color-mix(in srgb, var(--accent) 30%, transparent);
-}
-.foot-mark-wrap:hover .foot-mark {
-  -webkit-text-stroke-color: color-mix(in srgb, var(--fg) 45%, transparent);
-  text-shadow:
-    0 0 64px color-mix(in srgb, var(--accent) 22%, transparent),
-    0 0 120px color-mix(in srgb, var(--accent) 11%, transparent),
-    0 0 200px color-mix(in srgb, var(--accent) 5%, transparent);
-}
-[data-theme="light"] .foot-mark-wrap:hover .foot-mark {
-  -webkit-text-stroke-color: color-mix(in srgb, var(--fg) 35%, transparent);
-}
-.foot-mark-wrap:hover .foot-mark .dot {
-  text-shadow:
-    0 0 20px color-mix(in srgb, var(--accent) 80%, transparent),
-    0 0 40px color-mix(in srgb, var(--accent) 45%, transparent);
 }
 .foot-inner { max-width:var(--shell-max); margin:0 auto; }
 .foot {
@@ -320,65 +293,56 @@ html, body, .topbar, footer, .hero, .ways, .stage-wrap, .spec-strip, .page-head,
   transition: background-color .25s ease, border-color .25s ease, color .15s ease, box-shadow .25s ease;
 }
 
-/* Scroll-shrink: height + border change only. No shadow bloom, no blur
-   bump, no bouncy easing - just a crisp two-state. */
+/* Scroll-shrink: all inner sizes animate together on one curve so the
+   topbar doesn't visibly "reflow" while it's still shrinking. */
+:root { --shrink-ease: cubic-bezier(.4, 0, .2, 1); --shrink-dur: .22s; }
+
 .topbar {
-  transition: height .18s ease, border-color .18s ease;
+  transition: height var(--shrink-dur) var(--shrink-ease),
+              border-color var(--shrink-dur) var(--shrink-ease);
+  will-change: height;
 }
 .topbar.scrolled {
   height: 48px;
   border-bottom-color: var(--line-2);
 }
 /* Shrink chrome */
+.brand {
+  transition: font-size var(--shrink-dur) var(--shrink-ease);
+}
 .topbar.scrolled .brand { font-size: 14px; }
 .topbar .brand .v {
-  transition: opacity .14s linear, width .18s ease, padding .18s ease, margin .18s ease, border-color .14s linear;
   overflow: hidden;
+  transition: opacity var(--shrink-dur) var(--shrink-ease),
+              width var(--shrink-dur) var(--shrink-ease),
+              padding var(--shrink-dur) var(--shrink-ease),
+              margin var(--shrink-dur) var(--shrink-ease),
+              border-left-color var(--shrink-dur) var(--shrink-ease);
 }
 .topbar.scrolled .brand .v {
   opacity: 0; width: 0; padding-left: 0; margin-left: 0; border-left-color: transparent;
   pointer-events: none;
 }
+.v2-nav-trigger,
+.v2-nav-link {
+  transition: color .12s, background .12s,
+              font-size var(--shrink-dur) var(--shrink-ease);
+}
 .topbar.scrolled .v2-nav-trigger,
 .topbar.scrolled .v2-nav-link { font-size: 12px; }
+.accent-btn,
+.theme-btn,
+.v2-signin,
+.lang-menu,
+.lang-menu > .trigger {
+  transition: height var(--shrink-dur) var(--shrink-ease),
+              border-color .12s, color .12s, background .12s;
+}
 .topbar.scrolled .accent-btn,
+.topbar.scrolled .lang-menu,
 .topbar.scrolled .lang-menu > .trigger,
 .topbar.scrolled .theme-btn,
 .topbar.scrolled .v2-signin { height: 28px; }
-
-@keyframes bracketPulse {
-  0%, 100% { opacity: .35; }
-  50% { opacity: .7; }
-}
-.hero.hero-in-view::before,
-.hero.hero-in-view::after {
-  animation: bracketPulse 3.2s ease-in-out infinite;
-}
-.hero.hero-in-view::after {
-  animation-delay: 1.6s;
-}
-
-.spec-strip > div {
-  transition: transform .35s cubic-bezier(.22,1,.36,1), box-shadow .35s ease;
-}
-.spec-strip > div:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 40px -20px rgba(0,0,0,.45);
-}
-[data-theme="light"] .spec-strip > div:hover {
-  box-shadow: 0 12px 40px -20px rgba(0,0,0,.15);
-}
-.spec-strip > div::after {
-  content: "";
-  position: absolute;
-  left: 0; top: 0;
-  width: 0; height: 2px;
-  background: linear-gradient(90deg, var(--accent), transparent);
-  transition: width .45s cubic-bezier(.22,1,.36,1);
-}
-.spec-strip > div:hover::after {
-  width: 100%;
-}
 
 .way.reveal {
   transform: translateY(32px);

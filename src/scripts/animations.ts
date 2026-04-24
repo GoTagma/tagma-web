@@ -89,33 +89,26 @@ function initTopbarScroll(): void {
   const topbar = document.querySelector<HTMLElement>('.topbar');
   if (!topbar) return;
 
+  // Hysteresis: shrink past 32, expand back only below 12.
+  // Single-threshold scrollY > 30 flip-flops when the user micro-scrolls
+  // near the edge (trackpads especially), producing the visible jitter.
+  const SHRINK_AT = 32;
+  const EXPAND_AT = 12;
+
   let ticking = false;
+  function update() {
+    const y = window.scrollY;
+    const isScrolled = topbar!.classList.contains('scrolled');
+    if (!isScrolled && y > SHRINK_AT) topbar!.classList.add('scrolled');
+    else if (isScrolled && y < EXPAND_AT) topbar!.classList.remove('scrolled');
+  }
   window.addEventListener('scroll', () => {
-    if (!ticking) {
-      ticking = true;
-      requestAnimationFrame(() => {
-        topbar.classList.toggle('scrolled', window.scrollY > 30);
-        ticking = false;
-      });
-    }
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => { update(); ticking = false; });
   }, { passive: true });
-  topbar.classList.toggle('scrolled', window.scrollY > 30);
-}
-
-function initHeroPulse(): void {
-  if (REDUCED_MOTION) return;
-  const hero = document.querySelector<HTMLElement>('.hero');
-  if (!hero) return;
-
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        hero.classList.toggle('hero-in-view', entry.isIntersecting);
-      });
-    },
-    { threshold: 0.1 }
-  );
-  observer.observe(hero);
+  // Initial state: match current scroll without hysteresis (first paint).
+  topbar.classList.toggle('scrolled', window.scrollY > SHRINK_AT);
 }
 
 export function mountAnimations(): void {
@@ -124,5 +117,4 @@ export function mountAnimations(): void {
   initCounters();
   initParallax();
   initTopbarScroll();
-  initHeroPulse();
 }

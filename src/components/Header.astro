@@ -236,18 +236,12 @@ const communityLinks = [
 <script>
   (function megaMenu() {
     const items = document.querySelectorAll<HTMLElement>('.v2-nav-item[data-menu]');
-    const panels = document.querySelectorAll<HTMLElement>('[data-mega]');
     let openKey: string | null = null;
-    let closeTimer: number | null = null;
-    let openTimer: number | null = null;
-    let hoveringPanel = false;
 
     const panelFor   = (k: string) => document.querySelector<HTMLElement>(`[data-mega="${k}"]`);
     const triggerFor = (k: string) => document.querySelector<HTMLElement>(`.v2-nav-item[data-menu="${k}"] .v2-nav-trigger`);
 
     function open(key: string) {
-      if (openTimer) { clearTimeout(openTimer); openTimer = null; }
-      if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
       if (openKey === key) return;
       if (openKey) closeNow();
       const p = panelFor(key), t = triggerFor(key);
@@ -265,49 +259,14 @@ const communityLinks = [
       t?.classList.remove('open');
       openKey = null;
     }
-    function scheduleOpen(key: string) {
-      if (openTimer) clearTimeout(openTimer);
-      openTimer = window.setTimeout(() => open(key), 60);
-    }
-    function scheduleClose() {
-      if (openTimer) { clearTimeout(openTimer); openTimer = null; }
-      if (closeTimer) clearTimeout(closeTimer);
-      closeTimer = window.setTimeout(() => {
-        if (!hoveringPanel) closeNow();
-      }, 250);
-    }
 
     items.forEach((item) => {
       const key = item.dataset.menu;
       if (!key) return;
       const trigger = item.querySelector<HTMLElement>('.v2-nav-trigger');
-      item.addEventListener('mouseenter', () => {
-        if (openKey && openKey !== key) {
-          open(key);
-        } else {
-          scheduleOpen(key);
-        }
-      });
-      item.addEventListener('mouseleave', scheduleClose);
       trigger?.addEventListener('click', (e) => {
         e.preventDefault();
         openKey === key ? closeNow() : open(key);
-      });
-    });
-    panels.forEach((p) => {
-      p.addEventListener('mouseenter', () => {
-        hoveringPanel = true;
-        if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
-      });
-      p.addEventListener('mouseleave', () => {
-        hoveringPanel = false;
-        scheduleClose();
-      });
-    });
-    document.querySelectorAll<HTMLElement>('.v2-nav-link').forEach((a) => {
-      a.addEventListener('mouseenter', () => {
-        if (openTimer) { clearTimeout(openTimer); openTimer = null; }
-        closeNow();
       });
     });
     document.addEventListener('click', (e) => {

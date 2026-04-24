@@ -136,13 +136,6 @@ const TIER_PRICES_JSON = JSON.stringify(TIERS.map((t) => t.priceMonthly));
 
   {/* ───────────────────── MATRIX ───────────────────── */}
   <section class="pr-matrix-wrap">
-    <div class="pr-eyebrow pr-eyebrow-inline">
-      <span class="sq" aria-hidden="true"></span>
-      <span data-i18n="pricing.matrix.eyebrow">§ FIG. 01 · TIER MATRIX</span>
-      <span class="bar" aria-hidden="true"></span>
-      <span class="tag" data-i18n="pricing.matrix.tag">SWIM-LANE COMPARISON</span>
-    </div>
-
     <div class="pr-matrix">
 
       {/* Header row: label col + 3 tier header cells */}
@@ -158,7 +151,7 @@ const TIER_PRICES_JSON = JSON.stringify(TIERS.map((t) => t.priceMonthly));
         {TIERS.map((t, i) => (
           <div class:list={['pr-cell', 'pr-cell-tier', t.popular && 'is-popular']}>
             {t.popular && (
-              <span class="pr-popular-flag" data-i18n="pricing.popular">★ MOST PICKED</span>
+              <span class="pr-popular-flag" data-i18n="pricing.popular">MOST PICKED</span>
             )}
             <div class="pr-sec" style={`color:${t.accentVar}`}>
               § {String(i + 1).padStart(2, '0')} · <span data-i18n={t.badge}>{t.id.toUpperCase()}</span>
@@ -255,19 +248,11 @@ const TIER_PRICES_JSON = JSON.stringify(TIERS.map((t) => t.priceMonthly));
       <span><span class="pr-check-inline">✓</span> <span data-i18n="pricing.legend.yes">INCLUDED</span></span>
       <span>— <span data-i18n="pricing.legend.no">NOT INCLUDED</span></span>
       <span>∞ <span data-i18n="pricing.legend.infty">UNLIMITED</span></span>
-      <span class="pr-legend-right" data-i18n="pricing.legend.fig">FIG. 01 · TIER × CAPABILITY</span>
     </div>
   </section>
 
   {/* ───────────────────── FAQ ───────────────────── */}
   <section class="pr-faq">
-    <div class="pr-eyebrow pr-eyebrow-inline">
-      <span class="sq" aria-hidden="true"></span>
-      <span data-i18n="pricing.faq.eyebrow">§ FAQ · COMMON QUESTIONS</span>
-      <span class="bar" aria-hidden="true"></span>
-      <span class="tag" data-i18n="pricing.faq.tag">6 ANSWERS</span>
-    </div>
-
     <h3 class="pr-faq-title">
       <span data-i18n="pricing.faq.titleHead">Questions, answered</span>
       {' '}
@@ -275,13 +260,9 @@ const TIER_PRICES_JSON = JSON.stringify(TIERS.map((t) => t.priceMonthly));
     </h3>
 
     <div class="pr-faq-grid">
-      {FAQ_KEYS.map((key, i) => (
+      {FAQ_KEYS.map((key) => (
         <div class="pr-faq-item">
-          <div class="pr-faq-q">
-            <span class="n">§ {String(i + 1).padStart(2, '0')}</span>
-            &nbsp;·&nbsp;
-            <span data-i18n={`pricing.faq.${key}.q`}>Q?</span>
-          </div>
+          <div class="pr-faq-q" data-i18n={`pricing.faq.${key}.q`}>Q?</div>
           <div class="pr-faq-a" data-i18n={`pricing.faq.${key}.a`}>A.</div>
           <div class="pr-faq-d" data-i18n={`pricing.faq.${key}.d`}>…</div>
         </div>
