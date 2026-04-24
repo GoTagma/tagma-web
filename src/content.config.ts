@@ -18,14 +18,17 @@ const docs = defineCollection({
 });
 
 // Archive: one file per release under src/content/archive/*.md
-// Minimal frontmatter only — no body, no summary. The page derives download
-// URLs from the version field.
+// Frontmatter-only; body is dropped by the mono→web sync. Optional
+// `summary` / `summary_zh` fields are copied from the CHANGELOG in mono
+// when present — used by AnnouncementBar to show a real release tagline.
 const archive = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/archive' }),
   schema: z.object({
     version: z.string(),
     date: z.string(),
     channel: z.enum(['alpha', 'beta', 'rc', 'stable', 'patch']).default('stable'),
+    summary: z.string().optional(),
+    summary_zh: z.string().optional(),
   }),
 });
 

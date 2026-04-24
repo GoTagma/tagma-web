@@ -63,6 +63,72 @@ body::after {
 @media (max-width: 720px) { body::after { display:none; } }
 main,header,footer { position:relative; z-index:1; }
 
+/* ───── ANNOUNCEMENT BAR (above topbar) ─────
+   Hairline editorial banner — sharp, no pulse, no bloom. */
+.announce {
+  position: sticky; top: 0; z-index: 51;
+  height: 26px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+  display: flex; justify-content: center; align-items: stretch;
+  overflow: hidden;
+}
+.announce-inner {
+  width: 100%; max-width: var(--shell-max);
+  padding: 0 20px;
+  display: flex; align-items: center; gap: 12px;
+  font: 500 10.5px/1 'JetBrains Mono', ui-monospace, monospace;
+  letter-spacing: .08em;
+  color: var(--fg-dim);
+}
+.announce-sq {
+  width: 6px; height: 6px; background: var(--accent); flex: 0 0 6px;
+}
+.announce-kicker {
+  color: var(--accent);
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.announce-rule {
+  width: 1px; height: 12px; background: var(--line-2); flex: 0 0 1px;
+}
+.announce-msg {
+  flex: 1; min-width: 0;
+  display: inline-flex; align-items: center; gap: 10px;
+  color: var(--fg-dim);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  transition: color .12s linear;
+}
+.announce-msg-text {
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  min-width: 0;
+}
+.announce-msg b { color: var(--fg); font-weight: 600; }
+.announce-msg:hover { color: var(--fg); }
+.announce-msg:hover .announce-arrow { color: var(--accent); }
+.announce-arrow {
+  color: var(--fg-muted); flex: 0 0 auto;
+  transition: color .12s linear;
+}
+.announce-close {
+  width: 20px; height: 20px; flex: 0 0 20px;
+  border: 1px solid var(--line); color: var(--fg-muted);
+  font: 500 14px/1 'JetBrains Mono', ui-monospace, monospace;
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: color .12s linear, border-color .12s linear;
+}
+.announce-close:hover { color: var(--fg); border-color: var(--fg-muted); }
+
+/* Topbar drops its sticky-top when the announcement is visible,
+   so the topbar sits just below the bar without overlap. */
+html.has-announce .topbar { top: 26px; }
+
+@media (max-width: 720px) {
+  .announce-kicker { display: none; }
+  .announce-inner { gap: 8px; padding: 0 12px; }
+}
+
 /* ───── TOP BAR (shared, horizontally centered) ───── */
 .topbar {
   display:flex; justify-content:center;
@@ -252,16 +318,31 @@ html, body, .topbar, footer, .hero, .ways, .stage-wrap, .spec-strip, .page-head,
   transition: background-color .25s ease, border-color .25s ease, color .15s ease, box-shadow .25s ease;
 }
 
+/* Scroll-shrink: height + border change only. No shadow bloom, no blur
+   bump, no bouncy easing — just a crisp two-state. */
 .topbar {
-  transition: background-color .25s ease, border-color .25s ease, box-shadow .25s ease;
+  transition: height .18s ease, border-color .18s ease;
 }
 .topbar.scrolled {
-  background: color-mix(in srgb, var(--bg) 92%, transparent);
-  box-shadow: 0 1px 0 var(--line), 0 8px 32px -16px rgba(0,0,0,.35);
+  height: 48px;
+  border-bottom-color: var(--line-2);
 }
-[data-theme="light"] .topbar.scrolled {
-  box-shadow: 0 1px 0 var(--line), 0 8px 32px -16px rgba(0,0,0,.12);
+/* Control chrome follows the shrink, no content-layout bounce. */
+.topbar.scrolled .brand { font-size: 14px; }
+.topbar .brand .v {
+  transition: opacity .14s linear, width .18s ease, padding .18s ease, margin .18s ease, border-color .14s linear;
+  overflow: hidden;
 }
+.topbar.scrolled .brand .v {
+  opacity: 0; width: 0; padding-left: 0; margin-left: 0; border-left-color: transparent;
+  pointer-events: none;
+}
+.topbar.scrolled .v2-nav-trigger,
+.topbar.scrolled .v2-nav-link { font-size: 12px; }
+.topbar.scrolled .v2-search,
+.topbar.scrolled .accent-btn,
+.topbar.scrolled .lang-menu > .trigger,
+.topbar.scrolled .theme-btn { height: 28px; }
 
 @keyframes bracketPulse {
   0%, 100% { opacity: .35; }
@@ -405,6 +486,7 @@ html {
   height: 100%;
   display: flex;
   align-items: stretch;
+  position: relative; /* anchor for child dropdowns (e.g. Community) */
 }
 .v2-nav-trigger,
 .v2-nav-link {
@@ -505,14 +587,13 @@ html {
   top: 100%;
   background: var(--bg);
   border-bottom: 1px solid var(--line-2);
-  box-shadow: 0 16px 40px -16px rgba(0, 0, 0, .5);
   z-index: 100;
-  animation: megaIn .18s cubic-bezier(.22, 1, .36, 1);
+  animation: megaIn .14s linear;
 }
 .v2-mega[hidden] { display: none; }
 @keyframes megaIn {
-  from { opacity: 0; transform: translateY(-4px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 .v2-mega-inner {
   max-width: var(--shell-max);
@@ -825,6 +906,210 @@ html {
   font-family: inherit;
   font-size: 10px;
 }
+
+/* ── Download button + version tooltip ── */
+.dl-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+.dl-tip {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 280px;
+  padding: 14px 16px 12px;
+  background: var(--bg);
+  border: 1px solid var(--line-2);
+  z-index: 120;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .12s linear;
+}
+.dl-wrap:hover .dl-tip,
+.dl-wrap:focus-within .dl-tip {
+  opacity: 1;
+  pointer-events: auto;
+}
+.dl-tip-head {
+  display: flex; align-items: center; gap: 10px;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--line);
+  font: 500 10px/1 'JetBrains Mono', ui-monospace, monospace;
+  letter-spacing: .14em;
+  color: var(--fg-muted);
+  text-transform: uppercase;
+}
+.dl-tip-head .sq { width: 7px; height: 7px; background: var(--accent); }
+.dl-tip-head .kicker { color: var(--accent); }
+.dl-tip-rows {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  row-gap: 6px;
+  column-gap: 16px;
+  font: 500 11px/1.3 'JetBrains Mono', ui-monospace, monospace;
+  letter-spacing: .04em;
+}
+.dl-tip-rows > div {
+  display: contents;
+}
+.dl-tip-rows dt {
+  color: var(--fg-muted);
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  font-size: 10px;
+}
+.dl-tip-rows dd {
+  color: var(--fg);
+}
+.dl-tip-rows dd .muted { color: var(--fg-muted); }
+.dl-tip-rows .mono-tight {
+  font-size: 10.5px; letter-spacing: .02em;
+  color: var(--fg-dim);
+}
+.dl-tip-foot {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+  font: 500 10px/1 'JetBrains Mono', ui-monospace, monospace;
+  letter-spacing: .1em;
+  color: var(--fg-muted);
+  text-transform: uppercase;
+}
+@media (max-width: 720px) {
+  .dl-tip { display: none; }
+}
+
+/* ── Install copy chips (Product mega foot) ── */
+.v2-install-chips {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.v2-install-chip {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--bg-1);
+  border: 1px solid var(--line);
+  color: var(--fg);
+  font: 500 12px/1 'JetBrains Mono', ui-monospace, monospace;
+  letter-spacing: .04em;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .12s, background .12s;
+  overflow: hidden;
+}
+.v2-install-chip:hover { border-color: var(--accent); background: var(--bg); }
+.v2-install-chip .cmd {
+  flex: 1;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  color: var(--fg-dim);
+}
+.v2-install-chip:hover .cmd { color: var(--fg); }
+.v2-install-chip .copy-label,
+.v2-install-chip .copy-done {
+  flex: 0 0 auto;
+  padding: 3px 8px;
+  font-size: 10px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  border: 1px solid var(--line-2);
+  color: var(--fg-muted);
+  transition: color .12s, border-color .12s;
+}
+.v2-install-chip:hover .copy-label {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.v2-install-chip .copy-done { display: none; color: var(--green); border-color: var(--green); }
+.v2-install-chip.is-copied .copy-label { display: none; }
+.v2-install-chip.is-copied .copy-done  { display: inline-block; }
+@media (max-width: 720px) {
+  .v2-install-chips { grid-template-columns: 1fr; }
+}
+
+/* ── Community compact dropdown (.v2-drop) ──
+   Anchored to its parent .v2-nav-item (position:relative). Sharp
+   hairline border, single background, linear color transitions. */
+.v2-drop {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 300px;
+  background: var(--bg);
+  border: 1px solid var(--line-2);
+  border-top: 0;
+  z-index: 100;
+  animation: megaIn .14s linear;
+}
+.v2-drop[hidden] { display: none; }
+.v2-drop-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  font: 500 10px/1 'JetBrains Mono', ui-monospace, monospace;
+  color: var(--fg-muted);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+.v2-drop-head .sq { width: 6px; height: 6px; background: var(--accent); flex: 0 0 6px; }
+.v2-drop-head .bar { flex: 1; height: 1px; background: var(--line); }
+
+.v2-drop-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--line);
+  color: var(--fg);
+  text-decoration: none;
+  transition: background .12s linear;
+  position: relative;
+}
+.v2-drop-row:last-child { border-bottom: 0; }
+.v2-drop-row:hover { background: var(--bg-1); }
+.v2-drop-row::after {
+  content: "";
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 2px;
+  background: var(--accent);
+  opacity: 0;
+  transition: opacity .12s linear;
+}
+.v2-drop-row:hover::after { opacity: 1; }
+.v2-drop-row .icn {
+  width: 24px; height: 24px; flex: 0 0 24px;
+  border: 1px solid var(--line);
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--fg-dim);
+  transition: color .12s linear, border-color .12s linear;
+}
+.v2-drop-row:hover .icn { color: var(--fg); border-color: var(--line-2); }
+.v2-drop-row > div {
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column; gap: 3px;
+}
+.v2-drop-row .rn {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -.005em;
+}
+.v2-drop-row .rs {
+  font: 500 10.5px/1.3 'JetBrains Mono', ui-monospace, monospace;
+  letter-spacing: .04em;
+  color: var(--fg-muted);
+}
+.v2-drop-row .chev-r {
+  font-size: 11px; color: var(--fg-muted);
+  transition: color .12s linear;
+}
+.v2-drop-row:hover .chev-r { color: var(--accent); }
 
 /* ── Responsive ──────────────────────────────────────────── */
 @media (max-width: 960px) {

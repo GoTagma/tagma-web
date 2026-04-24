@@ -19,6 +19,15 @@ export const site = {
     sdk: 'https://github.com/GoTagma/tagma-mono/tree/main/packages/sdk',
     license: 'https://github.com/GoTagma/tagma-mono/blob/main/LICENSE',
   },
+  community: {
+    discord: 'https://discord.gg/tagma',
+    x:       'https://x.com/GoTagma',
+    youtube: 'https://www.youtube.com/@GoTagma',
+  },
+  install: {
+    sdk:   'bun add @tagma/sdk',
+    curl:  'curl -fsSL https://tagma.dev/install.sh | sh',
+  },
 };
 
 export type SiteConfig = typeof site;

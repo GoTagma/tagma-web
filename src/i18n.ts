@@ -4,9 +4,18 @@ export const I18N: Record<Lang, Record<string, string>> = {
   en: {
     'nav.product': 'Product', 'nav.docs': 'Docs', 'nav.archive': 'Archive', 'nav.github': 'GitHub ↗',
     'nav.resources': 'Resources', 'nav.pricing': 'Pricing', 'nav.showcase': 'Showcase',
+    'nav.community': 'Community',
     'nav.signin': 'Sign in', 'nav.signup': 'Sign up',
     'nav.search.ph': 'Search docs & commands…',
     'cta.docs': 'Docs ↗', 'cta.download': '↓ Download',
+    'announce.kicker': '§ RELEASE',
+    'announce.msg':    'Tagma <b>v{v}</b> is out — see the latest release.',
+    'dl.tip.kicker':   '§ LATEST RELEASE',
+    'dl.tip.ver':      'Version',
+    'dl.tip.date':     'Build',
+    'dl.tip.size':     'Size',
+    'dl.tip.sha':      'SHA-256',
+    'dl.tip.foot':     '↓ Click to download · signed build',
 
     // Mega menu — Product
     'nav.mega.product.eyebrow': '§ THREE WAYS TO RUN TAGMA',
@@ -40,6 +49,22 @@ export const I18N: Record<Lang, Record<string, string>> = {
     'nav.res.github.sub':    'Source · issues · releases',
     'nav.res.community':     'Community',
     'nav.res.community.sub': 'Discord · X · discussions',
+
+    // Community dropdown
+    'nav.mega.community.eyebrow': '§ COMMUNITY',
+    'nav.mega.community.tagline': 'DISCORD · X · YOUTUBE',
+    'nav.community.discord':      'Discord',
+    'nav.community.discord.sub':  'Real-time chat · plugin help',
+    'nav.community.x':            'X (Twitter)',
+    'nav.community.x.sub':        'Release notes · dev logs',
+    'nav.community.youtube':      'YouTube',
+    'nav.community.youtube.sub':  'Demos · tutorials · walkthroughs',
+
+    // Install copy chips (Product mega foot)
+    'nav.mega.install.sdk':  '$ bun add @tagma/sdk',
+    'nav.mega.install.curl': '$ curl -fsSL tagma.dev/install.sh | sh',
+    'nav.mega.install.copy': 'Copy',
+    'nav.mega.install.copied': '✓ Copied',
 
     // Command palette
     'cmdk.group.jump':        'Jump to',
@@ -265,9 +290,18 @@ export const I18N: Record<Lang, Record<string, string>> = {
   zh: {
     'nav.product': '产品', 'nav.docs': '文档', 'nav.archive': '历史版本', 'nav.github': 'GitHub ↗',
     'nav.resources': '资源', 'nav.pricing': '定价', 'nav.showcase': '案例',
+    'nav.community': '社区',
     'nav.signin': '登录', 'nav.signup': '注册',
     'nav.search.ph': '搜索文档与命令…',
     'cta.docs': '文档 ↗', 'cta.download': '↓ 下载',
+    'announce.kicker': '§ 新版发布',
+    'announce.msg':    'Tagma <b>v{v}</b> 已发布 —— 查看最新版本。',
+    'dl.tip.kicker':   '§ 最新版本',
+    'dl.tip.ver':      '版本',
+    'dl.tip.date':     '构建',
+    'dl.tip.size':     '体积',
+    'dl.tip.sha':      'SHA-256',
+    'dl.tip.foot':     '↓ 点击下载 · 已签名版本',
 
     // Mega menu — Product
     'nav.mega.product.eyebrow': '§ 三种方式运行 TAGMA',
@@ -301,6 +335,22 @@ export const I18N: Record<Lang, Record<string, string>> = {
     'nav.res.github.sub':    '源码 · Issue · Release',
     'nav.res.community':     '社区',
     'nav.res.community.sub': 'Discord · X · 讨论',
+
+    // Community dropdown
+    'nav.mega.community.eyebrow': '§ 社区',
+    'nav.mega.community.tagline': 'DISCORD · X · YOUTUBE',
+    'nav.community.discord':      'Discord',
+    'nav.community.discord.sub':  '实时聊天 · 插件答疑',
+    'nav.community.x':            'X（Twitter）',
+    'nav.community.x.sub':        '版本发布 · 开发日志',
+    'nav.community.youtube':      'YouTube',
+    'nav.community.youtube.sub':  '演示 · 教程 · 实操视频',
+
+    // Install copy chips (Product mega foot)
+    'nav.mega.install.sdk':  '$ bun add @tagma/sdk',
+    'nav.mega.install.curl': '$ curl -fsSL tagma.dev/install.sh | sh',
+    'nav.mega.install.copy': '复制',
+    'nav.mega.install.copied': '✓ 已复制',
 
     // Command palette
     'cmdk.group.jump':        '前往',

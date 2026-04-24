@@ -1,0 +1,115 @@
+---
+/**
+ * AnnouncementBar.astro
+ *
+ * Thin sticky banner above the topbar. Pulls the latest release entry
+ * from `src/content/archive/*.md` (synced from tagma-mono CHANGELOG)
+ * at build-time. If the CHANGELOG carried `summary` / `summary_zh`
+ * frontmatter, we show that; otherwise fall back to a generic line
+ * via i18n.
+ *
+ * Dismissal id is keyed to the release version so a new release
+ * auto-reappears for returning visitors.
+ */
+import { getCollection } from 'astro:content';
+import { site } from '../site.config';
+
+// Latest archive entry by semver-ish compare on the numeric segments.
+// The sync job only ever writes one file per release, so this is
+// effectively "pick the row whose version matches site.version" —
+// but we sort defensively in case a dev edits files by hand.
+const entries = await getCollection('archive');
+const toNums = (v: string) => v.split('.').map((n) => parseInt(n, 10) || 0);
+const cmp = (a: string, b: string) => {
+  const A = toNums(a), B = toNums(b);
+  for (let i = 0; i < Math.max(A.length, B.length); i++) {
+    if ((A[i] ?? 0) !== (B[i] ?? 0)) return (B[i] ?? 0) - (A[i] ?? 0);
+  }
+  return 0;
+};
+const latest = [...entries].sort((a, b) => cmp(a.data.version, b.data.version))[0];
+
+const version    = latest?.data.version ?? site.version;
+const summaryEn  = latest?.data.summary    ?? '';
+const summaryZh  = latest?.data.summary_zh ?? '';
+const id         = `tagma-release-v${version}`;
+---
+
+<aside
+  class="announce"
+  id="announce"
+  data-announce-id={id}
+  data-summary-en={summaryEn}
+  data-summary-zh={summaryZh}
+  role="status"
+  aria-label="Announcement"
+>
+  <div class="announce-inner">
+    <span class="announce-sq" aria-hidden="true"></span>
+    <span class="announce-kicker mono" data-i18n="announce.kicker">§ RELEASE</span>
+    <span class="announce-rule" aria-hidden="true"></span>
+    <a class="announce-msg" href="/archive">
+      {summaryEn
+        ? (
+          <span class="announce-msg-text">
+            <b>v{version}</b> — <span class="announce-msg-summary" data-announce-msg>{summaryEn}</span>
+          </span>
+        )
+        : (
+          <span class="announce-msg-text" data-i18n="announce.msg">
+            Tagma <b>v{version}</b> is out — see the latest release.
+          </span>
+        )
+      }
+      <span class="announce-arrow" aria-hidden="true">→</span>
+    </a>
+    <button type="button" class="announce-close" id="announceClose" aria-label="Dismiss announcement">×</button>
+  </div>
+</aside>
+
+<script>
+  /**
+   * Announcement bar: lang-aware summary swap + dismissal.
+   * - Picks en/zh summary from the bar's data-* attributes at apply time
+   *   (no markup duplication, no flicker on language toggle).
+   * - Dismiss state keyed by `data-announce-id` so a new release
+   *   auto-reappears for returning visitors.
+   */
+  (function announceBar() {
+    const bar = document.getElementById('announce');
+    if (!bar) return;
+    const id = bar.dataset.announceId || 'default';
+    const storageKey = `tagma_announce_${id}`;
+
+    try {
+      if (localStorage.getItem(storageKey) === '1') {
+        bar.remove();
+        return;
+      }
+    } catch { /* storage disabled → always show */ }
+
+    document.documentElement.classList.add('has-announce');
+
+    const en = bar.dataset.summaryEn || '';
+    const zh = bar.dataset.summaryZh || '';
+    const target = bar.querySelector<HTMLElement>('[data-announce-msg]');
+
+    function applySummary(): void {
+      if (!target || !en) return; // no summary → fallback text stays
+      const saved = (() => {
+        try { return JSON.parse(localStorage.getItem('tagma_tweaks') || '{}'); }
+        catch { return {}; }
+      })();
+      const lang = saved.lang === 'zh' ? 'zh' : 'en';
+      target.textContent = (lang === 'zh' && zh) ? zh : en;
+    }
+    applySummary();
+    document.addEventListener('tagma:apply', applySummary);
+
+    document.getElementById('announceClose')?.addEventListener('click', () => {
+      try { localStorage.setItem(storageKey, '1'); } catch { /* noop */ }
+      bar.remove();
+      document.documentElement.classList.remove('has-announce');
+    });
+  })();
+</script>
