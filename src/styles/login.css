@@ -1,0 +1,401 @@
+/* ──────────────────────────────────────────────────
+   LOGIN PAGE — Variant C · Manifesto
+   Left: manifesto + stats · Right: tabs + OAuth + magic link
+   All rules scoped under `.auth-*` / `.v-C` — shares shell tokens.
+   ────────────────────────────────────────────────── */
+
+.auth-page {
+  position: relative;
+  max-width: var(--shell-max);
+  margin: 0 auto;
+  min-height: calc(100vh - 56px);   /* fill under topbar */
+  border-left: 1px solid var(--line);
+  border-right: 1px solid var(--line);
+  background: var(--bg);
+}
+
+/* Two-column grid — manifesto on the left, form on the right */
+.auth-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  min-height: calc(100vh - 56px);
+}
+
+/* ─── Panels ─── */
+.ab-side,
+.ab-form {
+  padding: 44px 48px 40px;
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.ab-side {
+  border-right: 1px solid var(--line);
+  background: var(--bg-1);
+  justify-content: space-between;
+  gap: 40px;
+}
+.ab-form {
+  background: var(--bg);
+  justify-content: center;
+}
+.ab-form-inner {
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── Corner brackets (match pricing/hero language) ─── */
+.auth-corner {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
+  border-color: var(--fg-muted);
+  border-style: solid;
+  z-index: 2;
+}
+.auth-corner.tl { top: 0; left: 0; border-width: 1px 0 0 1px; }
+.auth-corner.tr { top: 0; right: 0; border-width: 1px 1px 0 0; }
+.auth-corner.bl { bottom: 0; left: 0; border-width: 0 0 1px 1px; }
+.auth-corner.br { bottom: 0; right: 0; border-width: 0 1px 1px 0; }
+
+/* ─── Eyebrow ─── */
+.ab-eyebrow {
+  display: flex; align-items: center; gap: 10px;
+  font: 500 10px/1 'JetBrains Mono', ui-monospace, monospace;
+  letter-spacing: .14em; color: var(--fg-dim);
+  text-transform: uppercase;
+  margin-bottom: 28px;
+}
+.ab-eyebrow .sq { width: 8px; height: 8px; background: var(--accent); flex: 0 0 8px; }
+.ab-eyebrow .bar { flex: 1; height: 1px; background: var(--line); max-width: 120px; }
+.ab-eyebrow .tag { color: var(--fg-muted); }
+
+/* ═══════════ VARIANT C · Manifesto (left side) ═══════════ */
+.v-manifesto {
+  font: 500 clamp(32px, 4vw, 54px)/1.08 'Space Grotesk', 'Noto Sans SC', sans-serif;
+  letter-spacing: -.02em;
+  color: var(--fg);
+  text-wrap: balance;
+  max-width: 16ch;
+}
+.v-manifesto .accent { color: var(--accent); }
+.v-manifesto .dot { color: var(--accent); }
+.v-manifesto .strike {
+  text-decoration: line-through;
+  color: var(--fg-muted);
+  font-weight: 400;
+}
+.v-manifesto br { display: block; content: ""; }
+
+.v-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px 20px;
+  border-top: 1px solid var(--line);
+  padding-top: 20px;
+  font: 500 10px/1.4 'JetBrains Mono', ui-monospace, monospace;
+  color: var(--fg-muted);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.v-stats div b {
+  display: block;
+  color: var(--fg);
+  font: 600 20px/1.1 'Space Grotesk', 'Noto Sans SC', sans-serif;
+  letter-spacing: -.01em;
+  margin-bottom: 6px;
+  text-transform: none;
+}
+
+/* ═══════════ FORM SIDE (right) ═══════════ */
+.ab-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 32px;
+}
+.ab-brand .mark {
+  width: 22px; height: 22px;
+  background: var(--accent);
+  position: relative;
+  flex-shrink: 0;
+}
+.ab-brand .mark::before {
+  content: ""; position: absolute;
+  left: 5px; top: 4px; width: 3px; height: 14px;
+  background: var(--bg);
+}
+.ab-brand .mark::after {
+  content: ""; position: absolute;
+  left: 10px; top: 9px; width: 8px; height: 3px;
+  background: var(--bg);
+}
+.ab-brand .name {
+  font: 600 16px/1 'Space Grotesk', sans-serif;
+  letter-spacing: -.01em;
+}
+.ab-brand .v {
+  font: 400 10px/1 'JetBrains Mono', ui-monospace, monospace;
+  color: var(--fg-muted);
+  padding-left: 10px;
+  border-left: 1px solid var(--line);
+  letter-spacing: .08em;
+}
+
+/* Sign in / Sign up tabs */
+.ab-tabs {
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--line-2);
+  background: var(--bg-1);
+  font: 500 11px/1 'JetBrains Mono', ui-monospace, monospace;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  margin-bottom: 28px;
+}
+.ab-tabs button {
+  flex: 1;
+  padding: 12px 14px;
+  background: transparent;
+  color: var(--fg-dim);
+  border: 0;
+  border-right: 1px solid var(--line-2);
+  cursor: pointer;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  transition: color .12s, background .12s;
+}
+.ab-tabs button:last-child { border-right: 0; }
+.ab-tabs button:hover { color: var(--fg); }
+.ab-tabs button.on {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+/* Heading + lede */
+.ab-h {
+  font: 600 clamp(24px, 2.6vw, 32px)/1.12 'Space Grotesk', 'Noto Sans SC', sans-serif;
+  letter-spacing: -.02em;
+  margin-bottom: 10px;
+  text-wrap: balance;
+}
+.ab-h .accent { color: var(--accent); }
+.ab-sub {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--fg-dim);
+  margin-bottom: 24px;
+  text-wrap: pretty;
+}
+
+/* OAuth buttons */
+.ab-oauth {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.ab-oauth button {
+  height: 44px;
+  padding: 0 14px;
+  background: transparent;
+  border: 1px solid var(--line-2);
+  color: var(--fg);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font: 500 13px/1 'Space Grotesk', sans-serif;
+  cursor: pointer;
+  transition: border-color .12s, background .12s;
+  text-align: left;
+}
+.ab-oauth button:hover {
+  border-color: var(--fg);
+  background: var(--bg-1);
+}
+.ab-oauth .icn {
+  width: 16px; height: 16px; flex: 0 0 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--fg);
+}
+.ab-oauth .kbd {
+  margin-left: auto;
+  font: 500 10px/1 'JetBrains Mono', ui-monospace, monospace;
+  color: var(--fg-muted);
+  letter-spacing: .08em;
+}
+
+.ab-or {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0 16px;
+  font: 500 10px/1 'JetBrains Mono', ui-monospace, monospace;
+  color: var(--fg-muted);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+.ab-or::before,
+.ab-or::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+
+/* Email field */
+.ab-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.ab-field label {
+  font: 500 10px/1 'JetBrains Mono', ui-monospace, monospace;
+  letter-spacing: .14em;
+  color: var(--fg-muted);
+  text-transform: uppercase;
+}
+.ab-field input {
+  height: 44px;
+  padding: 0 14px;
+  background: var(--bg-1);
+  border: 1px solid var(--line-2);
+  color: var(--fg);
+  font: 500 13px/1 'JetBrains Mono', ui-monospace, monospace;
+  outline: none;
+  transition: border-color .12s;
+  border-radius: 0;
+}
+.ab-field input:focus { border-color: var(--accent); }
+.ab-field input::placeholder { color: var(--fg-muted); }
+
+/* Primary CTA */
+.ab-cta {
+  height: 46px;
+  padding: 0 14px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  border: 1px solid var(--accent);
+  font: 600 13px/1 'JetBrains Mono', ui-monospace, monospace;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 6px;
+  transition: background .12s, transform .12s;
+}
+.ab-cta:hover {
+  background: color-mix(in oklab, var(--accent) 88%, black);
+}
+.ab-cta:active { transform: translateY(1px); }
+.ab-cta[disabled] { opacity: .6; cursor: not-allowed; }
+.ab-cta svg { flex: 0 0 16px; }
+
+/* Status (loading / success / error) */
+.ab-status {
+  margin-top: 14px;
+  font: 500 11px/1.5 'JetBrains Mono', ui-monospace, monospace;
+  letter-spacing: .08em;
+  padding: 11px 14px;
+  border: 1px solid var(--line-2);
+  background: var(--bg-1);
+  display: none;
+  align-items: center;
+  gap: 10px;
+  text-transform: uppercase;
+}
+.ab-status.show { display: flex; }
+.ab-status.st-ok    { border-color: color-mix(in oklab, var(--green) 60%, var(--line-2)); color: var(--green); }
+.ab-status.st-err   { border-color: color-mix(in oklab, var(--pink)  60%, var(--line-2)); color: var(--pink);  }
+.ab-status.st-load  { color: var(--accent); }
+.ab-status .dot {
+  width: 7px; height: 7px; background: currentColor; display: inline-block;
+  flex: 0 0 7px;
+}
+.ab-status.st-load .dot { animation: abblink 1s ease-in-out infinite; }
+@keyframes abblink { 50% { opacity: .3; } }
+
+/* Skip-login exit */
+.ab-skip {
+  margin-top: 22px;
+  padding: 14px 16px;
+  border: 1px dashed var(--line-2);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font: 500 11px/1.5 'JetBrains Mono', ui-monospace, monospace;
+  letter-spacing: .06em;
+  color: var(--fg-dim);
+}
+.ab-skip .txt { flex: 1; min-width: 0; }
+.ab-skip .txt strong {
+  color: var(--fg);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  display: block;
+  margin-bottom: 2px;
+}
+.ab-skip a {
+  color: var(--fg);
+  text-decoration: none;
+  padding: 8px 12px;
+  border: 1px solid var(--line-2);
+  font: 500 11px/1 'JetBrains Mono', ui-monospace, monospace;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: border-color .12s, color .12s;
+}
+.ab-skip a:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Foot */
+.ab-foot {
+  margin-top: 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font: 500 10px/1 'JetBrains Mono', ui-monospace, monospace;
+  color: var(--fg-muted);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.ab-foot a { color: inherit; }
+.ab-foot a:hover { color: var(--fg); }
+
+/* ─── Responsive ─── */
+@media (max-width: 920px) {
+  .auth-grid {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+  .ab-side {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+    padding: 36px 28px;
+    gap: 28px;
+  }
+  .ab-form {
+    padding: 36px 28px 48px;
+  }
+  .v-manifesto { max-width: 22ch; }
+}
+@media (max-width: 540px) {
+  .ab-side, .ab-form { padding: 28px 20px; }
+  .v-stats { grid-template-columns: 1fr; }
+}

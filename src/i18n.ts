@@ -223,6 +223,45 @@ export const I18N: Record<Lang, Record<string, string>> = {
     'pricing.faq.discount.q':  'Discounts for OSS, students, or startups?',
     'pricing.faq.discount.a':  'Yes \u2014 email us.',
     'pricing.faq.discount.d':  'Open-source maintainers and verified students get Pro free. Early-stage startups (< 10 people, < 2 yrs) get 50% off for the first year. Write to hello@tagma.dev.',
+
+    // \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 LOGIN (Variant C \u00b7 Manifesto) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+    'login.eyebrow':        '\u00a7 AN ACCOUNT IS OPTIONAL',
+    'login.eyebrow.tag':    'FIG. 03 \u00b7 LOCAL-FIRST',
+    'login.manifesto':
+      'Tagma runs on your <span class="accent">machine<span class="dot">.</span></span><br>The cloud is a <span class="strike">necessity</span> convenience.',
+    'login.stat.local.v':   '100%',
+    'login.stat.local.k':   'local-first editor',
+    'login.stat.bytes.v':   '0',
+    'login.stat.bytes.k':   'bytes sent on Free',
+    'login.stat.lic.v':     'MIT',
+    'login.stat.lic.k':     'licensed core',
+    'login.stat.size.v':    '~{size} MB',
+    'login.stat.size.k':    'desktop app',
+
+    'login.brand.v':        'v{v} \u00b7 {ch}',
+    'login.h.signin':       'Only when you <span class="accent">need the cloud</span>.',
+    'login.h.signup':       'Create an account \u2014 <span class="accent">only when it helps</span>.',
+    'login.sub.signin':     "The local Tagma doesn't know who you are \u2014 that's on purpose. Sign in only if you want sync, SSO, or the driver registry.",
+    'login.sub.signup':     'One account for sync, the driver registry, and Team features. No credit card, no feature gate on the local editor.',
+
+    'login.oauth.github':   'Continue with GitHub',
+    'login.oauth.google':   'Continue with Google',
+    'login.or':             'OR \u00b7 MAGIC LINK',
+    'login.email.label':    'EMAIL',
+    'login.email.ph':       'you@yourdomain.dev',
+    'login.cta':            'Send magic link',
+    'login.cta.sending':    'Sending\u2026',
+
+    'login.status.sent':    'LINK SENT \u00b7 CHECK YOUR INBOX',
+    'login.status.sending': 'SENDING MAGIC LINK\u2026',
+    'login.status.err':     'ERR \u00b7 COULD NOT SEND \u00b7 TRY AGAIN',
+
+    'login.skip.title':     "Don't need cloud?",
+    'login.skip.desc':      'Download the editor. No account, no prompt, no re-login.',
+    'login.skip.cta':       '\u2193 Download',
+
+    'login.foot.terms':     '\u00a7 BY CONTINUING YOU ACCEPT TERMS + PRIVACY',
+    'login.foot.fig':       'FIG. 03 \u00b7 MANIFESTO',
   },
   zh: {
     'nav.product': '产品', 'nav.docs': '文档', 'nav.archive': '历史版本', 'nav.github': 'GitHub ↗',
@@ -439,5 +478,44 @@ export const I18N: Record<Lang, Record<string, string>> = {
     'pricing.faq.discount.q':  '\u5f00\u6e90\u8d21\u732e\u8005\u3001\u5b66\u751f\u6216\u521d\u521b\u516c\u53f8\u6709\u4f18\u60e0\u5417\uff1f',
     'pricing.faq.discount.a':  '\u6709 \u2014 \u5199\u90ae\u4ef6\u7ed9\u6211\u4eec\u3002',
     'pricing.faq.discount.d':  '\u5f00\u6e90\u7ef4\u62a4\u8005\u548c\u5df2\u9a8c\u8bc1\u7684\u5b66\u751f\u514d\u8d39\u83b7\u5f97 Pro\u3002\u65e9\u671f\u521d\u521b\u516c\u53f8\uff08\u5c11\u4e8e 10 \u4eba\u3001\u6210\u7acb\u4e0d\u8d85\u8fc7 2 \u5e74\uff09\u9996\u5e74 5 \u6298\u3002\u53d1\u9001\u90ae\u4ef6\u5230 hello@tagma.dev\u3002',
+
+    // \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 LOGIN (Variant C \u00b7 Manifesto) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+    'login.eyebrow':        '\u00a7 \u8d26\u53f7\u662f\u53ef\u9009\u7684',
+    'login.eyebrow.tag':    '\u56fe 03 \u00b7 \u672c\u5730\u4f18\u5148',
+    'login.manifesto':
+      'Tagma \u8fd0\u884c\u5728\u4f60\u7684 <span class="accent">\u7535\u8111\u4e0a<span class="dot">.</span></span><br>\u4e91\u7aef\u53ea\u662f<span class="strike">\u5fc5\u9700\u54c1</span>\u4fbf\u5229\u3002',
+    'login.stat.local.v':   '100%',
+    'login.stat.local.k':   '\u672c\u5730\u4f18\u5148\u7f16\u8f91\u5668',
+    'login.stat.bytes.v':   '0',
+    'login.stat.bytes.k':   '\u514d\u8d39\u7248\u96f6\u5b57\u8282\u4e0a\u4f20',
+    'login.stat.lic.v':     'MIT',
+    'login.stat.lic.k':     '\u5f00\u6e90\u5185\u6838',
+    'login.stat.size.v':    '~{size} MB',
+    'login.stat.size.k':    '\u684c\u9762\u7aef',
+
+    'login.brand.v':        'v{v} \u00b7 {ch}',
+    'login.h.signin':       '\u53ea\u5728<span class="accent">\u9700\u8981\u4e91\u7aef</span>\u65f6\u767b\u5f55\u3002',
+    'login.h.signup':       '\u6ce8\u518c\u8d26\u53f7\u2014\u2014<span class="accent">\u53ea\u5728\u6709\u7528\u65f6</span>\u3002',
+    'login.sub.signin':     '\u672c\u5730\u7684 Tagma \u4e0d\u8ba4\u8bc6\u4f60\u2014\u2014\u8fd9\u662f\u523b\u610f\u8bbe\u8ba1\u3002\u53ea\u6709\u5f53\u4f60\u9700\u8981\u4e91\u540c\u6b65\u3001SSO \u6216\u9a71\u52a8 Registry \u65f6\u624d\u9700\u8981\u767b\u5f55\u3002',
+    'login.sub.signup':     '\u4e00\u4e2a\u8d26\u53f7\u7528\u4e8e\u540c\u6b65\u3001\u9a71\u52a8 Registry \u548c Team \u529f\u80fd\u3002\u4e0d\u6536\u4fe1\u7528\u5361\uff0c\u672c\u5730\u7f16\u8f91\u5668\u6c38\u8fdc\u4e0d\u9501\u529f\u80fd\u3002',
+
+    'login.oauth.github':   '\u4f7f\u7528 GitHub \u7ee7\u7eed',
+    'login.oauth.google':   '\u4f7f\u7528 Google \u7ee7\u7eed',
+    'login.or':             '\u6216 \u00b7 \u9b54\u6cd5\u94fe\u63a5',
+    'login.email.label':    '\u90ae\u7bb1',
+    'login.email.ph':       'you@yourdomain.dev',
+    'login.cta':            '\u53d1\u9001\u9b54\u6cd5\u94fe\u63a5',
+    'login.cta.sending':    '\u53d1\u9001\u4e2d\u2026',
+
+    'login.status.sent':    '\u94fe\u63a5\u5df2\u53d1\u9001 \u00b7 \u8bf7\u67e5\u6536\u90ae\u7bb1',
+    'login.status.sending': '\u6b63\u5728\u53d1\u9001\u9b54\u6cd5\u94fe\u63a5\u2026',
+    'login.status.err':     '\u9519\u8bef \u00b7 \u53d1\u9001\u5931\u8d25 \u00b7 \u8bf7\u91cd\u8bd5',
+
+    'login.skip.title':     '\u4e0d\u9700\u8981\u4e91\u7aef\uff1f',
+    'login.skip.desc':      '\u76f4\u63a5\u4e0b\u8f7d\u7f16\u8f91\u5668\u3002\u65e0\u9700\u8d26\u53f7\u3001\u65e0\u9700\u63d0\u793a\u3001\u65e0\u9700\u91cd\u767b\u3002',
+    'login.skip.cta':       '\u2193 \u4e0b\u8f7d',
+
+    'login.foot.terms':     '\u00a7 \u7ee7\u7eed\u5373\u8868\u793a\u4f60\u540c\u610f\u6761\u6b3e\u4e0e\u9690\u79c1\u653f\u7b56',
+    'login.foot.fig':       '\u56fe 03 \u00b7 \u5ba3\u8a00',
   },
 };

@@ -1,29 +1,251 @@
 ---
 /**
- * /login — placeholder
+ * /login — Tagma sign-in / sign-up (Variant C · Manifesto)
  *
- * Wired up so the V2 header's Sign in link doesn't 404. Replace
- * with real auth flow when account system is ready.
+ * Layout:
+ *   ┌─────────────────┬─────────────────┐
+ *   │  MANIFESTO      │  TABS           │
+ *   │  + stats grid   │  + OAuth        │
+ *   │                 │  + magic link   │
+ *   │  (local-first)  │  + skip-download│
+ *   └─────────────────┴─────────────────┘
+ *
+ * Auth is not wired to a backend yet — this page ships the UI
+ * for the upcoming flow. OAuth buttons + magic-link form are
+ * rendered; the submit handler shows a demo "LINK SENT" state.
+ *
+ * i18n keys live under `login.*` in src/i18n.ts.
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
+import '../styles/login.css';
 ---
 
-<BaseLayout title="Sign in · Tagma" description="Sign in to Tagma — coming soon.">
-  <section class="page-head">
-    <div class="page-eyebrow">
-      <span class="square"></span>
-      <span>§ SIGN IN · COMING SOON</span>
-      <span class="bar"></span>
-    </div>
-    <h1>Accounts are on the way.</h1>
-    <p class="lede">
-      Tagma is local-first — you don't need an account to use the editor,
-      SDK, or CLI today. Cloud features (sync, team workspaces) will come
-      with a sign-in flow soon.
-    </p>
-    <div style="display:flex; gap:12px; margin-top:16px;">
-      <a class="accent-btn" href="/#download">↓ Download Editor</a>
-      <a class="ghost-btn" href="/">Back home</a>
+<BaseLayout
+  title="Sign in · Tagma"
+  description="Sign in to Tagma — local-first by default. Accounts unlock cloud sync, the driver registry, and Team features. Never required."
+>
+  <section class="auth-page">
+    <span class="auth-corner tl" aria-hidden="true"></span>
+    <span class="auth-corner tr" aria-hidden="true"></span>
+    <span class="auth-corner bl" aria-hidden="true"></span>
+    <span class="auth-corner br" aria-hidden="true"></span>
+
+    <div class="auth-grid v-C">
+
+      {/* ─────────────── LEFT · Manifesto ─────────────── */}
+      <div class="ab-side">
+        <div>
+          <div class="ab-eyebrow">
+            <span class="sq" aria-hidden="true"></span>
+            <span data-i18n="login.eyebrow">§ AN ACCOUNT IS OPTIONAL</span>
+            <span class="bar" aria-hidden="true"></span>
+            <span class="tag" data-i18n="login.eyebrow.tag">FIG. 03 · LOCAL-FIRST</span>
+          </div>
+          <h2 class="v-manifesto" data-i18n="login.manifesto">
+            Tagma runs on your <span class="accent">machine<span class="dot">.</span></span><br />
+            The cloud is a <span class="strike">necessity</span> convenience.
+          </h2>
+        </div>
+
+        <div class="v-stats">
+          <div>
+            <b data-i18n="login.stat.local.v">100%</b>
+            <span data-i18n="login.stat.local.k">local-first editor</span>
+          </div>
+          <div>
+            <b data-i18n="login.stat.bytes.v">0</b>
+            <span data-i18n="login.stat.bytes.k">bytes sent on Free</span>
+          </div>
+          <div>
+            <b data-i18n="login.stat.lic.v">MIT</b>
+            <span data-i18n="login.stat.lic.k">licensed core</span>
+          </div>
+          <div>
+            <b data-i18n="login.stat.size.v">~154 MB</b>
+            <span data-i18n="login.stat.size.k">desktop app</span>
+          </div>
+        </div>
+      </div>
+
+      {/* ─────────────── RIGHT · Form ─────────────── */}
+      <div class="ab-form">
+        <div class="ab-form-inner">
+          <div class="ab-brand">
+            <span class="mark" aria-hidden="true"></span>
+            <span class="name">Tagma</span>
+            <span class="v" data-i18n="login.brand.v">v0.3.6 · ALPHA</span>
+          </div>
+
+          <div class="ab-tabs" role="tablist" id="authTabs">
+            <button type="button" role="tab" class="on" data-tab="signin" aria-selected="true" data-i18n="nav.signin">Sign in</button>
+            <button type="button" role="tab" data-tab="signup" aria-selected="false" data-i18n="nav.signup">Sign up</button>
+          </div>
+
+          <h2 class="ab-h" id="authH" data-tab-content="signin" data-i18n="login.h.signin">
+            Only when you <span class="accent">need the cloud</span>.
+          </h2>
+          <p class="ab-sub" id="authSub" data-tab-content="signin" data-i18n="login.sub.signin">
+            The local Tagma doesn't know who you are — that's on purpose. Sign in only if you want sync, SSO, or the driver registry.
+          </p>
+
+          <form class="ab-auth-form" id="authForm" novalidate>
+            <div class="ab-oauth">
+              <button type="button" data-oauth="github">
+                <span class="icn" aria-hidden="true">
+                  <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+                    <path d="M8 .2A8 8 0 0 0 5.47 15.8c.4.07.55-.17.55-.38v-1.32c-2.23.48-2.7-1.07-2.7-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.06-.49.06-.49.8.06 1.22.82 1.22.82.71 1.22 1.87.87 2.33.66.07-.52.28-.87.5-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.58.82-2.14-.08-.2-.36-1.02.08-2.13 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.52-1.03 2.2-.82 2.2-.82.43 1.11.16 1.93.08 2.13.51.56.82 1.27.82 2.14 0 3.06-1.87 3.74-3.65 3.94.29.25.54.73.54 1.48v2.2c0 .21.15.46.55.38A8 8 0 0 0 8 .2Z"/>
+                  </svg>
+                </span>
+                <span data-i18n="login.oauth.github">Continue with GitHub</span>
+                <span class="kbd">⌘G</span>
+              </button>
+              <button type="button" data-oauth="google">
+                <span class="icn" aria-hidden="true">
+                  <svg viewBox="0 0 16 16" width="16" height="16" fill="none">
+                    <path d="M15.68 8.18c0-.57-.05-1.11-.15-1.64H8v3.1h4.31a3.7 3.7 0 0 1-1.6 2.43v2.01h2.59c1.51-1.39 2.38-3.44 2.38-5.9Z" fill="#4285F4"/>
+                    <path d="M8 16c2.16 0 3.97-.72 5.3-1.94l-2.59-2.01c-.72.48-1.64.77-2.71.77-2.08 0-3.84-1.4-4.47-3.3H.86v2.07A8 8 0 0 0 8 16Z" fill="#34A853"/>
+                    <path d="M3.53 9.52a4.8 4.8 0 0 1 0-3.04V4.41H.86a8 8 0 0 0 0 7.18l2.67-2.07Z" fill="#FBBC05"/>
+                    <path d="M8 3.18c1.18 0 2.23.4 3.06 1.2l2.3-2.3A8 8 0 0 0 .85 4.4l2.67 2.08C4.16 4.58 5.92 3.18 8 3.18Z" fill="#EA4335"/>
+                  </svg>
+                </span>
+                <span data-i18n="login.oauth.google">Continue with Google</span>
+                <span class="kbd">⌘O</span>
+              </button>
+            </div>
+
+            <div class="ab-or" data-i18n="login.or">OR · MAGIC LINK</div>
+
+            <div class="ab-field">
+              <label for="authEmail" data-i18n="login.email.label">EMAIL</label>
+              <input
+                id="authEmail"
+                name="email"
+                type="email"
+                autocomplete="email"
+                required
+                placeholder="you@yourdomain.dev"
+                data-i18n-ph="login.email.ph"
+              />
+            </div>
+
+            <button type="submit" class="ab-cta" id="authSubmit">
+              <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                <rect x="1.5" y="3" width="13" height="10"/>
+                <path d="M1.5 4l6.5 5 6.5-5"/>
+              </svg>
+              <span data-i18n="login.cta">Send magic link</span>
+            </button>
+
+            <div class="ab-status" id="authStatus" role="status" aria-live="polite">
+              <span class="dot" aria-hidden="true"></span>
+              <span class="msg"></span>
+            </div>
+          </form>
+
+          <div class="ab-skip">
+            <div class="txt">
+              <strong data-i18n="login.skip.title">Don't need cloud?</strong>
+              <span data-i18n="login.skip.desc">Download the editor. No account, no prompt, no re-login.</span>
+            </div>
+            <a href="/#download" data-i18n="login.skip.cta">↓ Download</a>
+          </div>
+
+          <div class="ab-foot">
+            <span data-i18n="login.foot.terms">§ BY CONTINUING YOU ACCEPT TERMS + PRIVACY</span>
+            <span data-i18n="login.foot.fig">FIG. 03 · MANIFESTO</span>
+          </div>
+        </div>
+      </div>
+
     </div>
   </section>
+
+  {/* ─────────── Client wiring (module — imports I18N directly) ─────────── */}
+  <script>
+    import { I18N } from '../i18n';
+
+    type Lang = 'en' | 'zh';
+    function currentLang(): Lang {
+      try {
+        const saved = JSON.parse(localStorage.getItem('tagma_tweaks') || '{}');
+        return saved.lang === 'zh' ? 'zh' : 'en';
+      } catch { return 'en'; }
+    }
+    function t(key: string, lang: Lang = currentLang()): string {
+      return I18N[lang]?.[key] ?? I18N.en[key] ?? '';
+    }
+
+    /* Tab switch — Sign in ↔ Sign up. Rewrites the data-i18n key on the
+       heading + lede, then re-renders them from the live dictionary so
+       language changes + tab changes both work. */
+    const tabs = document.getElementById('authTabs');
+    const h    = document.getElementById('authH') as HTMLElement | null;
+    const sub  = document.getElementById('authSub') as HTMLElement | null;
+
+    function setTab(which: 'signin' | 'signup'): void {
+      if (!tabs || !h || !sub) return;
+      tabs.querySelectorAll<HTMLButtonElement>('button[data-tab]').forEach((b) => {
+        const on = b.dataset.tab === which;
+        b.classList.toggle('on', on);
+        b.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      h.dataset.i18n   = `login.h.${which}`;
+      sub.dataset.i18n = `login.sub.${which}`;
+      h.innerHTML   = t(h.dataset.i18n);
+      sub.innerHTML = t(sub.dataset.i18n);
+    }
+
+    tabs?.addEventListener('click', (e) => {
+      const t = (e.target as HTMLElement).closest('button[data-tab]') as HTMLButtonElement | null;
+      if (t?.dataset.tab) setTab(t.dataset.tab as 'signin' | 'signup');
+    });
+
+    /* Placeholder translation — shell.client.ts only translates innerHTML;
+       <input> placeholders need a separate pass, re-run on lang change. */
+    function applyPlaceholders(): void {
+      const lang = currentLang();
+      document.querySelectorAll<HTMLInputElement>('input[data-i18n-ph]').forEach((el) => {
+        const k = el.getAttribute('data-i18n-ph');
+        if (k) el.placeholder = t(k, lang);
+      });
+    }
+
+    /* Magic-link submit → demo state chain: SENDING → SENT. */
+    const form   = document.getElementById('authForm') as HTMLFormElement | null;
+    const status = document.getElementById('authStatus') as HTMLElement | null;
+
+    function setStatus(kind: 'ok' | 'err' | 'load', msgKey: string): void {
+      if (!status) return;
+      status.classList.remove('st-ok', 'st-err', 'st-load');
+      status.classList.add('show', `st-${kind}`);
+      const msg = status.querySelector<HTMLElement>('.msg');
+      if (msg) {
+        msg.dataset.i18n = msgKey;
+        msg.textContent = t(msgKey);
+      }
+    }
+
+    form?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = form.querySelector<HTMLInputElement>('#authEmail');
+      if (!email?.value || !email.value.includes('@')) {
+        setStatus('err', 'login.status.err');
+        return;
+      }
+      setStatus('load', 'login.status.sending');
+      window.setTimeout(() => setStatus('ok', 'login.status.sent'), 900);
+    });
+
+    /* OAuth buttons — fire the loading state. Real redirects wired later. */
+    document.querySelectorAll<HTMLButtonElement>('[data-oauth]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        setStatus('load', 'login.status.sending');
+      });
+    });
+
+    /* Run placeholders on first paint + on every lang/theme apply event.
+       shell.client.ts dispatches `tagma:apply` each time a tweak lands. */
+    applyPlaceholders();
+    document.addEventListener('tagma:apply', applyPlaceholders);
+  </script>
 </BaseLayout>
