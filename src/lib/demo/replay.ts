@@ -111,10 +111,12 @@ function createTasks(content: HTMLElement, tasks: Task[], lang: Lang, interactiv
 function positionTasks(content: HTMLElement, tasks: Task[], laneCount: number) {
   const fieldW = content.clientWidth;
   const fieldH = content.clientHeight;
-  const pad = 18;
+  const narrow = fieldW < 360;
+  const pad = narrow ? 10 : 18;
   const cols = 4;
-  const gap = 12;
-  const taskW = Math.max(158, Math.min(198, (fieldW - pad * 2 - gap * (cols - 1)) / cols));
+  const gap = narrow ? 8 : 12;
+  const minW = narrow ? 128 : 158;
+  const taskW = Math.max(minW, Math.min(198, (fieldW - pad * 2 - gap * (cols - 1)) / cols));
   const colStep = taskW + gap;
   const laneH = fieldH / laneCount;
   tasks.forEach((t) => {

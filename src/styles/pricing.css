@@ -322,3 +322,28 @@
   .pr-row-feature .pr-cell-val:nth-child(4) { grid-column:1 / -1; border-right:0; }
   .pr-faq-grid { grid-template-columns:1fr; }
 }
+@media (max-width: 560px) {
+  .pr-hero { padding:40px 16px 28px; }
+  .pr-matrix-wrap, .pr-faq { padding:28px 16px; }
+  .pr-h1 { font-size:clamp(36px, 9vw, 52px); }
+  .pr-lede { font-size:15px; }
+  .pr-hero-controls { gap:12px; }
+  .pr-billing button { padding:8px 14px; }
+  .pr-billing .save { padding:0 8px 0 6px; font-size:10px; }
+  .pr-hero-note { font-size:10px; letter-spacing:.08em; }
+  .pr-row, .pr-row-head { grid-template-columns: 1fr; }
+  .pr-cell { padding:14px 16px; border-right:0; }
+  .pr-row-head .pr-cell { padding:20px 16px 18px; }
+  .pr-row-feature .pr-cell-val:nth-child(4) { grid-column:auto; }
+  .pr-tier-name { font-size:24px; }
+  .pr-tier-tagline { min-height:0; }
+  .pr-price-big { font-size:32px; }
+  .pr-cta { height:42px; padding:0 16px; font-size:12px; }
+  .pr-popular-flag { right:12px; }
+  .pr-cell-label { padding:12px 16px; }
+  .pr-cell-val { padding:12px 16px; }
+  .pr-faq-item { padding:22px 20px; }
+  .pr-faq-a { font-size:16px; }
+  .pr-faq-d { font-size:13.5px; }
+  .pr-legend { gap:14px 18px; font-size:10px; }
+}

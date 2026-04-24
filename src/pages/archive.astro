@@ -332,6 +332,16 @@ function channelLabel(ch: string): string {
     .arc-dl { justify-content: flex-start; }
     .arc-menu { right: auto; left: 0; }
   }
+  @media (max-width: 540px) {
+    .page-head { padding: 32px 20px 20px; }
+    .page-head h1 { font-size: clamp(40px, 11vw, 72px); }
+    .page-head .lede { font-size: 15px; margin-top: 20px; }
+    .arc-wrap { padding: 0 20px 32px; }
+    .filter-bar { gap: 8px; padding: 14px 0; }
+    .filter-bar input { width: 100%; }
+    .arc-meta { gap: 8px; font-size: 12px; }
+    .arc-ver { font-size: 13px; }
+  }
 
   body { user-select: none; -webkit-user-select: none; }
   .filter-bar input { user-select: text; -webkit-user-select: text; }
