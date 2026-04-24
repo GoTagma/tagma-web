@@ -1,29 +1,332 @@
 ---
 /**
- * /pricing — placeholder
+ * /pricing — Tagma pricing page (Variant A · Swimlane Matrix)
  *
- * Wired up so the V2 header's Pricing link doesn't 404 during the
- * pricing page design pass. Replace this with the real Pricing
- * design in a follow-up PR.
+ * Structure:
+ *   1. Hero              — eyebrow, split h1, lede, billing toggle
+ *   2. Matrix            — single grid table with tier headers + 3
+ *                          capability groups (Core / Cloud / Team)
+ *   3. FAQ               — 6 Q&A cells in a 2-col grid
+ *
+ * All tier data, capability rows, and FAQ entries are defined in
+ * component frontmatter. Copy changes flow through i18n keys
+ * (see `src/i18n.ts`), prices are in site.config.ts.
+ *
+ * The billing toggle (Monthly ↔ Yearly) is wired inline at the
+ * bottom of the file — it only needs to rewrite a handful of
+ * `data-price`-bearing nodes and a class on the toggle root.
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../site.config';
+import '../styles/pricing.css';
+
+// ── Tier data ─────────────────────────────────────────────
+// Single source of truth. `priceMonthly` drives the Monthly/Yearly
+// computation in the inline script at page bottom (yearly = ×0.8).
+type Tier = {
+  id: 'free' | 'pro' | 'team';
+  badge: string;       // i18n key for the § badge above name
+  accentVar: string;   // css var the tier uses (for header + ✓)
+  popular?: boolean;
+  priceMonthly: number | null;   // null → "Let's talk"
+  ctaKind: 'primary' | 'ghost';
+  ctaHref: string;
+};
+
+const TIERS: Tier[] = [
+  { id: 'free', badge: 'pricing.tier.free.badge', accentVar: 'var(--fg-dim)', priceMonthly: 0,    ctaKind: 'ghost',   ctaHref: '/#download' },
+  { id: 'pro',  badge: 'pricing.tier.pro.badge',  accentVar: 'var(--accent)', priceMonthly: 19,   ctaKind: 'primary', ctaHref: '/login?plan=pro', popular: true },
+  { id: 'team', badge: 'pricing.tier.team.badge', accentVar: 'var(--teal)',   priceMonthly: null, ctaKind: 'ghost',   ctaHref: 'mailto:hello@tagma.dev?subject=Tagma%20Team' },
+];
+
+// ── Capability matrix ─────────────────────────────────────
+// Each row is one capability. `cells` is [free, pro, team] where:
+//   'yes'   → ✓ glyph
+//   'no'    → em-dash
+//   string  → rendered as literal (e.g. '∞', '10 GB', '5+')
+type Row = { k: string; cells: Array<'yes' | 'no' | string> };
+type Group = { id: string; titleKey: string; tagKey: string; rows: Row[] };
+
+const GROUPS: Group[] = [
+  {
+    id: 'core',
+    titleKey: 'pricing.grp.core.title',
+    tagKey:   'pricing.grp.core.tag',
+    rows: [
+      { k: 'editor',    cells: ['yes', 'yes', 'yes'] },
+      { k: 'sdk',       cells: ['yes', 'yes', 'yes'] },
+      { k: 'cli',       cells: ['yes', 'yes', 'yes'] },
+      { k: 'drivers',   cells: ['yes', 'yes', 'yes'] },
+      { k: 'pipelines', cells: ['∞',   '∞',   '∞'  ] },
+      { k: 'runs',      cells: ['∞',   '∞',   '∞'  ] },
+    ],
+  },
+  {
+    id: 'cloud',
+    titleKey: 'pricing.grp.cloud.title',
+    tagKey:   'pricing.grp.cloud.tag',
+    rows: [
+      { k: 'sync',      cells: ['no',  'yes', 'yes'] },
+      { k: 'registry',  cells: ['no',  'yes', 'yes'] },
+      { k: 'analytics', cells: ['no',  'yes', 'yes'] },
+      { k: 'runner',    cells: ['no',  'no',  'yes'] },
+      { k: 'storage',   cells: ['no',  '10 GB', '1 TB'] },
+    ],
+  },
+  {
+    id: 'team',
+    titleKey: 'pricing.grp.team.title',
+    tagKey:   'pricing.grp.team.tag',
+    rows: [
+      { k: 'sso',      cells: ['no', 'no', 'yes'] },
+      { k: 'audit',    cells: ['no', 'no', 'yes'] },
+      { k: 'sla',      cells: ['no', 'no', 'yes'] },
+      { k: 'selfhost', cells: ['no', 'no', 'yes'] },
+      { k: 'seats',    cells: ['1',  '1',  '5+'] },
+    ],
+  },
+];
+
+// ── FAQ ───────────────────────────────────────────────────
+const FAQ_KEYS = ['free', 'pay', 'run', 'selfhost', 'cancel', 'discount'];
+
+// Used to format price placeholders in the inline script
+const TIER_PRICES_JSON = JSON.stringify(TIERS.map((t) => t.priceMonthly));
 ---
 
-<BaseLayout title="Pricing · Tagma" description="Tagma pricing — coming soon.">
-  <section class="page-head">
-    <div class="page-eyebrow">
-      <span class="square"></span>
-      <span>§ PRICING · COMING SOON</span>
-      <span class="bar"></span>
-    </div>
-    <h1>Pricing is on the way.</h1>
-    <p class="lede">
-      We're working on it. In the meantime, Tagma Editor is free to download,
-      and the SDK &amp; CLI are open source.
-    </p>
-    <div style="display:flex; gap:12px; margin-top:16px;">
-      <a class="accent-btn" href="/#download">↓ Download Editor</a>
-      <a class="ghost-btn" href="/docs">Read the docs</a>
+<BaseLayout
+  title="Pricing · Tagma"
+  description="Tagma pricing — free forever for local-first use. Pay only for cloud services: sync, SSO, hosted runners."
+>
+
+  {/* ───────────────────── HERO ───────────────────── */}
+  <section class="pr-hero">
+    <span class="pr-corner-tl" aria-hidden="true"></span>
+    <span class="pr-corner-tr" aria-hidden="true"></span>
+    <span class="pr-corner-bl" aria-hidden="true"></span>
+    <span class="pr-corner-br" aria-hidden="true"></span>
+
+    <div class="pr-hero-inner">
+      <div class="pr-eyebrow">
+        <span class="sq" aria-hidden="true"></span>
+        <span data-i18n="pricing.hero.eyebrow">§ PRICING · SIMPLE · LOCAL-FIRST</span>
+        <span class="bar" aria-hidden="true"></span>
+        <span class="tag" data-i18n="pricing.hero.tagline">FREE FOREVER · CLOUD OPTIONAL</span>
+      </div>
+
+      <h1 class="pr-h1">
+        <span data-i18n="pricing.hero.h1a">Free where it matters.</span><br />
+        <span class="pr-accent"><span data-i18n="pricing.hero.h1b">Paid where it helps</span><span class="pr-dot">.</span></span>
+      </h1>
+
+      <p class="pr-lede" data-i18n="pricing.hero.lede">
+        The Editor, SDK, and CLI are free forever. Pro and Team add cloud services that only make sense on a server — sync, SSO, hosted runners. Nothing local gets locked.
+      </p>
+
+      <div class="pr-hero-controls">
+        <div class="pr-billing" data-billing="yearly">
+          <button type="button" data-bill="monthly" data-i18n="pricing.bill.monthly">MONTHLY</button>
+          <button type="button" class="on" data-bill="yearly" data-i18n="pricing.bill.yearly">YEARLY</button>
+          <span class="save" data-i18n="pricing.bill.save">· SAVE 20%</span>
+        </div>
+        <span class="pr-hero-note" data-i18n="pricing.bill.note">USD · PER USER · CHANGE ANYTIME</span>
+      </div>
     </div>
   </section>
+
+  {/* ───────────────────── MATRIX ───────────────────── */}
+  <section class="pr-matrix-wrap">
+    <div class="pr-eyebrow pr-eyebrow-inline">
+      <span class="sq" aria-hidden="true"></span>
+      <span data-i18n="pricing.matrix.eyebrow">§ FIG. 01 · TIER MATRIX</span>
+      <span class="bar" aria-hidden="true"></span>
+      <span class="tag" data-i18n="pricing.matrix.tag">SWIM-LANE COMPARISON</span>
+    </div>
+
+    <div class="pr-matrix">
+
+      {/* Header row: label col + 3 tier header cells */}
+      <div class="pr-row pr-row-head">
+        <div class="pr-cell pr-cell-label-head">
+          <div class="pr-sec" data-i18n="pricing.matrix.headKicker">§ CAPABILITY</div>
+          <div class="pr-head-title" data-i18n="pricing.matrix.headTitle">What you're comparing</div>
+          <div class="pr-head-sub" data-i18n="pricing.matrix.headSub">
+            Local is the floor. Cloud is the add-on. Team is the stack.
+          </div>
+        </div>
+
+        {TIERS.map((t, i) => (
+          <div class:list={['pr-cell', 'pr-cell-tier', t.popular && 'is-popular']}>
+            {t.popular && (
+              <span class="pr-popular-flag" data-i18n="pricing.popular">★ MOST PICKED</span>
+            )}
+            <div class="pr-sec" style={`color:${t.accentVar}`}>
+              § {String(i + 1).padStart(2, '0')} · <span data-i18n={t.badge}>{t.id.toUpperCase()}</span>
+            </div>
+            <div class="pr-tier-name" data-i18n={`pricing.tier.${t.id}.name`}>
+              {t.id === 'free' ? 'Free' : t.id === 'pro' ? 'Pro' : 'Team'}
+            </div>
+            <div class="pr-tier-tagline" data-i18n={`pricing.tier.${t.id}.tagline`}>
+              {t.id === 'free'
+                ? 'The whole product, running on your machine.'
+                : t.id === 'pro'
+                  ? 'Your pipelines, synced across every device.'
+                  : 'SSO, hosted runners, audit trails.'}
+            </div>
+
+            <div class="pr-price" data-tier-id={t.id} data-price-monthly={t.priceMonthly ?? ''}>
+              {t.priceMonthly === null ? (
+                <>
+                  <div class="pr-price-big" data-i18n="pricing.price.contact">Let's talk</div>
+                  <div class="pr-price-note" data-i18n="pricing.price.custom">CUSTOM QUOTE</div>
+                </>
+              ) : t.priceMonthly === 0 ? (
+                <>
+                  <div class="pr-price-big"><span>$0</span><span class="pr-price-unit" data-i18n="pricing.price.forever">/ forever</span></div>
+                  <div class="pr-price-note" data-i18n="pricing.price.freeNote">NO ACCOUNT · LOCAL-FIRST</div>
+                </>
+              ) : (
+                <>
+                  {/* Struck-through original monthly price, shown only on yearly */}
+                  <div class="pr-price-strike" data-strike>${t.priceMonthly}.00</div>
+                  <div class="pr-price-big">
+                    <span data-price-shown>${(t.priceMonthly * 0.8).toFixed(2)}</span>
+                    <span class="pr-price-unit" data-i18n="pricing.price.perUser">/ user · month</span>
+                  </div>
+                  <div class="pr-price-note pr-price-note-yearly" data-note-yearly data-i18n="pricing.price.yearlyNote">↓ 20% · BILLED ANNUALLY</div>
+                  <div class="pr-price-note pr-price-note-monthly" data-note-monthly data-i18n="pricing.price.monthlyNote">OR SAVE 20% YEARLY</div>
+                </>
+              )}
+            </div>
+
+            <a
+              class:list={['pr-cta', t.ctaKind === 'primary' ? 'pr-cta-primary' : 'pr-cta-ghost']}
+              href={t.ctaHref}
+              data-i18n={`pricing.tier.${t.id}.cta`}
+            >
+              {t.id === 'free' ? '↓ Download Tagma' : t.id === 'pro' ? 'Start Pro trial' : 'Contact sales'}
+            </a>
+            <div class="pr-cta-note" data-i18n={`pricing.tier.${t.id}.ctaNote`}>
+              {t.id === 'free'
+                ? 'Works offline · no account'
+                : t.id === 'pro'
+                  ? '14-day trial · no card required'
+                  : 'Custom onboarding · SLA'}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Capability groups */}
+      {GROUPS.map((grp) => (
+        <>
+          <div class="pr-row pr-row-group">
+            <div class="pr-cell pr-cell-group-title">
+              <span class="pr-sec accent" data-i18n={grp.titleKey}>{grp.id.toUpperCase()}</span>
+            </div>
+            <div class="pr-cell pr-cell-group-tag">
+              <span class="pr-sec muted" data-i18n={grp.tagKey}>…</span>
+            </div>
+          </div>
+          {grp.rows.map((row) => (
+            <div class="pr-row pr-row-feature">
+              <div class="pr-cell pr-cell-label">
+                <div class="pr-feat-label" data-i18n={`pricing.feat.${row.k}.label`}>{row.k}</div>
+                <div class="pr-feat-sub"   data-i18n={`pricing.feat.${row.k}.sub`}>—</div>
+              </div>
+              {row.cells.map((v, ci) => (
+                <div class:list={['pr-cell', 'pr-cell-val', ci === 1 && 'is-popular-col']}>
+                  {v === 'yes' ? (
+                    <span class="pr-check" style={`color:${TIERS[ci].accentVar}`}>✓</span>
+                  ) : v === 'no' ? (
+                    <span class="pr-dash">—</span>
+                  ) : (
+                    <span class="pr-val">{v}</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          ))}
+        </>
+      ))}
+    </div>
+
+    <div class="pr-legend">
+      <span><span class="pr-check-inline">✓</span> <span data-i18n="pricing.legend.yes">INCLUDED</span></span>
+      <span>— <span data-i18n="pricing.legend.no">NOT INCLUDED</span></span>
+      <span>∞ <span data-i18n="pricing.legend.infty">UNLIMITED</span></span>
+      <span class="pr-legend-right" data-i18n="pricing.legend.fig">FIG. 01 · TIER × CAPABILITY</span>
+    </div>
+  </section>
+
+  {/* ───────────────────── FAQ ───────────────────── */}
+  <section class="pr-faq">
+    <div class="pr-eyebrow pr-eyebrow-inline">
+      <span class="sq" aria-hidden="true"></span>
+      <span data-i18n="pricing.faq.eyebrow">§ FAQ · COMMON QUESTIONS</span>
+      <span class="bar" aria-hidden="true"></span>
+      <span class="tag" data-i18n="pricing.faq.tag">6 ANSWERS</span>
+    </div>
+
+    <h3 class="pr-faq-title">
+      <span data-i18n="pricing.faq.titleHead">Questions, answered</span>
+      {' '}
+      <span class="pr-accent"><span data-i18n="pricing.faq.titleTail">straight.</span></span>
+    </h3>
+
+    <div class="pr-faq-grid">
+      {FAQ_KEYS.map((key, i) => (
+        <div class="pr-faq-item">
+          <div class="pr-faq-q">
+            <span class="n">§ {String(i + 1).padStart(2, '0')}</span>
+            &nbsp;·&nbsp;
+            <span data-i18n={`pricing.faq.${key}.q`}>Q?</span>
+          </div>
+          <div class="pr-faq-a" data-i18n={`pricing.faq.${key}.a`}>A.</div>
+          <div class="pr-faq-d" data-i18n={`pricing.faq.${key}.d`}>…</div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  {/* ─────────── Billing toggle wiring ─────────── */}
+  <script is:inline define:vars={{ TIER_PRICES_JSON }}>
+    /**
+     * Billing toggle: flips data-billing on .pr-billing, which CSS uses
+     * to show/hide the strike-through, the ↓20% line, and the "or save
+     * 20%" line. Also rewrites the big-number for paid tiers.
+     *
+     * Values intentionally stay in the DOM as data-price-monthly so
+     * switching is pure display — never a re-fetch.
+     */
+    (function () {
+      var tiers  = JSON.parse(TIER_PRICES_JSON); // [0, 19, null]
+      var root   = document.querySelector('.pr-billing');
+      if (!root) return;
+
+      function apply(mode) {
+        root.dataset.billing = mode;
+        root.querySelectorAll('button[data-bill]').forEach(function (b) {
+          b.classList.toggle('on', b.dataset.bill === mode);
+        });
+        document.querySelectorAll('.pr-price').forEach(function (box) {
+          var m = box.dataset.priceMonthly;
+          if (!m) return; // free ($0) or contact (null) — nothing to swap
+          var monthly = parseFloat(m);
+          if (!monthly) return;
+          var shown = mode === 'yearly' ? (monthly * 0.8) : monthly;
+          var tgt   = box.querySelector('[data-price-shown]');
+          if (tgt) tgt.textContent = '$' + (Number.isInteger(shown) ? shown : shown.toFixed(2));
+          box.dataset.mode = mode;
+        });
+      }
+
+      root.addEventListener('click', function (e) {
+        var t = e.target.closest('button[data-bill]');
+        if (t) apply(t.dataset.bill);
+      });
+
+      apply('yearly');
+    })();
+  </script>
 </BaseLayout>
