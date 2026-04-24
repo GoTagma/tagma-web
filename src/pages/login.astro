@@ -1,0 +1,29 @@
+---
+/**
+ * /login — placeholder
+ *
+ * Wired up so the V2 header's Sign in link doesn't 404. Replace
+ * with real auth flow when account system is ready.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Sign in · Tagma" description="Sign in to Tagma — coming soon.">
+  <section class="page-head">
+    <div class="page-eyebrow">
+      <span class="square"></span>
+      <span>§ SIGN IN · COMING SOON</span>
+      <span class="bar"></span>
+    </div>
+    <h1>Accounts are on the way.</h1>
+    <p class="lede">
+      Tagma is local-first — you don't need an account to use the editor,
+      SDK, or CLI today. Cloud features (sync, team workspaces) will come
+      with a sign-in flow soon.
+    </p>
+    <div style="display:flex; gap:12px; margin-top:16px;">
+      <a class="accent-btn" href="/#download">↓ Download Editor</a>
+      <a class="ghost-btn" href="/">Back home</a>
+    </div>
+  </section>
+</BaseLayout>

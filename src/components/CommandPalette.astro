@@ -1,0 +1,150 @@
+---
+/**
+ * CommandPalette.astro
+ *
+ * Global ⌘K / Ctrl+K command palette.
+ *
+ * Mounted once by BaseLayout.astro. Listens for:
+ *   - custom event `tagma:cmdk:open` (dispatched by Header search button)
+ *   - ⌘K on macOS / Ctrl+K on Windows/Linux
+ *
+ * Items are grouped (Jump to / Drivers / Actions) and live-filtered
+ * against the input. Keyboard: ↑/↓ navigate, Enter invoke, Esc close.
+ */
+import { site } from '../site.config';
+---
+
+<div class="cmdk-overlay" id="cmdkOverlay" hidden role="dialog" aria-modal="true" aria-label="Command palette">
+  <div class="cmdk-box" role="combobox" aria-expanded="true" aria-controls="cmdkResults">
+    <div class="cmdk-input">
+      <span class="icon" aria-hidden="true">⌕</span>
+      <input
+        id="cmdkInput"
+        type="text"
+        autocomplete="off"
+        spellcheck="false"
+        placeholder="Search docs, commands, drivers…"
+      />
+      <span class="esc">ESC</span>
+    </div>
+
+    <div class="cmdk-body" id="cmdkResults">
+      <div class="cmdk-group" data-group="jump">
+        <h6 data-i18n="cmdk.group.jump">Jump to</h6>
+        <a class="cmdk-item" href="/#download"><span class="ci-k">↓</span><span data-i18n="cmdk.jump.download">Download Tagma Editor</span></a>
+        <a class="cmdk-item" href="/pricing"><span class="ci-k">$</span><span data-i18n="cmdk.jump.pricing">Pricing</span></a>
+        <a class="cmdk-item" href="/docs"><span class="ci-k">§</span><span data-i18n="cmdk.jump.docs.install">Docs · Install</span></a>
+        <a class="cmdk-item" href="/docs#first-pipeline"><span class="ci-k">§</span><span data-i18n="cmdk.jump.docs.first">Docs · First pipeline</span></a>
+        <a class="cmdk-item" href="/archive"><span class="ci-k">⌖</span><span data-i18n="cmdk.jump.changelog">Changelog</span></a>
+      </div>
+
+      <div class="cmdk-group" data-group="drivers">
+        <h6 data-i18n="cmdk.group.drivers">Drivers</h6>
+        <a class="cmdk-item" href="/docs#drivers"><span class="ci-k">▸</span>Claude Code</a>
+        <a class="cmdk-item" href="/docs#drivers"><span class="ci-k">▸</span>Codex</a>
+        <a class="cmdk-item" href="/docs#drivers"><span class="ci-k">▸</span>OpenCode</a>
+        <a class="cmdk-item" href="/docs#custom-plugins"><span class="ci-k">+</span><span data-i18n="cmdk.drivers.custom">Build a custom driver →</span></a>
+      </div>
+
+      <div class="cmdk-group" data-group="actions">
+        <h6 data-i18n="cmdk.group.actions">Actions</h6>
+        <button class="cmdk-item" data-action="copy-install"><span class="ci-k">⎘</span><span data-i18n="cmdk.action.copy">Copy: bun add @tagma/sdk</span></button>
+        <button class="cmdk-item" data-action="toggle-theme"><span class="ci-k">◐</span><span data-i18n="cmdk.action.theme">Toggle theme</span></button>
+        <a class="cmdk-item" href={site.github.mono} target="_blank" rel="noopener"><span class="ci-k">↗</span>GitHub ↗</a>
+      </div>
+
+      <div class="cmdk-empty" hidden>
+        <span data-i18n="cmdk.empty">No matches. Try another query.</span>
+      </div>
+    </div>
+
+    <div class="cmdk-foot">
+      <span><kbd>↑</kbd><kbd>↓</kbd> <span data-i18n="cmdk.foot.nav">navigate</span></span>
+      <span><kbd>↵</kbd> <span data-i18n="cmdk.foot.open">open</span></span>
+      <span><kbd>esc</kbd> <span data-i18n="cmdk.foot.close">close</span></span>
+    </div>
+  </div>
+</div>
+
+<script>
+  /**
+   * Command palette runtime
+   * -----------------------
+   * Self-contained — doesn't import anything. Relies on CSS classes
+   * `sel` / `[hidden]` defined in shell.css (v2 block).
+   */
+  (function cmdk() {
+    const overlay = document.getElementById('cmdkOverlay') as HTMLElement | null;
+    const input   = document.getElementById('cmdkInput')   as HTMLInputElement | null;
+    const body    = document.getElementById('cmdkResults') as HTMLElement | null;
+    if (!overlay || !input || !body) return;
+
+    const emptyEl = body.querySelector<HTMLElement>('.cmdk-empty');
+    let selIdx = 0;
+
+    function visibleItems(): HTMLElement[] {
+      return Array.from(body!.querySelectorAll<HTMLElement>('.cmdk-item'))
+        .filter((el) => !el.hasAttribute('hidden'));
+    }
+    function refreshSel() {
+      const items = visibleItems();
+      items.forEach((el, i) => el.classList.toggle('sel', i === selIdx));
+      items[selIdx]?.scrollIntoView({ block: 'nearest' });
+    }
+    function filter(q: string) {
+      const query = q.trim().toLowerCase();
+      let total = 0;
+      body!.querySelectorAll<HTMLElement>('.cmdk-group').forEach((g) => {
+        let shown = 0;
+        g.querySelectorAll<HTMLElement>('.cmdk-item').forEach((it) => {
+          const match = !query || (it.textContent || '').toLowerCase().includes(query);
+          it.toggleAttribute('hidden', !match);
+          if (match) shown++;
+        });
+        g.toggleAttribute('hidden', shown === 0);
+        total += shown;
+      });
+      emptyEl?.toggleAttribute('hidden', total !== 0);
+      selIdx = 0;
+      refreshSel();
+    }
+
+    function open() {
+      overlay!.removeAttribute('hidden');
+      requestAnimationFrame(() => {
+        input!.value = '';
+        filter('');
+        input!.focus();
+      });
+    }
+    function close() { overlay!.setAttribute('hidden', ''); }
+    function isOpen() { return !overlay!.hasAttribute('hidden'); }
+
+    document.addEventListener('tagma:cmdk:open', open);
+    document.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        isOpen() ? close() : open();
+      }
+      if (!isOpen()) return;
+      if (e.key === 'Escape')    { e.preventDefault(); close(); }
+      if (e.key === 'ArrowDown') { e.preventDefault(); selIdx = Math.min(visibleItems().length - 1, selIdx + 1); refreshSel(); }
+      if (e.key === 'ArrowUp')   { e.preventDefault(); selIdx = Math.max(0, selIdx - 1); refreshSel(); }
+      if (e.key === 'Enter')     { e.preventDefault(); visibleItems()[selIdx]?.click(); }
+    });
+
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+    input.addEventListener('input', () => filter(input.value));
+
+    body.addEventListener('click', (e) => {
+      const el = (e.target as HTMLElement).closest<HTMLElement>('[data-action]');
+      if (!el) { close(); return; }
+      if (el.dataset.action === 'copy-install') {
+        navigator.clipboard?.writeText('bun add @tagma/sdk').catch(() => {});
+      } else if (el.dataset.action === 'toggle-theme') {
+        document.getElementById('themeBtn')?.click();
+      }
+      close();
+    });
+  })();
+</script>

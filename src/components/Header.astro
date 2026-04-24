@@ -1,51 +1,309 @@
 ---
+/**
+ * Header.astro — V2
+ *
+ * Top bar with Product + Resources mega menus, ⌘K search trigger,
+ * Sign in, and Download CTA.
+ *
+ * Layout uses the existing `.topbar` / `.topbar-inner` grid from shell.css
+ * (auto 1fr auto, each cell padded 0 20px). The left cell holds brand +
+ * primary nav; the center cell is empty (spacer); the right cell holds
+ * search, language, theme, sign-in, and download.
+ *
+ * Mega menu panels are rendered as siblings of `.topbar-inner` and hang
+ * off `top: 100%`. They live INSIDE the same `.topbar` so they inherit
+ * the sticky header's stacking context.
+ *
+ * The ⌘K command palette lives in CommandPalette.astro, mounted globally
+ * by BaseLayout.astro. This component just dispatches a custom event
+ * when the search button is clicked.
+ */
 import { site } from '../site.config';
 
 interface Props { currentPath: string }
 const { currentPath } = Astro.props;
 
-const navItems = [
-  { href: '/',          key: 'index',     i18n: 'nav.product',   label: 'Product' },
-  { href: '/docs',      key: 'docs',      i18n: 'nav.docs',      label: 'Docs' },
-  { href: '/archive',   key: 'archive',   i18n: 'nav.archive',   label: 'Archive' },
-];
-
 function isActive(href: string): boolean {
   if (href === '/') return currentPath === '/' || currentPath === '';
   return currentPath === href || currentPath.startsWith(href + '/');
 }
+
+// Flat links shown after the two dropdown triggers.
+const flatNav = [
+  { href: '/pricing',  key: 'pricing',  i18n: 'nav.pricing',  label: 'Pricing' },
+  { href: '/showcase', key: 'showcase', i18n: 'nav.showcase', label: 'Showcase' },
+];
+
+// Mega menu: Product — three cards (Editor / SDK / CLI).
+const products = [
+  { key: 'editor', num: '01',
+    kindI18n: 'nav.mega.kind.desktop', kindLabel: 'DESKTOP',
+    nameI18n: 'nav.mega.editor.name',  name: 'Tagma Editor',
+    descI18n: 'nav.mega.editor.desc',
+    desc: 'Swim-lane UI — design, run, replay.',
+    tag: `v${site.version}`,
+    href: '/#download', external: false,
+  },
+  { key: 'sdk', num: '02',
+    kindI18n: 'nav.mega.kind.library', kindLabel: 'LIBRARY',
+    nameI18n: 'nav.mega.sdk.name',     name: '@tagma/sdk',
+    descI18n: 'nav.mega.sdk.desc',
+    desc: 'TypeScript SDK. Same runtime, imported as a library.',
+    tag: 'npm',
+    href: site.github.sdk, external: true,
+  },
+  { key: 'cli', num: '03',
+    kindI18n: 'nav.mega.kind.shell',   kindLabel: 'SHELL',
+    nameI18n: 'nav.mega.cli.name',     name: '@tagma/cli',
+    descI18n: 'nav.mega.cli.desc',
+    desc: 'Run any pipeline.yaml from a terminal.',
+    tag: 'npm',
+    href: site.github.cli, external: true,
+  },
+];
+
+// Mega menu: Resources — 2-column list.
+const resources = [
+  { key: 'docs',      href: '/docs',      external: false,
+    nameI18n: 'nav.res.docs',      name: 'Docs',
+    subI18n:  'nav.res.docs.sub',  sub:  'Install, pipelines, drivers' },
+  { key: 'changelog', href: '/archive',   external: false,
+    nameI18n: 'nav.res.changelog', name: 'Changelog',
+    subI18n:  'nav.res.changelog.sub', sub: `v${site.version} · latest`, fresh: true },
+  { key: 'api',       href: '/docs#sdk',  external: false,
+    nameI18n: 'nav.res.api',       name: 'API Reference',
+    subI18n:  'nav.res.api.sub',   sub:  'SDK & CLI types' },
+  { key: 'examples',  href: '/docs#first-pipeline', external: false,
+    nameI18n: 'nav.res.examples',  name: 'Examples',
+    subI18n:  'nav.res.examples.sub', sub: 'Open-source pipelines' },
+  { key: 'github',    href: site.github.mono, external: true,
+    nameI18n: 'nav.res.github',    name: 'GitHub',
+    subI18n:  'nav.res.github.sub', sub: 'Source · issues · releases' },
+  { key: 'community', href: '#',          external: false,
+    nameI18n: 'nav.res.community', name: 'Community',
+    subI18n:  'nav.res.community.sub', sub: 'Discord · X · discussions' },
+];
 ---
 
-<div class="topbar-inner">
-  <div class="brand">
-    <span class="mark"></span>
-    <span>{site.name}</span>
-    <span class="v">v{site.version}</span>
+<div class="topbar-inner v2-topbar">
+  {/* ─── LEFT: brand + primary nav ─── */}
+  <div class="v2-left">
+    <a class="brand" href="/">
+      <span class="mark" aria-hidden="true"></span>
+      <span>{site.name}</span>
+      <span class="v">v{site.version}</span>
+    </a>
+
+    <nav class="v2-nav" aria-label="Primary">
+      <div class="v2-nav-item" data-menu="product">
+        <button type="button" class="v2-nav-trigger" aria-haspopup="true" aria-expanded="false">
+          <span data-i18n="nav.product">Product</span>
+          <span class="chev" aria-hidden="true">▾</span>
+        </button>
+      </div>
+
+      <div class="v2-nav-item" data-menu="resources">
+        <button type="button" class="v2-nav-trigger" aria-haspopup="true" aria-expanded="false">
+          <span data-i18n="nav.resources">Resources</span>
+          <span class="chev" aria-hidden="true">▾</span>
+        </button>
+      </div>
+
+      {flatNav.map((item) => (
+        <a
+          href={item.href}
+          class={`v2-nav-link${isActive(item.href) ? ' active' : ''}`}
+          data-nav={item.key}
+          data-i18n={item.i18n}
+        >{item.label}</a>
+      ))}
+    </nav>
   </div>
-  <nav class="topnav">
-    {navItems.map((item) => (
-      <a
-        href={item.href}
-        data-nav={item.key}
-        data-i18n={item.i18n}
-        class={isActive(item.href) ? 'active' : undefined}
-      >{item.label}</a>
-    ))}
-    <a href={site.github.mono} target="_blank" rel="noopener" data-i18n="nav.github">GitHub ↗</a>
-  </nav>
-  <div class="topbar-right">
+
+  {/* Middle spacer — grid-template-columns: auto 1fr auto */}
+  <div class="v2-mid" aria-hidden="true"></div>
+
+  {/* ─── RIGHT: search, language, theme, account, download ─── */}
+  <div class="topbar-right v2-right">
+    <button type="button" class="v2-search" id="cmdkOpen" aria-label="Open search">
+      <span class="icon" aria-hidden="true">⌕</span>
+      <span class="ph" data-i18n="nav.search.ph">Search docs &amp; commands…</span>
+      <span class="kbd" aria-hidden="true"><span class="cmdk-mod">⌘</span>K</span>
+    </button>
+
+    <div class="v2-divider" aria-hidden="true"></div>
+
     <div class="lang-menu" id="lang">
       <button class="trigger" type="button" aria-haspopup="listbox" aria-expanded="false">
         <span class="label">EN</span><span class="caret">▾</span>
       </button>
       <div class="panel" role="listbox">
-        <button class="opt active"  data-v="en" type="button">English<span class="code">EN</span></button>
-        <button class="opt"         data-v="zh" type="button">中文<span class="code">ZH</span></button>
+        <button class="opt active" data-v="en" type="button">English<span class="code">EN</span></button>
+        <button class="opt"        data-v="zh" type="button">中文<span class="code">ZH</span></button>
         <button class="opt disabled" type="button">日本語<span class="code">Soon</span></button>
         <button class="opt disabled" type="button">Español<span class="code">Soon</span></button>
       </div>
     </div>
-    <button class="theme-btn" id="themeBtn" title="Toggle theme">◐</button>
+
+    <button class="theme-btn" id="themeBtn" title="Toggle theme" aria-label="Toggle theme">◐</button>
+
+    <a class="v2-signin" href="/login" data-i18n="nav.signin">Sign in</a>
     <a class="accent-btn" href="/#download" data-i18n="cta.download">↓ Download</a>
   </div>
 </div>
+
+{/* ─── Mega: Product (sibling of .topbar-inner, inside .topbar) ─── */}
+<div class="v2-mega" data-mega="product" hidden>
+  <div class="v2-mega-inner">
+    <div class="v2-mega-eyebrow">
+      <span class="sq" aria-hidden="true"></span>
+      <span data-i18n="nav.mega.product.eyebrow">§ THREE WAYS TO RUN TAGMA</span>
+      <span class="bar" aria-hidden="true"></span>
+      <span class="tagline" data-i18n="nav.mega.product.tagline">EDITOR · SDK · CLI</span>
+    </div>
+    <div class="v2-mega-grid">
+      {products.map((p) => (
+        <a class="v2-mega-cell" href={p.href} {...(p.external ? { target: '_blank', rel: 'noopener' } : {})}>
+          <div class="kind"><span class="n">{p.num}</span> · <span data-i18n={p.kindI18n}>{p.kindLabel}</span></div>
+          <div class="n2">
+            <span class="name" data-i18n={p.nameI18n}>{p.name}</span>
+            <span class="tag">{p.tag}</span>
+          </div>
+          <div class="desc" data-i18n={p.descI18n}>{p.desc}</div>
+          <div class="arrow" data-i18n="nav.mega.learn">Learn more →</div>
+        </a>
+      ))}
+    </div>
+    <div class="v2-mega-foot">
+      <span data-i18n="nav.mega.fig">§ FIG. 02 · ENTRY POINTS</span>
+      <span class="dot">│</span>
+      <a href="/#download"><span data-i18n="nav.mega.foot.dl">↓ Download desktop</span> · {site.sizeMB} MB</a>
+      <span class="dot">│</span>
+      <a href={site.github.sdk} target="_blank" rel="noopener">$ bun add @tagma/sdk</a>
+      <span class="dot">│</span>
+      <a href="/docs" data-i18n="nav.mega.foot.api">API reference →</a>
+    </div>
+  </div>
+</div>
+
+{/* ─── Mega: Resources ─── */}
+<div class="v2-mega" data-mega="resources" hidden>
+  <div class="v2-mega-inner">
+    <div class="v2-mega-eyebrow">
+      <span class="sq" aria-hidden="true"></span>
+      <span data-i18n="nav.mega.resources.eyebrow">§ RESOURCES</span>
+      <span class="bar" aria-hidden="true"></span>
+      <span class="tagline" data-i18n="nav.mega.resources.tagline">DOCS · CHANGELOG · API</span>
+    </div>
+    <div class="v2-mega-list">
+      {resources.map((r) => (
+        <a class="v2-mega-row" href={r.href} {...(r.external ? { target: '_blank', rel: 'noopener' } : {})}>
+          <div>
+            <div class="rn">
+              {r.fresh && <span class="fresh-dot" aria-hidden="true"></span>}
+              <span data-i18n={r.nameI18n}>{r.name}</span>
+            </div>
+            <div class="rs" data-i18n={r.subI18n}>{r.sub}</div>
+          </div>
+          <span class="chev-r" aria-hidden="true">→</span>
+        </a>
+      ))}
+    </div>
+  </div>
+</div>
+
+<script>
+  /**
+   * Mega menu controller
+   * --------------------
+   * Opens on hover (desktop) with a small close delay so diagonal mouse
+   * movement into the panel doesn't dismiss it. Also click-toggleable for
+   * touch and keyboard users.
+   */
+  (function megaMenu() {
+    const items = document.querySelectorAll<HTMLElement>('.v2-nav-item[data-menu]');
+    const panels = document.querySelectorAll<HTMLElement>('.v2-mega[data-mega]');
+    let openKey: string | null = null;
+    let closeTimer: number | null = null;
+
+    const panelFor   = (k: string) => document.querySelector<HTMLElement>(`.v2-mega[data-mega="${k}"]`);
+    const triggerFor = (k: string) => document.querySelector<HTMLElement>(`.v2-nav-item[data-menu="${k}"] .v2-nav-trigger`);
+
+    function open(key: string) {
+      if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
+      if (openKey === key) return;
+      close();
+      const p = panelFor(key), t = triggerFor(key);
+      if (!p || !t) return;
+      p.removeAttribute('hidden');
+      t.setAttribute('aria-expanded', 'true');
+      t.classList.add('open');
+      openKey = key;
+    }
+    function close() {
+      if (!openKey) return;
+      const p = panelFor(openKey), t = triggerFor(openKey);
+      p?.setAttribute('hidden', '');
+      t?.setAttribute('aria-expanded', 'false');
+      t?.classList.remove('open');
+      openKey = null;
+    }
+    function scheduleClose() {
+      if (closeTimer) clearTimeout(closeTimer);
+      closeTimer = window.setTimeout(close, 120);
+    }
+
+    items.forEach((item) => {
+      const key = item.dataset.menu;
+      if (!key) return;
+      const trigger = item.querySelector<HTMLElement>('.v2-nav-trigger');
+      item.addEventListener('mouseenter', () => open(key));
+      item.addEventListener('mouseleave', scheduleClose);
+      trigger?.addEventListener('click', (e) => {
+        e.preventDefault();
+        openKey === key ? close() : open(key);
+      });
+    });
+    panels.forEach((p) => {
+      p.addEventListener('mouseenter', () => {
+        if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
+      });
+      p.addEventListener('mouseleave', scheduleClose);
+    });
+    document.querySelectorAll<HTMLElement>('.v2-nav-link').forEach((a) => {
+      a.addEventListener('mouseenter', close);
+    });
+    document.addEventListener('click', (e) => {
+      const t = e.target as HTMLElement;
+      if (!t.closest('.v2-nav-item') && !t.closest('.v2-mega')) close();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') close();
+    });
+  })();
+
+  /**
+   * Platform-aware ⌘K hint
+   * ----------------------
+   * Show "Ctrl" on Windows/Linux so the keyboard hint matches reality.
+   */
+  (function platformHint() {
+    const ua = navigator.userAgent + ' ' + navigator.platform;
+    const isMac = /Mac|iPhone|iPad|iPod/.test(ua);
+    if (!isMac) {
+      document.querySelectorAll<HTMLElement>('.cmdk-mod').forEach((el) => {
+        el.textContent = 'Ctrl';
+        el.style.fontSize = '9.5px';
+      });
+    }
+  })();
+
+  /**
+   * Search button → open command palette
+   * ------------------------------------
+   * The palette component listens for this event globally.
+   */
+  document.getElementById('cmdkOpen')?.addEventListener('click', () => {
+    document.dispatchEvent(new CustomEvent('tagma:cmdk:open'));
+  });
+</script>

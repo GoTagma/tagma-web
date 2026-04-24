@@ -1,0 +1,29 @@
+---
+/**
+ * /pricing — placeholder
+ *
+ * Wired up so the V2 header's Pricing link doesn't 404 during the
+ * pricing page design pass. Replace this with the real Pricing
+ * design in a follow-up PR.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Pricing · Tagma" description="Tagma pricing — coming soon.">
+  <section class="page-head">
+    <div class="page-eyebrow">
+      <span class="square"></span>
+      <span>§ PRICING · COMING SOON</span>
+      <span class="bar"></span>
+    </div>
+    <h1>Pricing is on the way.</h1>
+    <p class="lede">
+      We're working on it. In the meantime, Tagma Editor is free to download,
+      and the SDK &amp; CLI are open source.
+    </p>
+    <div style="display:flex; gap:12px; margin-top:16px;">
+      <a class="accent-btn" href="/#download">↓ Download Editor</a>
+      <a class="ghost-btn" href="/docs">Read the docs</a>
+    </div>
+  </section>
+</BaseLayout>
