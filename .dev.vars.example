@@ -1,0 +1,6 @@
+# Copy to .dev.vars (gitignored). `wrangler dev` loads this automatically.
+# For production use `wrangler secret put <NAME>` instead — do NOT commit real values.
+
+# AUTH_SECRET=replace-with-openssl-rand-hex-32
+# STRIPE_SECRET_KEY=sk_test_...
+# STRIPE_WEBHOOK_SECRET=whsec_...

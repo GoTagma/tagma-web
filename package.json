@@ -2,19 +2,29 @@
   "name": "tagma-web",
   "type": "module",
   "version": "0.1.0",
+  "private": true,
+  "workspaces": ["src/cloud"],
   "engines": {
     "node": ">=22.12.0"
   },
   "scripts": {
-    "dev": "astro dev",
+    "dev": "concurrently -k -n web,api -c cyan,magenta \"bun run dev:web\" \"bun run dev:api\"",
+    "dev:web": "astro dev",
+    "dev:api": "wrangler dev --config wrangler.dev.jsonc --port 8787",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "deploy": "astro build && wrangler deploy",
+    "astro": "astro",
+    "typecheck": "astro check && bun run --filter @tagma/cloud typecheck",
+    "db:migrate:local": "wrangler d1 migrations apply tagma --local",
+    "db:migrate:prod": "wrangler d1 migrations apply tagma --remote"
   },
   "dependencies": {
     "astro": "^6.1.8"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250418.0",
+    "concurrently": "^9.1.0",
     "rehype-autolink-headings": "^7.1.0",
     "rehype-slug": "^6.0.0",
     "wrangler": "^4.83.0"

@@ -4,6 +4,13 @@ import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 
 export default defineConfig({
+  vite: {
+    server: {
+      proxy: {
+        '/api': { target: 'http://127.0.0.1:8787', changeOrigin: false },
+      },
+    },
+  },
   markdown: {
     shikiConfig: {
       themes: { light: 'github-light', dark: 'github-dark-dimmed' },

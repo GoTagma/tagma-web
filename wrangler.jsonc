@@ -1,11 +1,32 @@
 {
-  // Cloudflare Workers Builds manifest. Deploys the Astro static output
-  // (./dist) as a Worker with static assets. Consumed by `npx wrangler deploy`
-  // both locally and in the CF Workers Builds UI.
+  // Single Worker that serves the Astro static site (./dist via ASSETS binding)
+  // and routes /api/* to the @tagma/cloud Hono app (src/cloud, private
+  // submodule). See wrangler.dev.jsonc for the local-dev overlay.
+  "$schema": "node_modules/wrangler/config-schema.json",
   "name": "tagma-web",
+  "main": "src/worker.ts",
   "compatibility_date": "2026-04-18",
+  "compatibility_flags": ["nodejs_compat"],
   "assets": {
     "directory": "./dist",
+    "binding": "ASSETS",
     "not_found_handling": "404-page"
+  },
+  "vars": {
+    "PUBLIC_SITE_URL": "https://tagma.dev"
   }
+  // Add when ready — create resources first, then fill in the IDs:
+  //   wrangler d1 create tagma
+  //   wrangler kv namespace create SESSIONS
+  //
+  // "d1_databases": [
+  //   { "binding": "DB", "database_name": "tagma", "database_id": "REPLACE_ME" }
+  // ],
+  // "kv_namespaces": [
+  //   { "binding": "SESSIONS", "id": "REPLACE_ME" }
+  // ]
+  //
+  // Secrets (AUTH_SECRET, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET) should be
+  // set via `wrangler secret put <NAME>` in production and via .dev.vars
+  // locally — never commit them here.
 }

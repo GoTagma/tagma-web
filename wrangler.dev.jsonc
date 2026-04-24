@@ -1,0 +1,15 @@
+{
+  // Local-dev overrides. Astro's dev server serves static assets on :4321 and
+  // proxies /api/* to this Worker on :8787, so we disable the assets binding
+  // here — wrangler should only handle /api/* locally.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "tagma-web-dev",
+  "main": "src/worker.ts",
+  "compatibility_date": "2026-04-18",
+  "compatibility_flags": ["nodejs_compat"],
+  "vars": {
+    "PUBLIC_SITE_URL": "http://localhost:4321"
+  }
+  // Mirror D1 / KV / secret bindings from wrangler.jsonc here when you add them.
+  // wrangler dev --local will emulate them against ./.wrangler/state/.
+}
