@@ -288,7 +288,6 @@ footer { border-top:1px solid var(--line); background:var(--bg); }
 }
 @media (max-width: 540px) {
   .topbar { height:52px; }
-  .topbar.scrolled { height:46px; }
   .topbar-inner > * { padding:0 12px; }
   .brand .v { display:none; }
   .topbar-right { gap:4px; }
@@ -319,56 +318,17 @@ html, body, .topbar, footer, .hero, .ways, .stage-wrap, .spec-strip, .page-head,
   transition: background-color .25s ease, border-color .25s ease, color .15s ease, box-shadow .25s ease;
 }
 
-/* Scroll-shrink: all inner sizes animate together on one curve so the
-   topbar doesn't visibly "reflow" while it's still shrinking. */
-:root { --shrink-ease: cubic-bezier(.4, 0, .2, 1); --shrink-dur: .22s; }
-
-.topbar {
-  transition: height var(--shrink-dur) var(--shrink-ease),
-              border-color var(--shrink-dur) var(--shrink-ease);
-  will-change: height;
-}
-.topbar.scrolled {
-  height: 48px;
-  border-bottom-color: var(--line-2);
-}
-/* Shrink chrome */
-.brand {
-  transition: font-size var(--shrink-dur) var(--shrink-ease);
-}
-.topbar.scrolled .brand { font-size: 14px; }
-.topbar .brand .v {
-  overflow: hidden;
-  transition: opacity var(--shrink-dur) var(--shrink-ease),
-              width var(--shrink-dur) var(--shrink-ease),
-              padding var(--shrink-dur) var(--shrink-ease),
-              margin var(--shrink-dur) var(--shrink-ease),
-              border-left-color var(--shrink-dur) var(--shrink-ease);
-}
-.topbar.scrolled .brand .v {
-  opacity: 0; width: 0; padding-left: 0; margin-left: 0; border-left-color: transparent;
-  pointer-events: none;
-}
 .v2-nav-trigger,
 .v2-nav-link {
-  transition: color .12s, background .12s,
-              font-size var(--shrink-dur) var(--shrink-ease);
+  transition: color .12s, background .12s;
 }
-.topbar.scrolled .v2-nav-trigger,
-.topbar.scrolled .v2-nav-link { font-size: 12px; }
 .accent-btn,
 .theme-btn,
 .v2-signin,
 .lang-menu,
 .lang-menu > .trigger {
-  transition: height var(--shrink-dur) var(--shrink-ease),
-              border-color .12s, color .12s, background .12s;
+  transition: border-color .12s, color .12s, background .12s;
 }
-.topbar.scrolled .accent-btn,
-.topbar.scrolled .lang-menu,
-.topbar.scrolled .lang-menu > .trigger,
-.topbar.scrolled .theme-btn,
-.topbar.scrolled .v2-signin { height: 28px; }
 
 .way.reveal {
   transform: translateY(32px);
