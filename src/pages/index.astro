@@ -247,8 +247,15 @@ const DL = {
     max-width: 1360px; margin: 0 auto;
     padding: 64px 40px 32px;
     display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px;
-    border-bottom: 1px solid var(--line);
     position: relative;
+  }
+  /* The hero/spec-strip divider is drawn by .spec-strip::before below so
+     it can stay confined between the side rails. The hero itself can't
+     host this hairline because both ::before and ::after are taken by the
+     corner brackets. On narrow viewports (≤720px) the rails are hidden,
+     so we restore a plain full-width border-bottom as the visual divider. */
+  @media (max-width: 720px) {
+    .hero { border-bottom: 1px solid var(--line); }
   }
   /* Tech-drawing corner brackets */
   .hero::before, .hero::after {
@@ -264,7 +271,30 @@ const DL = {
   .spec-strip {
     max-width: 1360px; margin: 0 auto;
     display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
-    border-bottom: 1px solid var(--line);
+    position: relative;
+  }
+  /* Top + bottom hairlines confined between the side rails. The pseudos
+     escape to 100vw via the negative-margin trick so the gradient math
+     (which references viewport --rail-x) lines up with the rails on every
+     screen size. ::before draws the hero/spec-strip boundary, ::after the
+     spec-strip/stage-wrap boundary. */
+  .spec-strip::before,
+  .spec-strip::after {
+    content: ""; position: absolute;
+    left: 50%; width: 100vw; transform: translateX(-50%);
+    height: 1px; pointer-events: none;
+    background: linear-gradient(to right,
+      transparent var(--rail-x),
+      var(--line) var(--rail-x),
+      var(--line) calc(100% - var(--rail-x)),
+      transparent calc(100% - var(--rail-x)));
+  }
+  .spec-strip::before { top: 0; }
+  .spec-strip::after  { bottom: 0; }
+  @media (max-width: 720px) {
+    .spec-strip { border-bottom: 1px solid var(--line); }
+    .spec-strip::before,
+    .spec-strip::after { display: none; }
   }
   .spec-strip > div {
     padding: 22px 28px 20px; border-right: 1px solid var(--line);
@@ -462,14 +492,57 @@ const DL = {
   .docs-link:hover { color: var(--fg); border-color: var(--fg-muted); }
 
   .stage-wrap {
-    background: var(--bg-1);
-    border-top: 1px solid var(--line);
-    border-bottom: 1px solid var(--line);
+    /* Tinted bg confined between the side rails. Outside the rails the
+       layer is transparent so the body bg + dot pattern shows through —
+       the Demo block reads as a panel that lives between the guides
+       instead of a stripe that bleeds to the viewport edges. */
+    background: linear-gradient(to right,
+      transparent var(--rail-x),
+      var(--bg-1) var(--rail-x),
+      var(--bg-1) calc(100% - var(--rail-x)),
+      transparent calc(100% - var(--rail-x)));
     padding: 56px 40px 72px;
     display: flex; flex-direction: column; align-items: center; gap: 24px;
     min-height: 640px;
+    position: relative;
   }
-  [data-theme="light"] .stage-wrap { background: #fafaf7; }
+  /* Top + bottom hairlines confined between the side rails — replaces the
+     old full-width border-top / border-bottom on the Demo stage section.
+     This element fills the viewport horizontally so a simple inset pseudo
+     aligns naturally with the rail gradient. */
+  .stage-wrap::before,
+  .stage-wrap::after {
+    content: ""; position: absolute; left: 0; right: 0; height: 1px;
+    pointer-events: none;
+    background: linear-gradient(to right,
+      transparent var(--rail-x),
+      var(--line) var(--rail-x),
+      var(--line) calc(100% - var(--rail-x)),
+      transparent calc(100% - var(--rail-x)));
+  }
+  .stage-wrap::before { top: 0; }
+  .stage-wrap::after  { bottom: 0; }
+  @media (max-width: 720px) {
+    /* Rails are hidden below 720px, so the panel goes full-width again
+       and the borders return as the visual divider. */
+    .stage-wrap {
+      background: var(--bg-1);
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+    .stage-wrap::before,
+    .stage-wrap::after { display: none; }
+  }
+  [data-theme="light"] .stage-wrap {
+    background: linear-gradient(to right,
+      transparent var(--rail-x),
+      #fafaf7 var(--rail-x),
+      #fafaf7 calc(100% - var(--rail-x)),
+      transparent calc(100% - var(--rail-x)));
+  }
+  @media (max-width: 720px) {
+    [data-theme="light"] .stage-wrap { background: #fafaf7; }
+  }
   /* FIG. 01 eyebrow above the stage — same width + rhythm as hero eyebrow */
   .stage-eyebrow {
     width: 100%; max-width: 1280px; margin: 0;
