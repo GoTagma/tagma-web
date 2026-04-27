@@ -29,3 +29,4 @@ pnpm-debug.log*
 
 
 .claude/settings.local.json
+.omx
