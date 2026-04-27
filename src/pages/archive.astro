@@ -213,27 +213,6 @@ function channelLabel(ch: string): string {
 </script>
 
 <style is:global>
-  .page-head {
-    max-width: 1360px; margin: 0 auto;
-    padding: 64px 40px 40px;
-    border-bottom: 1px solid var(--line);
-  }
-  .page-eyebrow {
-    display: flex; align-items: center; gap: 14px;
-    font-family: 'JetBrains Mono', monospace; font-size: 11px;
-    color: var(--fg-muted); letter-spacing: 0.1em; text-transform: uppercase;
-    margin-bottom: 24px;
-  }
-  .page-eyebrow .square { width: 8px; height: 8px; background: var(--accent); }
-  .page-eyebrow .bar { flex: 1; height: 1px; background: var(--line-2); max-width: 100px; }
-  .page-head h1 {
-    font-size: clamp(48px, 8vw, 108px);
-    line-height: 0.94; letter-spacing: -0.04em; font-weight: 500;
-    max-width: 18ch;
-  }
-  .page-head h1 .accent { color: var(--accent); }
-  .page-head .lede { margin-top: 28px; font-size: 17px; color: var(--fg-dim); max-width: 60ch; line-height: 1.55; }
-
   .arc-wrap { padding: 0 40px 80px; max-width: 1360px; margin: 0 auto; }
 
   .filter-bar {
@@ -333,9 +312,6 @@ function channelLabel(ch: string): string {
     .arc-menu { right: auto; left: 0; }
   }
   @media (max-width: 540px) {
-    .page-head { padding: 32px 20px 20px; }
-    .page-head h1 { font-size: clamp(40px, 11vw, 72px); }
-    .page-head .lede { font-size: 15px; margin-top: 20px; }
     .arc-wrap { padding: 0 20px 32px; }
     .filter-bar { gap: 8px; padding: 14px 0; }
     .filter-bar input { width: 100%; }
@@ -343,6 +319,4 @@ function channelLabel(ch: string): string {
     .arc-ver { font-size: 13px; }
   }
 
-  body { user-select: none; -webkit-user-select: none; }
-  .filter-bar input { user-select: text; -webkit-user-select: text; }
 </style>

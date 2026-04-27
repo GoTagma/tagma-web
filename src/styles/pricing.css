@@ -309,18 +309,70 @@
   text-wrap:pretty;
 }
 
-/* ====== Responsive — matrix collapses on narrow screens ====== */
+/* ====== Mobile cards (per-tier) ====== */
+.pr-mobile-cards { display:none; }
+
+.pr-mob-card {
+  position:relative;
+  border:1px solid var(--line);
+  background:var(--bg-1);
+}
+.pr-mob-card.is-popular {
+  border-color:var(--accent);
+  background:color-mix(in oklab, var(--accent) 6%, var(--bg-1));
+}
+[data-theme="light"] .pr-mob-card.is-popular {
+  background:color-mix(in oklab, var(--accent) 8%, var(--panel));
+}
+.pr-mob-card .pr-popular-flag {
+  position:absolute; top:-10px; right:16px;
+}
+
+.pr-mob-card-head {
+  padding:24px 20px 20px;
+  border-bottom:1px solid var(--line);
+  display:flex; flex-direction:column; gap:12px;
+  background:var(--bg);
+}
+.pr-mob-card.is-popular .pr-mob-card-head {
+  background:color-mix(in oklab, var(--accent) 4%, var(--bg));
+}
+[data-theme="light"] .pr-mob-card.is-popular .pr-mob-card-head {
+  background:color-mix(in oklab, var(--accent) 6%, var(--panel));
+}
+.pr-mob-card-head .pr-tier-name { margin-top:-2px; }
+.pr-mob-card-head .pr-tier-tagline { min-height:0; }
+
+.pr-mob-card-body { padding:6px 20px 18px; }
+
+.pr-mob-grp { padding:14px 0 6px; border-bottom:1px solid var(--line); }
+.pr-mob-grp:last-child { border-bottom:0; }
+.pr-mob-grp-title {
+  font:500 10.5px/1 'JetBrains Mono',ui-monospace,monospace;
+  letter-spacing:.16em; color:var(--accent);
+  text-transform:uppercase; margin-bottom:10px;
+}
+
+.pr-mob-feat {
+  display:flex; align-items:center; justify-content:space-between;
+  gap:12px; padding:8px 0;
+}
+.pr-mob-feat-label { display:flex; flex-direction:column; gap:2px; min-width:0; }
+.pr-mob-feat-label .pr-feat-label { font-size:13.5px; }
+.pr-mob-feat-label .pr-feat-sub { font-size:10px; }
+.pr-mob-feat-val { flex:0 0 auto; }
+
+/* ====== Responsive — swap matrix → cards on narrow screens ====== */
 @media (max-width: 900px) {
   .pr-hero { padding:60px 24px 40px; }
   .pr-matrix-wrap, .pr-faq { padding:40px 24px; }
-  .pr-row, .pr-row-head {
-    grid-template-columns: 1fr 1fr;
-  }
-  .pr-row-group { grid-template-columns: 1fr; }
-  .pr-cell-label-head { grid-column:1 / -1; border-right:0; }
-  .pr-row-feature .pr-cell-label { grid-column:1 / -1; border-right:0; background:var(--bg); }
-  .pr-row-feature .pr-cell-val:nth-child(4) { grid-column:1 / -1; border-right:0; }
   .pr-faq-grid { grid-template-columns:1fr; }
+
+  /* Hide the matrix; show stacked per-tier cards. */
+  .pr-matrix { display:none; }
+  .pr-mobile-cards {
+    display:flex; flex-direction:column; gap:18px;
+  }
 }
 @media (max-width: 560px) {
   .pr-hero { padding:40px 16px 28px; }
@@ -331,17 +383,12 @@
   .pr-billing button { padding:8px 14px; }
   .pr-billing .save { padding:0 8px 0 6px; font-size:10px; }
   .pr-hero-note { font-size:10px; letter-spacing:.08em; }
-  .pr-row, .pr-row-head { grid-template-columns: 1fr; }
-  .pr-cell { padding:14px 16px; border-right:0; }
-  .pr-row-head .pr-cell { padding:20px 16px 18px; }
-  .pr-row-feature .pr-cell-val:nth-child(4) { grid-column:auto; }
   .pr-tier-name { font-size:24px; }
-  .pr-tier-tagline { min-height:0; }
   .pr-price-big { font-size:32px; }
   .pr-cta { height:42px; padding:0 16px; font-size:12px; }
   .pr-popular-flag { right:12px; }
-  .pr-cell-label { padding:12px 16px; }
-  .pr-cell-val { padding:12px 16px; }
+  .pr-mob-card-head { padding:20px 16px 16px; }
+  .pr-mob-card-body { padding:4px 16px 14px; }
   .pr-faq-item { padding:22px 20px; }
   .pr-faq-a { font-size:16px; }
   .pr-faq-d { font-size:13.5px; }

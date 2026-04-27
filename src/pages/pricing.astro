@@ -244,6 +244,90 @@ const TIER_PRICES_JSON = JSON.stringify(TIERS.map((t) => t.priceMonthly));
       ))}
     </div>
 
+    {/* Mobile-only stacked cards — one per tier, all features as a list. */}
+    <div class="pr-mobile-cards">
+      {TIERS.map((t, ti) => (
+        <article class:list={['pr-mob-card', t.popular && 'is-popular']}>
+          {t.popular && (
+            <span class="pr-popular-flag" data-i18n="pricing.popular">MOST PICKED</span>
+          )}
+
+          <div class="pr-mob-card-head">
+            <div class="pr-sec" style={`color:${t.accentVar}`}>
+              § {String(ti + 1).padStart(2, '0')} · <span data-i18n={t.badge}>{t.id.toUpperCase()}</span>
+            </div>
+            <div class="pr-tier-name" data-i18n={`pricing.tier.${t.id}.name`}>
+              {t.id === 'free' ? 'Free' : t.id === 'pro' ? 'Pro' : 'Team'}
+            </div>
+            <div class="pr-tier-tagline" data-i18n={`pricing.tier.${t.id}.tagline`}>
+              {t.id === 'free'
+                ? 'The whole product, running on your machine.'
+                : t.id === 'pro'
+                  ? 'Your pipelines, synced across every device.'
+                  : 'SSO, hosted runners, audit trails.'}
+            </div>
+
+            <div class="pr-price" data-tier-id={t.id} data-price-monthly={t.priceMonthly ?? ''}>
+              {t.priceMonthly === null ? (
+                <>
+                  <div class="pr-price-big" data-i18n="pricing.price.contact">Let's talk</div>
+                  <div class="pr-price-note" data-i18n="pricing.price.custom">CUSTOM QUOTE</div>
+                </>
+              ) : t.priceMonthly === 0 ? (
+                <>
+                  <div class="pr-price-big"><span>$0</span><span class="pr-price-unit" data-i18n="pricing.price.forever">/ forever</span></div>
+                  <div class="pr-price-note" data-i18n="pricing.price.freeNote">NO ACCOUNT · LOCAL-FIRST</div>
+                </>
+              ) : (
+                <>
+                  <div class="pr-price-strike" data-strike>${t.priceMonthly}.00</div>
+                  <div class="pr-price-big">
+                    <span data-price-shown>${(t.priceMonthly * 0.8).toFixed(2)}</span>
+                    <span class="pr-price-unit" data-i18n="pricing.price.perUser">/ user · month</span>
+                  </div>
+                  <div class="pr-price-note pr-price-note-yearly" data-note-yearly data-i18n="pricing.price.yearlyNote">↓ 20% · BILLED ANNUALLY</div>
+                  <div class="pr-price-note pr-price-note-monthly" data-note-monthly data-i18n="pricing.price.monthlyNote">OR SAVE 20% YEARLY</div>
+                </>
+              )}
+            </div>
+
+            <a
+              class:list={['pr-cta', t.ctaKind === 'primary' ? 'pr-cta-primary' : 'pr-cta-ghost']}
+              href={t.ctaHref}
+              data-i18n={`pricing.tier.${t.id}.cta`}
+            >
+              {t.id === 'free' ? '↓ Download Tagma' : t.id === 'pro' ? 'Start Pro trial' : 'Contact sales'}
+            </a>
+          </div>
+
+          <div class="pr-mob-card-body">
+            {GROUPS.map((grp) => (
+              <div class="pr-mob-grp">
+                <h6 class="pr-mob-grp-title" data-i18n={grp.titleKey}>{grp.id.toUpperCase()}</h6>
+                {grp.rows.map((row) => (
+                  <div class="pr-mob-feat">
+                    <div class="pr-mob-feat-label">
+                      <span class="pr-feat-label" data-i18n={`pricing.feat.${row.k}.label`}>{row.k}</span>
+                      <span class="pr-feat-sub" data-i18n={`pricing.feat.${row.k}.sub`}>—</span>
+                    </div>
+                    <div class="pr-mob-feat-val">
+                      {row.cells[ti] === 'yes' ? (
+                        <span class="pr-check" style={`color:${t.accentVar}`}>✓</span>
+                      ) : row.cells[ti] === 'no' ? (
+                        <span class="pr-dash">—</span>
+                      ) : (
+                        <span class="pr-val">{row.cells[ti]}</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        </article>
+      ))}
+    </div>
+
     <div class="pr-legend">
       <span><span class="pr-check-inline">✓</span> <span data-i18n="pricing.legend.yes">INCLUDED</span></span>
       <span>— <span data-i18n="pricing.legend.no">NOT INCLUDED</span></span>

@@ -528,12 +528,10 @@ html {
 }
 
 /* ============================================================
-   TOPBAR V2 - Mega menus, search trigger, command palette
+   TOPBAR V2 - Mega menus
    ------------------------------------------------------------
-   Appended in V2 pass. Reuses existing tokens (--bg, --fg, --line,
-   --accent, --green, etc). Lives alongside the original topbar
-   rules above so both old-style and v2 pages can co-exist during
-   migration.
+   Reuses existing tokens (--bg, --fg, --line, --accent, --green,
+   etc).
    ============================================================ */
 
 /* The V2 header fills the .topbar-inner grid cell structure
@@ -945,4 +943,128 @@ html {
   }
   .v2-mega-cell:last-child { border-bottom: 0; }
   .v2-mega-row { border-right: 0; }
+  /* On mobile, the megas are unused — they live inside the drawer instead. */
+  .v2-mega { display: none !important; }
 }
+
+/* ============================================================
+   MOBILE DRAWER — hamburger trigger + sheet of navigation
+   ============================================================ */
+.v2-hamburger {
+  display: none;
+  width: 36px; height: 32px;
+  border: 1px solid var(--line-2);
+  background: transparent;
+  align-items: center; justify-content: center;
+  margin-right: 8px;
+  transition: border-color .12s, color .12s;
+  color: var(--fg-dim);
+}
+.v2-hamburger:hover { color: var(--fg); border-color: var(--fg-muted); }
+.v2-hamburger .hb-bars {
+  display: inline-flex; flex-direction: column;
+  gap: 4px; width: 14px;
+}
+.v2-hamburger .hb-bars span {
+  display: block; height: 1.5px; background: currentColor;
+  transition: transform .15s ease, opacity .15s ease;
+  transform-origin: center;
+}
+.v2-hamburger.open .hb-bars span:nth-child(1) { transform: translateY(5.5px) rotate(45deg); }
+.v2-hamburger.open .hb-bars span:nth-child(2) { opacity: 0; }
+.v2-hamburger.open .hb-bars span:nth-child(3) { transform: translateY(-5.5px) rotate(-45deg); }
+
+.v2-mobile-drawer {
+  position: absolute;
+  top: 100%;
+  left: 0; right: 0;
+  width: 100vw;
+  height: calc(100svh - 56px);
+  background: var(--bg);
+  z-index: 110;
+  overflow: hidden;
+  border-bottom: 1px solid var(--line);
+  box-shadow: 0 18px 40px -28px rgba(0,0,0,.65);
+}
+html.has-announce .v2-mobile-drawer { height: calc(100svh - 82px); }
+.v2-mobile-drawer[hidden] { display: none; }
+
+.v2-mob-scroll {
+  height: 100%;
+  overflow-y: auto;
+  padding: 16px 20px 96px;
+  display: flex; flex-direction: column; gap: 22px;
+}
+.v2-mob-section { display: flex; flex-direction: column; }
+.v2-mob-section h6 {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--fg-muted); font-weight: 500;
+  padding: 0 0 10px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 4px;
+}
+.v2-mob-section.v2-mob-flat { gap: 0; border-top: 1px solid var(--line); padding-top: 4px; }
+
+.v2-mob-row {
+  display: grid;
+  grid-template-columns: 28px 1fr 16px;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 4px;
+  color: var(--fg);
+  text-decoration: none;
+  border-bottom: 1px solid var(--line);
+}
+.v2-mob-row:last-child { border-bottom: 0; }
+.v2-mob-row-num {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 10px; color: var(--accent); letter-spacing: .12em;
+}
+.v2-mob-row-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.v2-mob-row-name { font-size: 15px; font-weight: 500; }
+.v2-mob-row-sub {
+  font-size: 12px; color: var(--fg-dim); line-height: 1.4;
+  text-overflow: ellipsis; overflow: hidden;
+}
+.v2-mob-row-arrow { color: var(--fg-muted); justify-self: end; }
+
+.v2-mob-link {
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 12px 4px;
+  color: var(--fg); text-decoration: none;
+  border-bottom: 1px solid var(--line);
+  font-size: 15px; font-weight: 500;
+}
+.v2-mob-link:last-child { border-bottom: 0; }
+.v2-mob-link-sub {
+  font: 500 11px/1.4 'JetBrains Mono', ui-monospace, monospace;
+  letter-spacing: .04em; color: var(--fg-muted); text-transform: none;
+}
+
+.v2-mob-cta {
+  margin-top: 8px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px;
+  background: var(--accent); color: var(--accent-ink);
+  font: 600 14px/1 'JetBrains Mono', ui-monospace, monospace;
+  letter-spacing: .04em;
+  text-decoration: none;
+  border: 1px solid var(--accent);
+}
+[data-theme="light"] .v2-mob-cta { color: #fff; }
+.v2-mob-cta-meta {
+  font-weight: 500; font-size: 11px;
+  opacity: .85; letter-spacing: .08em;
+}
+
+@media (max-width: 720px) {
+  .v2-hamburger { display: inline-flex; }
+}
+@media (min-width: 721px) {
+  .v2-mobile-drawer { display: none !important; }
+}
+
+/* Lock body scroll while the drawer is open. */
+html.drawer-open,
+html.drawer-open body { overflow: hidden; }

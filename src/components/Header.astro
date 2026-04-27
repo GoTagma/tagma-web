@@ -77,6 +77,17 @@ const communityLinks = [
 
 <div class="topbar-inner v2-topbar">
   <div class="v2-left">
+    <button
+      class="v2-hamburger"
+      type="button"
+      aria-label="Menu"
+      aria-expanded="false"
+      aria-controls="mobileDrawer"
+      data-mobile-toggle
+    >
+      <span class="hb-bars" aria-hidden="true"><span></span><span></span><span></span></span>
+    </button>
+
     <a class="brand" href="/">
       <span class="mark" aria-hidden="true"></span>
       <span>{site.name}</span>
@@ -233,7 +244,95 @@ const communityLinks = [
   </div>
 </div>
 
+{/* ─── Mobile drawer (≤720px) ─── */}
+<div class="v2-mobile-drawer" id="mobileDrawer" hidden aria-hidden="true">
+  <div class="v2-mob-scroll">
+    <div class="v2-mob-section">
+      <h6 data-i18n="nav.product">Product</h6>
+      {products.map((p) => (
+        <a
+          class="v2-mob-row"
+          href={p.href}
+          {...(p.external ? { target: '_blank', rel: 'noopener' } : {})}
+        >
+          <span class="v2-mob-row-num">{p.num}</span>
+          <span class="v2-mob-row-body">
+            <span class="v2-mob-row-name" data-i18n={p.nameI18n}>{p.name}</span>
+            <span class="v2-mob-row-sub" data-i18n={p.descI18n}>{p.desc}</span>
+          </span>
+          <span class="v2-mob-row-arrow" aria-hidden="true">→</span>
+        </a>
+      ))}
+    </div>
+
+    <div class="v2-mob-section">
+      <h6 data-i18n="nav.resources">Resources</h6>
+      {resources.map((r) => (
+        <a
+          class="v2-mob-link"
+          href={r.href}
+          {...(r.external ? { target: '_blank', rel: 'noopener' } : {})}
+        >
+          <span data-i18n={r.nameI18n}>{r.name}</span>
+          <span class="v2-mob-link-sub" data-i18n={r.subI18n}>{r.sub}</span>
+        </a>
+      ))}
+    </div>
+
+    <div class="v2-mob-section">
+      <h6 data-i18n="nav.community">Community</h6>
+      {communityLinks.map((c) => (
+        <a class="v2-mob-link" href={c.href} target="_blank" rel="noopener">
+          <span>{c.name}</span>
+          <span class="v2-mob-link-sub">{c.sub}</span>
+        </a>
+      ))}
+    </div>
+
+    <div class="v2-mob-section v2-mob-flat">
+      <a class="v2-mob-link" href="/pricing"><span data-i18n="nav.pricing">Pricing</span></a>
+      <a class="v2-mob-link" href="/showcase"><span data-i18n="nav.showcase">Showcase</span></a>
+      <a class="v2-mob-link" href="/login"><span data-i18n="nav.signin">Sign in</span></a>
+    </div>
+
+    <a class="v2-mob-cta" href="/#download">
+      <span data-i18n="cta.download">↓ Download</span>
+      <span class="v2-mob-cta-meta">v{site.version} · {site.sizeMB} MB</span>
+    </a>
+  </div>
+</div>
+
 <script>
+  (function mobileDrawer() {
+    const root = document.getElementById('mobileDrawer');
+    const btn  = document.querySelector<HTMLButtonElement>('[data-mobile-toggle]');
+    if (!root || !btn) return;
+
+    function setOpen(open: boolean) {
+      root!.toggleAttribute('hidden', !open);
+      root!.setAttribute('aria-hidden', String(!open));
+      btn!.setAttribute('aria-expanded', String(open));
+      btn!.classList.toggle('open', open);
+      document.documentElement.classList.toggle('drawer-open', open);
+    }
+    function isOpen() { return !root!.hasAttribute('hidden'); }
+
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      setOpen(!isOpen());
+    });
+    root.addEventListener('click', (e) => {
+      const a = (e.target as HTMLElement).closest<HTMLAnchorElement>('a');
+      if (a) setOpen(false);
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && isOpen()) setOpen(false);
+    });
+    window.addEventListener('resize', () => {
+      if (isOpen() && window.innerWidth > 720) setOpen(false);
+    });
+  })();
+
   (function megaMenu() {
     const items = document.querySelectorAll<HTMLElement>('.v2-nav-item[data-menu]');
     let openKey: string | null = null;

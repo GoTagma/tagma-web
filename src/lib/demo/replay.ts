@@ -109,15 +109,28 @@ function createTasks(content: HTMLElement, tasks: Task[], lang: Lang, interactiv
 }
 
 function positionTasks(content: HTMLElement, tasks: Task[], laneCount: number) {
-  const fieldW = content.clientWidth;
-  const fieldH = content.clientHeight;
-  const narrow = fieldW < 360;
+  const field = content.parentElement as HTMLElement | null;
+  const viewportW = field?.clientWidth || content.clientWidth;
+  const maxCol = tasks.reduce((max, t) => Math.max(max, t.col), 0);
+  const cols = maxCol + 1;
+  const narrow = viewportW < 360;
   const pad = narrow ? 10 : 18;
-  const cols = 4;
   const gap = narrow ? 8 : 12;
   const minW = narrow ? 128 : 158;
-  const taskW = Math.max(minW, Math.min(198, (fieldW - pad * 2 - gap * (cols - 1)) / cols));
+  const taskW = Math.max(minW, Math.min(198, (viewportW - pad * 2 - gap * (cols - 1)) / cols));
   const colStep = taskW + gap;
+  const contentW = Math.max(
+    viewportW,
+    ...tasks.map((t) => pad + t.col * colStep + (t.nudge ?? 0) + taskW + pad)
+  );
+
+  // On narrow screens the readable task cards cannot all fit in the clipped
+  // lane viewport. Make the inner board wider and let the pan logic reveal it.
+  content.style.width = `${Math.ceil(contentW)}px`;
+  content.style.right = 'auto';
+  content.style.height = '100%';
+
+  const fieldH = content.clientHeight;
   const laneH = fieldH / laneCount;
   tasks.forEach((t) => {
     const el = content.querySelector<HTMLElement>(`[data-id="${t.id}"]`);
@@ -197,16 +210,23 @@ function renderMinimap(mm: HTMLElement, sample: Sample) {
 // a visible subset of the minimap.
 const WORLD_RATIO = 1 + 2 * PAN_MARGIN;
 function updateMinimapPositions(mm: HTMLElement, content: HTMLElement, panX: number) {
+  const field = content.parentElement as HTMLElement | null;
+  const viewportW = field?.clientWidth || content.clientWidth;
   const fw = content.clientWidth;
   const fh = content.clientHeight;
   if (fw === 0 || fh === 0) return;
+  const overflow = Math.max(0, fw - viewportW);
   mm.querySelectorAll<HTMLElement>('.mm-block').forEach((b) => {
     const id = b.dataset.id;
     if (!id) return;
     const task = content.querySelector<HTMLElement>(`[data-id="${id}"]`);
     if (!task) return;
-    const xf = (task.offsetLeft / fw + PAN_MARGIN) / WORLD_RATIO;
-    const wf = (task.offsetWidth / fw) / WORLD_RATIO;
+    const xf = overflow > 0
+      ? task.offsetLeft / fw
+      : (task.offsetLeft / fw + PAN_MARGIN) / WORLD_RATIO;
+    const wf = overflow > 0
+      ? task.offsetWidth / fw
+      : (task.offsetWidth / fw) / WORLD_RATIO;
     b.style.left = `${xf * 100}%`;
     b.style.width = `${wf * 100}%`;
     b.style.top = `${(task.offsetTop / fh) * 100}%`;
@@ -214,8 +234,10 @@ function updateMinimapPositions(mm: HTMLElement, content: HTMLElement, panX: num
   });
   const view = mm.querySelector<HTMLElement>('.mm-view');
   if (view) {
-    const vwf = 1 / WORLD_RATIO;
-    const vxf = Math.max(0, Math.min(1 - vwf, (PAN_MARGIN - panX / fw) / WORLD_RATIO));
+    const vwf = overflow > 0 ? viewportW / fw : 1 / WORLD_RATIO;
+    const vxf = overflow > 0
+      ? Math.max(0, Math.min(1 - vwf, -panX / fw))
+      : Math.max(0, Math.min(1 - vwf, (PAN_MARGIN - panX / fw) / WORLD_RATIO));
     view.style.left = `${vxf * 100}%`;
     view.style.width = `${vwf * 100}%`;
     view.style.right = 'auto';
@@ -363,8 +385,12 @@ export function mount(roots: ReplayRoots, sample: Sample, opts: MountOptions = {
   }
 
   function clampPan() {
-    const range = roots.content.clientWidth * PAN_MARGIN;
-    panX = Math.max(-range, Math.min(range, panX));
+    const viewportW = roots.field.clientWidth;
+    const contentW = roots.content.clientWidth;
+    const overflow = Math.max(0, contentW - viewportW);
+    const min = overflow > 0 ? -overflow : -contentW * PAN_MARGIN;
+    const max = overflow > 0 ? 0 : contentW * PAN_MARGIN;
+    panX = Math.max(min, Math.min(max, panX));
     roots.content.style.transform = `translateX(${panX}px)`;
   }
 

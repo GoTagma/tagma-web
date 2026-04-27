@@ -371,8 +371,6 @@ const DL = {
   .hero-meta, .dl-group .os, .docs-link, .chips, .glyph,
   .foot-base, #tweaks, .seg button { user-select: none; -webkit-user-select: none; }
 
-  body { scrollbar-width: none; -ms-overflow-style: none; }
-  body::-webkit-scrollbar { display: none; }
   .ways { max-width: 1360px; margin: 0 auto; padding: 72px 40px 48px; }
   .ways-title {
     font-family: 'Space Grotesk', sans-serif;
@@ -409,8 +407,7 @@ const DL = {
   }
   .way-install .prompt { color: var(--fg-muted); user-select: none; }
   .way-install code { flex: 1; overflow-x: auto; white-space: nowrap; }
-  body { user-select: none; -webkit-user-select: none; }
-  .way-install code.cmd { user-select: text; -webkit-user-select: text; cursor: text; }
+  .way-install code.cmd { cursor: text; }
   .way-install .copy {
     font-size: 10px; letter-spacing: .1em; color: var(--fg-dim);
     border: 1px solid var(--line-2); padding: 3px 8px; cursor: pointer;
@@ -605,7 +602,7 @@ const DL = {
   .lane-rail .lane-meta { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--fg-muted); letter-spacing: 0.04em; font-variant-numeric: tabular-nums; }
   .lane-rail .cnt { position: absolute; right: 12px; top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--fg-muted); font-variant-numeric: tabular-nums; }
 
-  .lane-field { position: absolute; left: 152px; right: 0; top: 0; bottom: 0; overflow: hidden; cursor: grab; }
+  .lane-field { position: absolute; left: 152px; right: 0; top: 0; bottom: 0; overflow: hidden; cursor: grab; touch-action: pan-y; }
   .lane-field.panning { cursor: grabbing; }
   .field-content { position: absolute; inset: 0; will-change: transform; }
   .lane-strip { position: absolute; left: 0; right: 0; border-bottom: 1px solid var(--line); }

@@ -66,22 +66,28 @@ function mountHeadingAnchors() {
 // top of the viewport; whichever heading is inside the band (or, as a
 // fallback, the last one above it) is marked active.
 function mountTocScrollSpy() {
-  const toc = document.querySelector<HTMLElement>('.doc-toc');
+  const tocs = document.querySelectorAll<HTMLElement>('.doc-toc, .doc-toc-inline-list');
   const article = document.querySelector<HTMLElement>('.doc-main');
-  if (!toc || !article) return;
+  if (tocs.length === 0 || !article) return;
 
-  const links = Array.from(toc.querySelectorAll<HTMLAnchorElement>('a[href^="#"]'));
+  const links = Array.from(tocs).flatMap((toc) =>
+    Array.from(toc.querySelectorAll<HTMLAnchorElement>('a[href^="#"]')),
+  );
   if (links.length === 0) return;
 
-  const linkById = new Map<string, HTMLAnchorElement>();
+  const linksById = new Map<string, HTMLAnchorElement[]>();
   for (const a of links) {
     const id = a.getAttribute('href')?.slice(1);
-    if (id) linkById.set(decodeURIComponent(id), a);
+    if (!id) continue;
+    const decoded = decodeURIComponent(id);
+    const list = linksById.get(decoded) ?? [];
+    list.push(a);
+    linksById.set(decoded, list);
   }
 
   const headings = Array.from(
     article.querySelectorAll<HTMLHeadingElement>('h2[id], h3[id]'),
-  ).filter((h) => linkById.has(h.id));
+  ).filter((h) => linksById.has(h.id));
   if (headings.length === 0) return;
 
   const visible = new Set<string>();
@@ -91,7 +97,7 @@ function mountTocScrollSpy() {
     if (id === activeId) return;
     activeId = id;
     for (const a of links) a.classList.remove('active');
-    if (id) linkById.get(id)?.classList.add('active');
+    if (id) linksById.get(id)?.forEach((a) => a.classList.add('active'));
   };
 
   const pickActive = () => {
@@ -132,10 +138,21 @@ function mountTocScrollSpy() {
   pickActive();
 }
 
+function mountCollapsibles() {
+  const triggers = document.querySelectorAll<HTMLButtonElement>('[data-collapse-toggle]');
+  triggers.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const open = btn.getAttribute('aria-expanded') === 'true';
+      btn.setAttribute('aria-expanded', String(!open));
+    });
+  });
+}
+
 function init() {
   mountCopyButtons();
   mountHeadingAnchors();
   mountTocScrollSpy();
+  mountCollapsibles();
 }
 
 if (document.readyState === 'loading') {
