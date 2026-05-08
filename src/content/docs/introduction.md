@@ -3,7 +3,7 @@ title: Introduction
 description: A swim-lane editor and runtime for AI agent orchestration.
 group: Getting Started
 order: 10
-updated: 2026-04-21
+updated: 2026-05-08
 ---
 
 Tagma is a swim-lane editor and runtime for AI agent orchestration. You compose pipelines of **tasks** — prompts or shell commands — and they execute on the agent CLIs you already have installed locally (Claude Code, OpenCode, Codex, …).
@@ -20,10 +20,12 @@ Two kinds of users get the most out of it:
 
 - Run **multiple agent CLIs in one pipeline** and hand off context between them (`continue_from` resumes the upstream session, or falls back to injecting its normalized output).
 - Parallelize work across **tracks** — e.g. a "plan" track on Claude Code running alongside a "test" track on Codex — instead of babysitting one REPL at a time.
+- Pass typed values between tasks with **`inputs` / `outputs`** — `{{inputs.city}}` substitution in commands, structured `[Inputs]` / `[Output Format]` blocks injected into AI prompts, JSON output extraction on the way out.
 - Drop back to plain shell (`command:` tasks) for glue work between AI tasks without leaving the pipeline.
 
 **2. Teams that want agents on rails** — engineers who don't want an agent CLI making arbitrary changes to their repo and instead want:
 
+- **Pipeline modes** (`mode: safe` / `mode: trusted`). `safe` is the default and blocks shell commands, lifecycle hooks, automatic plugin loading, `execute: true` permissions, and any non-allowlisted driver/trigger/completion/middleware. `trusted` opts the file in to the full surface area. Either way, what's in the YAML is what runs.
 - **Per-task permissions** (`read` / `write` / `execute`) that map onto each driver's native sandbox flags — Claude Code's allowed-tools + `--permission-mode`, Codex's `--sandbox read-only` / `workspace-write` / `danger-full-access`, etc. The agent physically cannot do what you didn't grant.
 - **Manual approval gates** (`trigger: { type: manual }`) that block a task until a human approves in the editor or over WebSocket — useful before deploys, migrations, or any destructive step.
 - **Explicit completion checks** (`completion: exit_code | file_exists | output_check | llm_judge`) so a task counts as "succeeded" only when it actually does what you wanted — not just when the agent happily exits 0.
@@ -37,6 +39,7 @@ A pipeline has one or more **tracks**. Tracks run in parallel; tasks inside a tr
 # .tagma/hello.yaml
 pipeline:
   name: hello
+  mode: trusted                     # opt in to the full surface; "safe" is the default
   driver: claude-code
   plugins:
     - "@tagma/driver-claude-code"   # claude-code is a plugin; opencode is the only built-in driver
@@ -65,10 +68,10 @@ Draw pipelines as swim lanes, run them, and watch logs stream live. Approvals, r
 
 ### SDK, CLI & custom plugins (for developers)
 
-Everything the editor does is backed by `@tagma/sdk`. Run pipelines from a script, embed the runtime in your own tools, or extend it with plugins. Four plugin categories: **drivers**, **triggers**, **completions**, **middlewares** — each a TypeScript object that implements a small interface.
+Everything the editor does is backed by `@tagma/sdk` (a Bun-only convenience layer that composes `@tagma/core` + `@tagma/runtime-bun`). Run pipelines from a script, embed the runtime in your own tools, or extend it with plugins. Four plugin categories: **drivers**, **triggers**, **completions**, **middlewares** — each a TypeScript object that implements a small interface, bundled into a package-level `TagmaPlugin` capability map.
 
 - [Install the SDK or CLI](/docs/install#sdk--cli)
-- [SDK reference](/docs/sdk) — `runPipeline`, approval gateway, pipeline CRUD
+- [SDK reference](/docs/sdk) — `createTagma`, approval gateway, pipeline CRUD
 - [CLI reference](/docs/cli) — `tagma <pipeline.yaml>` for headless runs
 - [Writing custom plugins](/docs/custom-plugins) — per-category walkthroughs
 
@@ -76,7 +79,7 @@ Everything the editor does is backed by `@tagma/sdk`. Run pipelines from a scrip
 
 Tagma is open source. The code lives in two repositories:
 
-- **[github.com/GoTagma/tagma-mono](https://github.com/GoTagma/tagma-mono)** — the editor, `@tagma/sdk`, `@tagma/types`, and the first-party driver / trigger / completion / middleware packages.
+- **[github.com/GoTagma/tagma-mono](https://github.com/GoTagma/tagma-mono)** — the editor (`apps/editor`), the desktop shell (`apps/electron`), and the public packages: `@tagma/types`, `@tagma/core`, `@tagma/runtime-bun`, `@tagma/sdk`, plus the first-party driver / trigger / completion / middleware plugin packages.
 - **[github.com/GoTagma/tagma-cli](https://github.com/GoTagma/tagma-cli)** — the `@tagma/cli` headless runner.
 
 Issues and contributions welcome.

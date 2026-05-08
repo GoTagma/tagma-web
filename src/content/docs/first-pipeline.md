@@ -3,10 +3,10 @@ title: Your First Pipeline
 description: Compose a two-track pipeline and run it end-to-end in five minutes.
 group: Getting Started
 order: 30
-updated: 2026-04-21
+updated: 2026-05-08
 ---
 
-This guide builds the smallest non-trivial pipeline in Tagma: two tracks, four tasks, one cross-track dependency.
+This guide builds the smallest non-trivial pipeline in Tagma: two tracks, four tasks, one cross-track dependency, plus one typed value handed off between tasks.
 
 ## Create the file
 
@@ -17,6 +17,7 @@ Create `.tagma/hello.yaml`:
 ```yaml
 pipeline:
   name: hello
+  mode: trusted                    # required: this pipeline contains a `command:` task
   driver: claude-code
   plugins:
     - "@tagma/driver-claude-code"
@@ -25,7 +26,10 @@ pipeline:
       name: Plan
       tasks:
         - id: outline
-          prompt: "Outline a CLI that greets the user."
+          prompt: "Outline a CLI that greets the user. Reply with JSON: {\"binary\":\"<name>\"}."
+          outputs:
+            binary:
+              type: string
 
     - id: build
       name: Build
@@ -39,16 +43,22 @@ pipeline:
           depends_on: [scaffold]
           continue_from: scaffold
         - id: verify
-          command: "node ./dist/cli.js --version"
-          depends_on: [implement]
+          command: "node ./dist/{{inputs.binary}}.js --version"
+          depends_on: [implement, plan.outline]
+          inputs:
+            binary:
+              type: string
+              required: true
 ```
 
 A few things worth noting:
 
+- **`mode: trusted` is required here** because the pipeline has a `command:` task. The default mode is `safe`, which blocks shell tasks, lifecycle hooks, automatic plugin loading, `execute: true` permissions, and any non-allowlisted plugin type. See [Pipeline YAML reference → mode](/docs/pipeline-yaml#mode).
 - `opencode` is the only built-in driver. `claude-code` and `codex` ship as plugins, so they must be declared under `pipeline.plugins` — that's the line above. To run this pipeline on OpenCode instead, drop the `plugins:` list and set `driver: opencode`.
 - Cross-track dependencies use `trackId.taskId` syntax (`plan.outline`). Same-track references can use the bare task id (`scaffold`).
 - `continue_from` does **not** imply `depends_on`; the DAG builder adds the edge for you, but listing both is explicit and safe.
 - The last task uses `command:` instead of `prompt:` — it's a plain shell command, no driver needed.
+- **Typed handoff**: `outline` declares an `outputs.binary: { type: string }` port. `verify`'s `inputs.binary` auto-matches that same name on its direct upstreams (`plan.outline`), and `{{inputs.binary}}` is substituted into the command line before the shell sees it. The engine renders an `[Output Format]` block into the prompt for `outline` so the model knows the shape it needs to emit. See [Inputs / outputs](/docs/pipeline-yaml#inputs--outputs).
 
 ## Run it
 

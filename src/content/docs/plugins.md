@@ -3,7 +3,7 @@ title: Plugins
 description: Triggers, completions, and middlewares — what ships and how to add one.
 group: Reference
 order: 220
-updated: 2026-04-21
+updated: 2026-05-08
 ---
 
 Tagma pipelines are extended with four plugin categories: **drivers**, **triggers**, **completions**, and **middlewares**. Drivers have their own page; this page covers the other three and how external packages are loaded.
@@ -23,7 +23,9 @@ pipeline:
 
 `opencode` is the SDK's only built-in driver — it doesn't need to appear here. `claude-code` and `codex` ship as plugin packages and must be listed.
 
-A plugin package must declare a `tagmaPlugin` manifest in its `package.json`:
+> **Safe-mode reminder.** `pipeline.plugins` is *automatic* loading at run time. The default `mode: safe` blocks it — the engine reports `safe mode blocks automatic plugin loading via pipeline.plugins`. Either set `mode: trusted` or pre-install the plugin in the host (workspace `node_modules`) and have the host skip auto-load (`skipPluginLoading: true`). The editor follows that pattern: workspace plugins are pre-loaded into the registry and only added to YAML for portability.
+
+A plugin package must declare a `tagmaPlugin` manifest in its `package.json` so hosts can auto-discover it without importing the module:
 
 ```json
 {
@@ -32,7 +34,7 @@ A plugin package must declare a `tagmaPlugin` manifest in its `package.json`:
 }
 ```
 
-Categories: `drivers` | `triggers` | `completions` | `middlewares`.
+Categories: `drivers` | `triggers` | `completions` | `middlewares`. The actual capabilities a package provides live in its default-exported `TagmaPlugin` object — a single package may bundle multiple drivers / triggers / completions / middlewares; the manifest's `type` is the primary capability surfaced to discovery UIs. See [Custom Plugins](/docs/custom-plugins) for the full layout.
 
 ## Triggers
 
@@ -75,14 +77,18 @@ trigger:
   timeout: 30m
 ```
 
-| Field        | Type     | Default      | Notes                                                                                       |
-| ------------ | -------- | ------------ | ------------------------------------------------------------------------------------------- |
-| `port`       | number   | _(required)_ | TCP port to listen on (1–65535). A single listener is shared across tasks with the same `(port, path)` |
-| `path`       | string   | `/webhook`   | URL path to match; must start with `/`                                                      |
-| `secret_env` | string   | _(none)_     | Env var holding the HMAC-SHA256 secret; when set, requests must include `x-tagma-signature` |
-| `timeout`    | duration | _(forever)_  | Max wait time; omit for unbounded wait                                                      |
+| Field            | Type     | Default      | Notes                                                                                                     |
+| ---------------- | -------- | ------------ | --------------------------------------------------------------------------------------------------------- |
+| `port`           | number   | _(required)_ | TCP port to listen on (1–65535). A single listener is shared across tasks with the same `(host, port, path)` |
+| `path`           | string   | `/webhook`   | URL path to match; must start with `/`                                                                    |
+| `host`           | string   | `127.0.0.1`  | Interface to bind. Defaults to loopback. Setting `0.0.0.0` or any non-loopback address without `secret_env` is **refused at config time**. |
+| `secret_env`     | string   | _(none)_     | Env var holding the HMAC-SHA256 secret. When set, requests must include `x-tagma-signature: sha256=<hex>` and verification is constant-time. |
+| `max_body_bytes` | number   | `1048576`    | Max accepted request body size (bytes). Larger requests return `413 payload too large` before parsing.    |
+| `timeout`        | duration | `30m`        | Max wait time; set to `0` for unbounded wait.                                                             |
 
-Always set `secret_env` in production. Bind the host to `127.0.0.1` at the OS level if only local callers need to fire the trigger.
+Multiple tasks watching the same `(host, port, path)` form a FIFO waiter queue — the next POST wakes one waiter, and the listener is reference-counted (closed when the last waiter resolves, aborts, or times out). A POST arriving with no waiting task is rejected with `409 no waiting task` so the caller can retry once the pipeline is up; non-matching paths return `404`, non-POST methods return `405`. JSON bodies (`content-type: application/json`) are parsed and handed to the task as the trigger payload — malformed JSON under that content-type returns `400 invalid JSON body`.
+
+Always set `secret_env` in production. The plugin already binds to `127.0.0.1` by default; only change `host` when you deliberately need LAN/container reachability, and **always** pair a non-loopback bind with `secret_env`.
 
 ## Completions
 
@@ -169,17 +175,20 @@ middlewares:
     label: Knowledge Graph Context
 ```
 
-| Field         | Type     | Default                   | Notes                                                                                  |
-| ------------- | -------- | ------------------------- | -------------------------------------------------------------------------------------- |
-| `endpoint`    | string   | _(required)_              | LightRAG API server base URL (default port 9621)                                       |
-| `mode`        | enum     | `mix`                     | One of `local`, `global`, `hybrid`, `naive`, `mix` — matches LightRAG's server default |
-| `top_k`       | number   | `10`                      | Top-k entities (local mode) / relationships (global mode)                              |
-| `api_key_env` | string   | _(none)_                  | Env var holding the API key; sent via `X-API-Key` header                               |
-| `timeout`     | duration | `30s`                     | Max time to wait for the LightRAG response                                             |
-| `label`       | string   | `Knowledge Graph Context` | Header rendered above the retrieved context in the final prompt                        |
-| `query`       | string   | _(task prompt)_           | Override the retrieval query; useful when the prompt itself is not a good KG query     |
+| Field               | Type     | Default                   | Notes                                                                                                   |
+| ------------------- | -------- | ------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `endpoint`          | string   | _(required)_              | LightRAG API server base URL. Must be `http`/`https` — other schemes are rejected.                      |
+| `mode`              | enum     | `mix`                     | One of `local`, `global`, `hybrid`, `naive`, `mix` — matches LightRAG's server default.                  |
+| `top_k`             | number   | `10`                      | Top-k entities (local mode) / relationships (global mode). Capped at `200` at runtime.                  |
+| `max_context_chars` | number   | `40000`                   | Maximum retrieved-context characters inserted into the prompt.                                          |
+| `api_key_env`       | string   | _(none)_                  | Env var holding the API key; sent via `X-API-Key` (LightRAG's auth scheme), not `Authorization: Bearer`. |
+| `timeout`           | duration | `30s`                     | Max time to wait for the LightRAG response.                                                             |
+| `required`          | boolean  | `false`                   | When `true`, an empty retrieval result fails the middleware (and implies `on_error: fail`).             |
+| `on_error`          | enum     | `warn` (or `fail`)        | One of `warn`, `fail`, `skip`. Controls transport / non-2xx error handling. Defaults to `warn`; defaults to `fail` when `required: true`. |
+| `label`             | string   | `Knowledge Graph Context` | Header rendered above the retrieved context in the final prompt.                                        |
+| `query`             | string   | _(task instruction)_      | Override the retrieval query. Defaults to `PromptDocument.task` (the user's instruction), not the already-serialized prompt. |
 
-Fail-open: if the server is unreachable, returns an empty response, or errors, the middleware passes the original prompt through unchanged and logs a warning — tasks never fail purely because the KG was offline.
+Calls `POST /query` with `only_need_context: true`, `include_references: false`, `stream: false`, and prepends the raw context as `[<label>]\n<context>\n\n<prompt>`. The middleware does **not** emit a `[Task]` header — that framing belongs to the driver (e.g. opencode's `agent_profile` wrapping). With `on_error: warn` (the default) the middleware passes the original prompt through unchanged on transport / non-2xx errors and logs a warning, so tasks never fail purely because the KG was offline. Set `on_error: fail` (or `required: true`) when retrieval is load-bearing for the task.
 
 ### Composition rules
 

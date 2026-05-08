@@ -3,7 +3,7 @@ title: Drivers
 description: Built-in and plugin drivers for invoking agent CLIs.
 group: Reference
 order: 210
-updated: 2026-04-21
+updated: 2026-05-08
 ---
 
 A **driver** is the adapter that turns a task into a process invocation of an agent CLI. Pick one with `driver:` at the pipeline, track, or task level.
@@ -12,7 +12,7 @@ A **driver** is the adapter that turns a task into a process invocation of an ag
 
 ## Built-in: `opencode`
 
-Ships with the SDK — no plugin load required. Invokes the [OpenCode CLI](https://github.com/anomalyco/opencode). This is the only driver registered by `bootstrapBuiltins()`; every other driver must be declared under `pipeline.plugins`.
+Ships with the SDK — no plugin load required. Invokes the [OpenCode CLI](https://github.com/anomalyco/opencode). This is the only driver registered by default when you call `createTagma()` (or, equivalently, `bootstrapBuiltins(registry)` from `@tagma/sdk/plugins`); every other driver must be declared under `pipeline.plugins`.
 
 **Prerequisite:** the `opencode` CLI must be on your `PATH`. The desktop editor ships a platform-matched `opencode` binary under `resources/opencode/` and prepends it to the sidecar's `PATH` at launch, so end users of the packaged app don't need a separate install. For SDK / CLI direct use, if `bun` is on `PATH` the driver will auto-install `opencode-ai` globally on first run.
 
@@ -66,11 +66,11 @@ pipeline:
 | Permissions → flags    | maps to `--sandbox read-only` / `workspace-write` / `danger-full-access` |
 | Invocation             | `codex exec …` with `--ask-for-approval never` |
 
-**Prerequisite:** Install the Codex CLI from [github.com/openai/codex](https://github.com/openai/codex) (`npm i -g @openai/codex`) and confirm `codex --version` works in your terminal. The driver runs this probe once per process and throws a clear error if the binary is missing.
+**Prerequisite:** Install the Codex CLI from [github.com/openai/codex](https://github.com/openai/codex) (`npm i -g @openai/codex`) and confirm `codex --version` works in your terminal. The driver itself does **not** probe for the binary — if it isn't on `PATH`, the runtime spawn fails with `ENOENT` and the task is marked `failed` with `failureKind: 'spawn_error'`.
 
 ## Writing your own
 
-A driver is a small TypeScript object that implements `DriverPlugin` from `@tagma/types`. See the [SDK guide](/docs/sdk) for the full contract and a copy-pasteable template.
+A driver is a small TypeScript object that implements `DriverPlugin` from `@tagma/types`, packaged as one capability inside a `TagmaPlugin` default export. See [Custom Plugins → Drivers](/docs/custom-plugins#drivers) for the full contract and a copy-pasteable template.
 
 ## Choosing at runtime
 
@@ -80,4 +80,15 @@ Precedence, most specific wins:
 task.driver  >  track.driver  >  pipeline.driver  >  "opencode"
 ```
 
-`command:` tasks ignore drivers entirely — they're plain shell invocations, useful for glue work (file prep, smoke tests) between AI tasks.
+`command:` tasks ignore drivers entirely — they're plain shell invocations, useful for glue work (file prep, smoke tests) between AI tasks. (Reminder: `command:` tasks require `mode: trusted`.)
+
+## Capability flags
+
+Each `DriverPlugin` declares a `capabilities` block that the engine and editor read up-front:
+
+| Flag                    | What it tells the engine |
+| ----------------------- | ------------------------ |
+| `sessionResume`         | The driver supports continuing a prior task's session via `--resume` / `--session` etc. When `false`, `continue_from` falls back to prepending the upstream's normalized output as text. |
+| `systemPrompt`          | The driver can inject a system-prompt fragment (used by `agent_profile`). When `false`, drivers usually prepend a `[Role]…[Task]…` envelope to the prompt instead. |
+| `outputFormat`          | The driver can emit machine-parseable structured output (e.g. JSON) for `parseResult` to consume. |
+| `enforcesPermissions`   | The driver maps Tagma `Permissions` onto its underlying CLI and can fail closed for disallowed write/execute access. |
