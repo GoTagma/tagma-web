@@ -3,8 +3,8 @@
   "channel": "alpha",
   "dist": {
     "url": "https://github.com/GoTagma/tagma-mono/releases/download/desktop-v0.5.20/editor-dist-0.5.20.tar.gz",
-    "sha256": "e8d20d32192fd9760658d97c2b4b7a77390b3e8e14d8e96f90000f21ac05ad69",
-    "size": 461559
+    "sha256": "149cfea10923a250eb7834930cb8174c7e6ca9ff98113e029c7a71876caa7efe",
+    "size": 461557
   },
   "sidecar": {
     "targets": [
@@ -46,5 +46,5 @@
     ]
   },
   "releaseNotesUrl": "https://github.com/GoTagma/tagma-mono/releases/tag/desktop-v0.5.20",
-  "signature": "C9sUQlisitbUVz/P7MlirRZ6VoCF/PtqV55CAykB2Mm7FA0sI2qX4KAmseRqDHL8hlwttZ621oFZ5woY85xrBQ=="
+  "signature": "d7foKdamK5iMhcIBOEVVG6S471ln2et1H+WXnTqQzmt0FoTZxctRPjxNZUAgp9JHAIvMtARCo1FCijry6P0CBg=="
 }
