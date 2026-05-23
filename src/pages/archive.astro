@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { pickArchiveSummary } from '../lib/archiveSummary';
 import { site } from '../site.config';
 
 const entries = await getCollection('archive');
@@ -92,14 +93,21 @@ function channelLabel(ch: string): string {
       </div>
 
       <ul class="arc-list">
-        {entries.map((e) => (
-          <li class="arc-row" data-channel={e.data.channel} data-version={e.data.version}>
-            <div class="arc-meta">
-              <span class="arc-ver">v{e.data.version}</span>
-              <span class={`arc-tag ${e.data.channel}`}>{channelLabel(e.data.channel)}</span>
-              <span class="arc-date">{fmtDate(e.data.date)}</span>
-            </div>
-            <div class="arc-dl">
+        {entries.map((e) => {
+          const summaryEn = e.data.summary ?? '';
+          const summaryZh = e.data.summary_zh ?? '';
+          const hasSummary = Boolean(summaryEn || summaryZh);
+          const initialSummary = pickArchiveSummary('en', summaryEn, summaryZh);
+
+          return (
+            <li class="arc-row" data-channel={e.data.channel} data-version={e.data.version}>
+              <div class="arc-head">
+                <div class="arc-meta">
+                  <span class="arc-ver">v{e.data.version}</span>
+                  <span class={`arc-tag ${e.data.channel}`}>{channelLabel(e.data.channel)}</span>
+                  <span class="arc-date">{fmtDate(e.data.date)}</span>
+                </div>
+                <div class="arc-dl">
               {PLATFORMS.map((p) => (
                 p.items.length === 1 ? (
                   <div class="arc-os-wrap" data-os={p.os}>
@@ -127,15 +135,29 @@ function channelLabel(ch: string): string {
                   </div>
                 )
               ))}
-            </div>
-          </li>
-        ))}
+                </div>
+              </div>
+              {hasSummary && (
+                <div class="arc-summary" data-summary-wrap>
+                  <p class="arc-summary-text" data-summary-text data-summary-en={summaryEn} data-summary-zh={summaryZh}>
+                    {initialSummary}
+                  </p>
+                  <button type="button" class="arc-summary-toggle" data-summary-toggle aria-expanded="false" hidden>
+                    More
+                  </button>
+                </div>
+              )}
+            </li>
+          );
+        })}
       </ul>
     </div>
   </main>
 </BaseLayout>
 
 <script>
+  import { pickArchiveSummary, type ArchiveLang } from '../lib/archiveSummary';
+
   const chips = document.querySelectorAll<HTMLElement>('.filter-bar .chip');
   const rows = document.querySelectorAll<HTMLElement>('.arc-row');
   const q = document.getElementById('arc-q') as HTMLInputElement | null;
@@ -165,6 +187,57 @@ function channelLabel(ch: string): string {
     query = q.value.trim().toLowerCase();
     apply();
   });
+
+  type ArchiveShellWindow = Window & {
+    TAGMA_SHELL?: { get(): { lang: 'en' | 'zh' } };
+  };
+
+  function currentLang(): ArchiveLang {
+    const shellLang = (window as ArchiveShellWindow).TAGMA_SHELL?.get().lang;
+    if (shellLang === 'zh') return 'zh';
+    try {
+      const saved = JSON.parse(localStorage.getItem('tagma_tweaks') || '{}');
+      return saved.lang === 'zh' ? 'zh' : 'en';
+    } catch {
+      return 'en';
+    }
+  }
+
+  function syncSummary(wrap: HTMLElement): void {
+    const text = wrap.querySelector<HTMLElement>('[data-summary-text]');
+    const toggle = wrap.querySelector<HTMLButtonElement>('[data-summary-toggle]');
+    if (!text || !toggle) return;
+
+    const en = text.dataset.summaryEn || '';
+    const zh = text.dataset.summaryZh || '';
+    const lang = currentLang();
+    text.textContent = pickArchiveSummary(lang, en, zh);
+
+    const wasOpen = wrap.classList.contains('open');
+    wrap.classList.remove('open');
+    const overflows = text.scrollHeight > text.clientHeight + 1;
+    wrap.classList.toggle('open', wasOpen && overflows);
+    toggle.hidden = !overflows;
+    toggle.textContent = wrap.classList.contains('open') ? 'Less' : 'More';
+    toggle.setAttribute('aria-expanded', wrap.classList.contains('open') ? 'true' : 'false');
+  }
+
+  function syncSummaries(): void {
+    document.querySelectorAll<HTMLElement>('[data-summary-wrap]').forEach(syncSummary);
+  }
+
+  document.querySelectorAll<HTMLButtonElement>('[data-summary-toggle]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const wrap = btn.closest<HTMLElement>('[data-summary-wrap]');
+      if (!wrap) return;
+      wrap.classList.toggle('open');
+      btn.textContent = wrap.classList.contains('open') ? 'Less' : 'More';
+      btn.setAttribute('aria-expanded', wrap.classList.contains('open') ? 'true' : 'false');
+    });
+  });
+
+  syncSummaries();
+  document.addEventListener('tagma:apply', syncSummaries);
 
   function closeAllMenus(except?: HTMLElement) {
     document.querySelectorAll<HTMLElement>('.arc-os-wrap.has-menu').forEach((wrap) => {
@@ -236,11 +309,13 @@ function channelLabel(ch: string): string {
 
   .arc-list { list-style: none; padding: 0; margin: 0; }
   .arc-row {
-    display: grid; grid-template-columns: minmax(240px, 320px) minmax(0, 1fr);
-    gap: 32px; align-items: center;
     padding: 20px 0; border-bottom: 1px solid var(--line);
   }
   .arc-row:last-child { border-bottom: 0; }
+  .arc-head {
+    display: grid; grid-template-columns: minmax(240px, 320px) minmax(0, 1fr);
+    gap: 32px; align-items: center;
+  }
 
   .arc-meta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
   .arc-ver {
@@ -262,6 +337,44 @@ function channelLabel(ch: string): string {
     font-family: 'JetBrains Mono', monospace; font-size: 11px;
     color: var(--fg-muted); letter-spacing: .05em;
   }
+  .arc-summary {
+    margin-top: 12px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: end;
+  }
+  .arc-summary-text {
+    margin: 0;
+    max-width: 980px;
+    color: var(--fg-dim);
+    font-size: 14px;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+  }
+  .arc-summary.open .arc-summary-text {
+    display: block;
+    overflow: visible;
+    -webkit-line-clamp: unset;
+  }
+  .arc-summary-toggle {
+    padding: 4px 0;
+    border: 0;
+    background: transparent;
+    color: var(--accent);
+    cursor: pointer;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .arc-summary-toggle:hover { color: var(--fg); }
+  .arc-summary-toggle[hidden] { display: none; }
 
   .arc-dl { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
   .arc-os-wrap { position: relative; display: inline-flex; }
@@ -307,9 +420,13 @@ function channelLabel(ch: string): string {
 
   @media (max-width: 900px) {
     .arc-wrap { padding: 0 24px 40px; }
-    .arc-row { grid-template-columns: 1fr; gap: 12px; padding: 18px 0; }
+    .arc-row { padding: 18px 0; }
+    .arc-head { grid-template-columns: 1fr; gap: 12px; }
     .arc-dl { justify-content: flex-start; }
     .arc-menu { right: auto; left: 0; }
+    .arc-summary { grid-template-columns: 1fr; gap: 6px; }
+    .arc-summary-text { max-width: none; }
+    .arc-summary-toggle { justify-self: start; }
   }
   @media (max-width: 540px) {
     .arc-wrap { padding: 0 20px 32px; }
