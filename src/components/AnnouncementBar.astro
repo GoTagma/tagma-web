@@ -12,6 +12,7 @@
  * auto-reappears for returning visitors.
  */
 import { getCollection } from 'astro:content';
+import { pickAnnouncementSummary } from '../lib/archiveSummary';
 import { site } from '../site.config';
 
 // Latest archive entry by semver-ish compare on the numeric segments.
@@ -29,10 +30,12 @@ const cmp = (a: string, b: string) => {
 };
 const latest = [...entries].sort((a, b) => cmp(a.data.version, b.data.version))[0];
 
-const version    = latest?.data.version ?? site.version;
-const summaryEn  = latest?.data.summary    ?? '';
-const summaryZh  = latest?.data.summary_zh ?? '';
-const id         = `tagma-release-v${version}`;
+const version      = latest?.data.version ?? site.version;
+const rawSummaryEn = latest?.data.summary    ?? '';
+const rawSummaryZh = latest?.data.summary_zh ?? '';
+const summaryEn    = pickAnnouncementSummary('en', rawSummaryEn, rawSummaryZh);
+const summaryZh    = rawSummaryZh ? pickAnnouncementSummary('zh', rawSummaryEn, rawSummaryZh) : '';
+const id           = `tagma-release-v${version}`;
 ---
 
 <aside
