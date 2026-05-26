@@ -1,50 +1,50 @@
 {
-  "version": "0.6.26",
+  "version": "0.6.27",
   "channel": "alpha",
   "dist": {
-    "url": "https://github.com/GoTagma/tagma-mono/releases/download/desktop-v0.6.26/editor-dist-0.6.26.tar.gz",
-    "sha256": "2f67eda275f401184d72e583a70cae5b2178a1671b30e6c3040e6049876dbe7f",
-    "size": 486528
+    "url": "https://github.com/GoTagma/tagma-mono/releases/download/desktop-v0.6.27/editor-dist-0.6.27.tar.gz",
+    "sha256": "8e37ff8c99cedcd950088bc30f1b06f0be19c365b987b0a7f3a9c7663ff2edac",
+    "size": 486753
   },
   "sidecar": {
     "targets": [
       {
         "platform": "win32",
         "arch": "x64",
-        "url": "https://github.com/GoTagma/tagma-mono/releases/download/desktop-v0.6.26/tagma-editor-server-0.6.26-win32-x64.exe",
-        "sha256": "fbbbd66778236fac856bc00f0802c80912beff3e2e2c16fd8dc233a9959a7554",
-        "size": 119396864
+        "url": "https://github.com/GoTagma/tagma-mono/releases/download/desktop-v0.6.27/tagma-editor-server-0.6.27-win32-x64.exe",
+        "sha256": "15f8931bc629787a2499d0fd3bf26fcd934b8aea61cb6359c75f4d502eae7ad7",
+        "size": 119397376
       },
       {
         "platform": "linux",
         "arch": "x64",
-        "url": "https://github.com/GoTagma/tagma-mono/releases/download/desktop-v0.6.26/tagma-editor-server-0.6.26-linux-x64",
-        "sha256": "fcfc16042112cd6b6dfce0372d4017ec73215187685cc910786a825826db6a84",
-        "size": 103102971
+        "url": "https://github.com/GoTagma/tagma-mono/releases/download/desktop-v0.6.27/tagma-editor-server-0.6.27-linux-x64",
+        "sha256": "639870e6106b13f1e1f074d08e8a250907933d3d7ae6a421b6c2f4faf128a797",
+        "size": 103103191
       },
       {
         "platform": "linux",
         "arch": "arm64",
-        "url": "https://github.com/GoTagma/tagma-mono/releases/download/desktop-v0.6.26/tagma-editor-server-0.6.26-linux-arm64",
-        "sha256": "6f946815e348fd198020aa20ffc5aab1e6692eec4f906cf0efa91923c9f4ec8e",
-        "size": 103387804
+        "url": "https://github.com/GoTagma/tagma-mono/releases/download/desktop-v0.6.27/tagma-editor-server-0.6.27-linux-arm64",
+        "sha256": "88426f4bda16c7e5e6805d8f0562fc1ac85d21250d153bfc6a2eff0f6e920a84",
+        "size": 103388024
       },
       {
         "platform": "darwin",
         "arch": "x64",
-        "url": "https://github.com/GoTagma/tagma-mono/releases/download/desktop-v0.6.26/tagma-editor-server-0.6.26-darwin-x64",
-        "sha256": "b9b6e895115de82aa14d9d4f6f5ad3f9a2d8fd2c33573e9263433b82e52ce8d3",
+        "url": "https://github.com/GoTagma/tagma-mono/releases/download/desktop-v0.6.27/tagma-editor-server-0.6.27-darwin-x64",
+        "sha256": "7bbe5b0886c258a3cbc32453e2a37d15797174f4e51d7cf568edd413fb8f2974",
         "size": 70765120
       },
       {
         "platform": "darwin",
         "arch": "arm64",
-        "url": "https://github.com/GoTagma/tagma-mono/releases/download/desktop-v0.6.26/tagma-editor-server-0.6.26-darwin-arm64",
-        "sha256": "f0dcb3358cadc8611977061d9e8001aced3c6b30cbb7e7e968eeb601d8ce049c",
+        "url": "https://github.com/GoTagma/tagma-mono/releases/download/desktop-v0.6.27/tagma-editor-server-0.6.27-darwin-arm64",
+        "sha256": "22bc45a28da327f1164afa2a9848f788c0dd676cf6462e4839611380b4bc7b77",
         "size": 65742112
       }
     ]
   },
-  "releaseNotesUrl": "https://github.com/GoTagma/tagma-mono/releases/tag/desktop-v0.6.26",
-  "signature": "J5UoyqM7DV8TiV+B0qrmHzZTBVEB8x/CZ4qtYygaPQ+6h+pg7fjNU4kIwelRgifEE7q8GHPKKssZRxj8+LgHCA=="
+  "releaseNotesUrl": "https://github.com/GoTagma/tagma-mono/releases/tag/desktop-v0.6.27",
+  "signature": "saGXpDk+2sIOVx1cVDlq8kM4vaioIyg9uwr0GP4e0ibC+3HtpluXrF7rcNRwA07WSkiXNO8zQLSk1rM4PNY5Bg=="
 }
