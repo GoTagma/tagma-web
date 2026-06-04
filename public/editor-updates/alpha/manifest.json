@@ -1,41 +1,40 @@
 {
-  "version": "0.8.6",
+  "version": "0.8.7",
   "channel": "alpha",
-  "minShellVersion": "0.8.6",
   "dist": {
-    "url": "https://github.com/GoTagma/tagma-mono/releases/download/desktop-v0.8.6/editor-dist-0.8.6.tar.gz",
-    "sha256": "e9c2fae5f3e07bdf85a563180a0b072042067e85f7920311f6c26eb0fd65b6c0",
-    "size": 507429
+    "url": "https://github.com/GoTagma/tagma-mono/releases/download/desktop-v0.8.7/editor-dist-0.8.7.tar.gz",
+    "sha256": "0bc44a2521439583a876707f8fc91acc208f435da6bde7021add586f5983138b",
+    "size": 507071
   },
   "sidecar": {
     "targets": [
       {
         "platform": "win32",
         "arch": "x64",
-        "url": "https://github.com/GoTagma/tagma-mono/releases/download/desktop-v0.8.6/tagma-editor-server-0.8.6-win32-x64.exe",
-        "sha256": "1575be230b887afa0343d630b1778b604a0eeaf1a16c9784d821229a922745bf",
-        "size": 119611904
+        "url": "https://github.com/GoTagma/tagma-mono/releases/download/desktop-v0.8.7/tagma-editor-server-0.8.7-win32-x64.exe",
+        "sha256": "9a615c41f31092c7f1e64c324b71e697d7fbb934b53bd3080ee01c0bef859a66",
+        "size": 119617024
       },
       {
         "platform": "linux",
         "arch": "x64",
-        "url": "https://github.com/GoTagma/tagma-mono/releases/download/desktop-v0.8.6/tagma-editor-server-0.8.6-linux-x64",
-        "sha256": "5b0810fcf7b77f82dab3c68a146e66303822208845521cf52a6e3ac89ec3f81e",
-        "size": 103317693
+        "url": "https://github.com/GoTagma/tagma-mono/releases/download/desktop-v0.8.7/tagma-editor-server-0.8.7-linux-x64",
+        "sha256": "aba4e9388b74b42bf7ef080dcb710f29cb542419094093da89989aa7560d98f4",
+        "size": 103323126
       },
       {
         "platform": "darwin",
         "arch": "x64",
-        "url": "https://github.com/GoTagma/tagma-mono/releases/download/desktop-v0.8.6/tagma-editor-server-0.8.6-darwin-x64",
-        "sha256": "aaea0a5fed2ad69c300fdeafc89b91c6287ab761d2aa7d580517cb5c202b29ce",
-        "size": 70978112
+        "url": "https://github.com/GoTagma/tagma-mono/releases/download/desktop-v0.8.7/tagma-editor-server-0.8.7-darwin-x64",
+        "sha256": "705ce3903f29f3698789e346ae60ce36c28fcc3d9cde2d670d5a9d141e5d6de1",
+        "size": 70994496
       },
       {
         "platform": "darwin",
         "arch": "arm64",
-        "url": "https://github.com/GoTagma/tagma-mono/releases/download/desktop-v0.8.6/tagma-editor-server-0.8.6-darwin-arm64",
-        "sha256": "0a7bda52e9098920ed9b109c3ebb65cf883529f37888835d283ccd93c286ee76",
-        "size": 65956768
+        "url": "https://github.com/GoTagma/tagma-mono/releases/download/desktop-v0.8.7/tagma-editor-server-0.8.7-darwin-arm64",
+        "sha256": "e04c60653d7c93061ecae26ca765ac2607afed3e5bd2f9c13b03f371583b4a10",
+        "size": 65973280
       }
     ]
   },
@@ -45,33 +44,33 @@
       {
         "platform": "win32",
         "arch": "x64",
-        "url": "https://github.com/GoTagma/tagma-mono/releases/download/desktop-v0.8.6/opencode-1.15.13-win32-x64.exe",
+        "url": "https://github.com/GoTagma/tagma-mono/releases/download/desktop-v0.8.7/opencode-1.15.13-win32-x64.exe",
         "sha256": "0b7f1ed5a5866cb39cd2cee4b8b4a650f72a745aba1ebee2f59f50536af92125",
         "size": 142998408
       },
       {
         "platform": "linux",
         "arch": "x64",
-        "url": "https://github.com/GoTagma/tagma-mono/releases/download/desktop-v0.8.6/opencode-1.15.13-linux-x64",
+        "url": "https://github.com/GoTagma/tagma-mono/releases/download/desktop-v0.8.7/opencode-1.15.13-linux-x64",
         "sha256": "8e97f83175c84daeb51e96b34baf9ee9839ae54e5e848a3cce1e0e32dcf41a6c",
         "size": 145324160
       },
       {
         "platform": "darwin",
         "arch": "x64",
-        "url": "https://github.com/GoTagma/tagma-mono/releases/download/desktop-v0.8.6/opencode-1.15.13-darwin-x64",
+        "url": "https://github.com/GoTagma/tagma-mono/releases/download/desktop-v0.8.7/opencode-1.15.13-darwin-x64",
         "sha256": "8a3dc50d423752fd56d81c38672d42f26894931c68b42b9fc0f2f3d62f2c1f19",
         "size": 114081872
       },
       {
         "platform": "darwin",
         "arch": "arm64",
-        "url": "https://github.com/GoTagma/tagma-mono/releases/download/desktop-v0.8.6/opencode-1.15.13-darwin-arm64",
+        "url": "https://github.com/GoTagma/tagma-mono/releases/download/desktop-v0.8.7/opencode-1.15.13-darwin-arm64",
         "sha256": "1cdcb7e426a863528a41ae8f9f6b65470b8395ddd48937229b01299ddc1085f0",
         "size": 108688994
       }
     ]
   },
-  "releaseNotesUrl": "https://github.com/GoTagma/tagma-mono/releases/tag/desktop-v0.8.6",
-  "signature": "os179H6/B0maorw4jxnnfl16HZCgbT7yRTiIXHWH4ifuQUOJYc6xvpdjeQ3q7E0xeD5cYeLi+nTkbmHZyRMoBw=="
+  "releaseNotesUrl": "https://github.com/GoTagma/tagma-mono/releases/tag/desktop-v0.8.7",
+  "signature": "RP9xNhBfy5FstspPBgCXivl4q0tW37EftxOTcZVj3C89jXlc2UPz/R9GrGezx/3/pTqhJALHqaeu3L0BJQPZCA=="
 }
