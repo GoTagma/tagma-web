@@ -4,8 +4,8 @@
   "minShellVersion": "0.8.24",
   "dist": {
     "url": "https://github.com/GoTagma/tagma-mono/releases/download/desktop-v0.8.24/editor-dist-0.8.24.tar.gz",
-    "sha256": "55bba3ccb8e68432f85393f4d1039342c2e8919cd5289ad0a1f012e268e01fe4",
-    "size": 509548
+    "sha256": "5cad840365cae5b5379892454045cc703af1ff92548110cc9019f4c2a31c1fe5",
+    "size": 509549
   },
   "sidecar": {
     "targets": [
@@ -73,5 +73,5 @@
     ]
   },
   "releaseNotesUrl": "https://github.com/GoTagma/tagma-mono/releases/tag/desktop-v0.8.24",
-  "signature": "fksJFGz6Tf1g4XgEMx7sFFQLTxRP7du6u1iYR19QKUyP3pQQ4f+S/lXvrlcBOmW/1ZoKGEeGco1CzNOt7PXDAg=="
+  "signature": "Olwji0btVO4HF589OX9uucjcYzOhAjo8PbgPGapiCuXgAZT0PLoAne/2d76oCQYzye/onwuWpcZNT/PyL3DSBQ=="
 }
