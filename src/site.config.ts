@@ -4,11 +4,11 @@
 
 export const site = {
   name: 'Tagma',
-  version: "0.8.21",
+  version: "0.8.22",
   channel: "alpha" as 'beta' | 'stable' | 'rc' | 'alpha',
-  build: "2026.06.16",
-  buildDate: "2026-06-16",
-  sha256Short: "01C8…1226",
+  build: "2026.06.17",
+  buildDate: "2026-06-17",
+  sha256Short: "819F…7132",
   sizeMB: 191,
   platforms: ['macOS', 'Windows', 'Linux'] as const,
   license: 'MIT',
