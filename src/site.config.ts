@@ -8,7 +8,7 @@ export const site = {
   channel: "alpha" as 'beta' | 'stable' | 'rc' | 'alpha',
   build: "2026.08.14",
   buildDate: "2026-08-14",
-  sha256Short: "03FA…628A",
+  sha256Short: "168E…5B7A",
   sizeMB: 196,
   platforms: ['macOS', 'Windows', 'Linux'] as const,
   license: 'MIT',
